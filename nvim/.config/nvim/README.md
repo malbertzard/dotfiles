@@ -1,5 +1,34 @@
 # A Basic Stable IDE config for Neovim
 
+<!--toc:start-->
+- [A Basic Stable IDE config for Neovim](#a-basic-stable-ide-config-for-neovim)
+  - [Install Neovim 0.7](#install-neovim-07)
+  - [Install the config](#install-the-config)
+  - [Get healthy](#get-healthy)
+  - [Fonts](#fonts)
+  - [Configuration](#configuration)
+    - [Usage](#usage)
+    - [Plugins](#plugins)
+      - [Essential](#essential)
+      - [General Movment](#general-movment)
+      - [Project managment](#project-managment)
+      - [File Mangment](#file-mangment)
+      - [Colorschemes](#colorschemes)
+      - [Visual](#visual)
+      - [Fuzzy Search](#fuzzy-search)
+      - [Auto completion](#auto-completion)
+        - [Completion Snippet](#completion-snippet)
+      - [LSP](#lsp)
+        - [Treesitter](#treesitter)
+      - [Git](#git)
+      - [Neotest](#neotest)
+      - [File Specific](#file-specific)
+        - [CSS](#css)
+        - [Markdown](#markdown)
+    - [Presentation](#presentation)
+    - [WIP](#wip)
+<!--toc:end-->
+
 ## Install Neovim 0.7
 
 You can install Neovim with your package manager e.g. brew, apt, pacman etc.. but remember that when you update your packages Neovim may be upgraded to a newer version.
@@ -24,41 +53,13 @@ Open `nvim` and enter the following:
 :checkhealth
 ```
 
-You'll probably notice you don't have support for copy/paste also that python and node haven't been setup
-
-So let's fix that
-
-First we'll fix copy/paste
-
-- On mac `pbcopy` should be builtin
-
-- On Ubuntu
-
-  ```sh
-  sudo apt install xsel # for X11
-  sudo apt install wl-clipboard # for wayland
-  ```
-
-Next we need to install python support (node is optional)
-
-- Neovim python support
-
-  ```sh
-  pip install pynvim
-  ```
-
-- Neovim node support
-
-  ```sh
-  npm i -g neovim
-  ```
-
 We will also need `ripgrep` for Telescope to work:
 
 - Ripgrep
 
   ```sh
   sudo apt install ripgrep
+  sudo apt install fd
   ```
 ---
 
@@ -74,26 +75,129 @@ I recommend using the following repo to get a "Nerd Font" (Font that supports ic
 
 ## Configuration
 
-### LSP
+### Usage
 
 To add a new LSP
 
 First Enter:
 
 ```
-:LspInstallInfo
+:Mason
 ```
 
 and press `i` on the Language Server you wish to install
 
-### Formatters and linters
-
-**NOTE** Some are already setup as examples, remove them if you want
-
-#### Mason
-
-WIP Switch to Mason to manage lsp etc
-
 ### Plugins
 
----
+#### Essential
+- wbthomason/packer.nvim
+- nvim-lua/plenary.nvim
+- lewis6991/impatient.nvim
+- kyazdani42/nvim-tree.lua
+- anuvyklack/hydra.nvim
+
+#### General Movment
+- windwp/nvim-autopairs
+- terrortylor/nvim-comment
+- akinsho/toggleterm.nvim
+- lukas-reineke/indent-blankline.nvim
+- kylechui/nvim-surround
+- moll/vim-bbye
+- cappyzawa/trim.nvim
+
+#### Project managment
+- tiagovla/scope.nvim
+- ahmedkhalf/project.nvim
+
+#### File Mangment
+- fedepujol/move.nvim"
+- folke/trouble.nvim
+- ThePrimeagen/harpoon
+- nathom/filetype.nvim
+
+#### Colorschemes
+- shaunsingh/nord.nvim
+
+Other ones:
+- Everblush/everblush.nvim
+- shaunsingh/moonlight.nvim
+- luisiacc/gruvbox-baby
+- folke/tokyonight.nvim
+- lunarvim/darkplus.nvim
+- NTBBloodbath/doom-one.nvim
+
+#### Visual
+- nvim-lualine/lualine.nvim
+- kdheepak/tabline.nvim
+- goolord/alpha-nvim
+- kyazdani42/nvim-web-devicons
+- karb94/neoscroll.nvim
+- stevearc/dressing.nvim
+- rcarriga/nvim-notify
+
+#### Fuzzy Search
+- nvim-telescope/telescope.nvim
+- cljoly/telescope-repo.nvim
+- camgraff/telescope-tmux.nvim
+
+#### Auto completion
+- hrsh7th/nvim-cmp -- The completion plugin
+- hrsh7th/cmp-buffer -- buffer completions
+- hrsh7th/cmp-path -- path completions
+- saadparwaiz1/cmp_luasnip -- snippet completions
+- hrsh7th/cmp-nvim-lsp
+
+##### Completion Snippet
+- L3MON4D3/LuaSnip --snippet engine
+- rafamadriz/friendly-snippets -- a bunch of snippets to use
+
+#### LSP
+- neovim/nvim-lspconfig
+- williamboman/mason.nvim
+- williamboman/mason-lspconfig.nvim
+- glepnir/lspsaga.nvim
+- RRethy/vim-illuminate
+- jose-elias-alvarez/null-ls.nvim
+
+##### Treesitter
+- nvim-treesitter/nvim-treesitter
+- nvim-treesitter/nvim-treesitter-context
+
+#### Git
+- lewis6991/gitsigns.nvim
+- TimUntersberger/neogit
+- sindrets/diffview.nvim
+
+#### Neotest
+- nvim-neotest/neotest
+- nvim-neotest/neotest-python
+- nvim-neotest/neotest-plenary
+- nvim-neotest/neotest-vim-test
+- olimorris/neotest-phpunit
+
+#### File Specific
+
+##### CSS
+- NvChad/nvim-colorizer.lua
+
+##### Markdown
+- ellisonleao/glow.nvim
+- jubnzv/mdeval.nvim
+- AckslD/nvim-FeMaco.lua
+- jghauser/follow-md-links.nvim
+- jbyuki/venn.nvim
+
+### Presentation
+- folke/twilight.nvim
+- folke/zen-mode.nvim
+
+### WIP
+
+- dense-analysis/ale
+
+- gbprod/phpactor.nvim
+
+- mfussenegger/nvim-dap
+- rcarriga/nvim-dap-ui
+
+- jamestthompson3/nvim-remote-containers
