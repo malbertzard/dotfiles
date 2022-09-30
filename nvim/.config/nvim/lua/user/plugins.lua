@@ -56,16 +56,19 @@ return packer.startup(function(use)
     use { "moll/vim-bbye" }
 
     -- General
-    use { "fedepujol/move.nvim", event="VimEnter" }
-    use { "folke/trouble.nvim", event="VimEnter" }
-    use { "ThePrimeagen/harpoon", event="VimEnter" }
-    use { "nathom/filetype.nvim", event="VimEnter" }
+    use { "fedepujol/move.nvim", event = "VimEnter" }
+    use { "folke/trouble.nvim", event = "VimEnter" }
+    use { "ThePrimeagen/harpoon", event = "VimEnter" }
+    use { "nathom/filetype.nvim", event = "VimEnter" }
 
     -- Colorschemes
-    use { "shaunsingh/nord.nvim" }
+    use { "catppuccin/nvim", as = "catppuccin" }
+    -- use { "shaunsingh/nord.nvim" }
+    -- use 'kvrohit/rasmus.nvim'
+    -- use { "ellisonleao/gruvbox.nvim" }
+    -- use "rebelot/kanagawa.nvim"
     -- use { 'Everblush/everblush.nvim', as = 'everblush' }
     -- use { 'shaunsingh/moonlight.nvim' }
-    -- use { 'luisiacc/gruvbox-baby', as = 'gruvbox' }
     -- use { "folke/tokyonight.nvim" }
     -- use { "lunarvim/darkplus.nvim" }
     -- use { "NTBBloodbath/doom-one.nvim" }
@@ -98,10 +101,10 @@ return packer.startup(function(use)
     use { "rafamadriz/friendly-snippets" } -- a bunch of snippets to use
 
     -- LSP
-    use {'neovim/nvim-lspconfig'}
-    use {'williamboman/mason.nvim'}
-    use {'williamboman/mason-lspconfig.nvim'}
-    use {'glepnir/lspsaga.nvim'} -- LSP UIs
+    use { 'neovim/nvim-lspconfig' }
+    use { 'williamboman/mason.nvim' }
+    use { 'williamboman/mason-lspconfig.nvim' }
+    use { 'glepnir/lspsaga.nvim' } -- LSP UIs
 
     use { "jose-elias-alvarez/null-ls.nvim" } -- for formatters and linters
     use { "RRethy/vim-illuminate" }
@@ -124,21 +127,21 @@ return packer.startup(function(use)
     use { "sindrets/diffview.nvim" }
 
     -- Neotest
-    use { "nvim-neotest/neotest"}
-    use { "nvim-neotest/neotest-python"}
-    use { "nvim-neotest/neotest-plenary"}
-    use { "nvim-neotest/neotest-vim-test"}
+    use { "nvim-neotest/neotest" }
+    use { "nvim-neotest/neotest-python" }
+    use { "nvim-neotest/neotest-plenary" }
+    use { "nvim-neotest/neotest-vim-test" }
     use { "olimorris/neotest-phpunit" }
 
     -- CSS
-    use { "NvChad/nvim-colorizer.lua", ft={"css","html","scss"} }
+    use { "NvChad/nvim-colorizer.lua", ft = { "css", "html", "scss" } }
 
     -- Markdown
-    use { "ellisonleao/glow.nvim", ft="markdown" }
-    use { "jubnzv/mdeval.nvim", ft="markdown" }
-    use { "AckslD/nvim-FeMaco.lua", ft="markdown" }
-    use { "jghauser/follow-md-links.nvim", ft="markdown" }
-    use { "jbyuki/venn.nvim", ft="markdown" }
+    use { "ellisonleao/glow.nvim", ft = "markdown" }
+    use { "jubnzv/mdeval.nvim", ft = "markdown" }
+    use { "AckslD/nvim-FeMaco.lua", ft = "markdown" }
+    use { "jghauser/follow-md-links.nvim", ft = "markdown" }
+    use { "jbyuki/venn.nvim", ft = "markdown" }
 
     -- PHP
     -- use {"gbprod/phpactor.nvim" }
