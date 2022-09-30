@@ -1,7 +1,7 @@
-# A Basic Stable IDE config for Neovim
+# A Hydra based Config
 
 <!--toc:start-->
-- [A Basic Stable IDE config for Neovim](#a-basic-stable-ide-config-for-neovim)
+- [A Hydra based Config](#a-hydra-based-config)
   - [Install Neovim 0.7](#install-neovim-07)
   - [Install the config](#install-the-config)
   - [Get healthy](#get-healthy)
@@ -29,6 +29,12 @@
     - [WIP](#wip)
 <!--toc:end-->
 
+## Goal
+This is my personal Config but this also can be used as a template for anyone.
+I use this as a full IDE replacment and it works great.
+
+This was and allways will be a work in progress as my job and prefrences change.
+
 ## Install Neovim 0.7
 
 You can install Neovim with your package manager e.g. brew, apt, pacman etc.. but remember that when you update your packages Neovim may be upgraded to a newer version.
@@ -44,6 +50,13 @@ sudo make install
 ```
 
 ## Install the config
+The Dotfiles are build with gnu stow in mind so this is a one comment install.
+You can run:
+
+```bash
+cd ~/dotfiles
+stow nvim
+```
 
 ## Get healthy
 
@@ -190,6 +203,10 @@ Other ones:
 ### Presentation
 - folke/twilight.nvim
 - folke/zen-mode.nvim
+
+First Uncomment Plugins in conf
+Enable Zen Mode to disable UI.
+`:Zenmode`
 
 ### WIP
 
