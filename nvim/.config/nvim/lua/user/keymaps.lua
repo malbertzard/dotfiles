@@ -25,6 +25,9 @@ keymap("n", "<leader>c", "<cmd>nohlsearch<CR>", opts)
 -- Clear CSS colors
 keymap("n", "<leader>C", ":ColorizerToggle<cr>", opts)
 
+-- Transparent Toggle
+keymap("n", "<leader>V", ":TransparentToggle<cr>", opts)
+
 -- Dashboard
 keymap("n", "<leader>A", ":Alpha<cr>", opts)
 

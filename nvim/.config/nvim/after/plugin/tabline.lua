@@ -4,5 +4,6 @@ if not status_ok then
 end
 
 tabline.setup({
-    enable = true
+    enable = true,
+    show_tabs_only = true
 })

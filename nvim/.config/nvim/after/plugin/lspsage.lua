@@ -7,7 +7,16 @@ saga.init_lsp_saga {
     saga_winblend = 0,
     server_filetype_map = {
         typescript = 'typescript'
-    }
+    },
+    code_action_lightbulb = {
+        enable = true,
+        enable_in_insert = true,
+        cache_code_action = true,
+        sign = true,
+        update_time = 150,
+        sign_priority = 20,
+        virtual_text = false,
+    },
 }
 
 local opts = { noremap = true, silent = true }

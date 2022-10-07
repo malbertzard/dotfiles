@@ -84,6 +84,11 @@ _G.packer_plugins = {
     path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/alpha-nvim",
     url = "https://github.com/goolord/alpha-nvim"
   },
+  catppuccin = {
+    loaded = true,
+    path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/catppuccin",
+    url = "https://github.com/catppuccin/nvim"
+  },
   ["cmp-buffer"] = {
     loaded = true,
     path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/cmp-buffer",
@@ -236,11 +241,6 @@ _G.packer_plugins = {
     path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/neotest-vim-test",
     url = "https://github.com/nvim-neotest/neotest-vim-test"
   },
-  ["nord.nvim"] = {
-    loaded = true,
-    path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/nord.nvim",
-    url = "https://github.com/shaunsingh/nord.nvim"
-  },
   ["null-ls.nvim"] = {
     loaded = true,
     path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/null-ls.nvim",
@@ -290,6 +290,11 @@ _G.packer_plugins = {
     path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/nvim-surround",
     url = "https://github.com/kylechui/nvim-surround"
   },
+  ["nvim-transparent"] = {
+    loaded = true,
+    path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/nvim-transparent",
+    url = "https://github.com/xiyaowong/nvim-transparent"
+  },
   ["nvim-tree.lua"] = {
     loaded = true,
     path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/nvim-tree.lua",
@@ -324,6 +329,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/project.nvim",
     url = "https://github.com/ahmedkhalf/project.nvim"
+  },
+  ["schemastore.nvim"] = {
+    loaded = true,
+    path = "/home/albertzard/.local/share/nvim/site/pack/packer/start/schemastore.nvim",
+    url = "https://github.com/b0o/schemastore.nvim"
   },
   ["scope.nvim"] = {
     loaded = true,
@@ -391,14 +401,14 @@ vim.cmd [[augroup packer_load_aucmds]]
 vim.cmd [[au!]]
   -- Filetype lazy-loads
 time([[Defining lazy-load filetype autocommands]], true)
-vim.cmd [[au FileType markdown ++once lua require("packer.load")({'follow-md-links.nvim', 'nvim-FeMaco.lua', 'glow.nvim', 'venn.nvim', 'mdeval.nvim'}, { ft = "markdown" }, _G.packer_plugins)]]
-vim.cmd [[au FileType css ++once lua require("packer.load")({'nvim-colorizer.lua'}, { ft = "css" }, _G.packer_plugins)]]
 vim.cmd [[au FileType html ++once lua require("packer.load")({'nvim-colorizer.lua'}, { ft = "html" }, _G.packer_plugins)]]
 vim.cmd [[au FileType scss ++once lua require("packer.load")({'nvim-colorizer.lua'}, { ft = "scss" }, _G.packer_plugins)]]
+vim.cmd [[au FileType markdown ++once lua require("packer.load")({'nvim-FeMaco.lua', 'glow.nvim', 'follow-md-links.nvim', 'venn.nvim', 'mdeval.nvim'}, { ft = "markdown" }, _G.packer_plugins)]]
+vim.cmd [[au FileType css ++once lua require("packer.load")({'nvim-colorizer.lua'}, { ft = "css" }, _G.packer_plugins)]]
 time([[Defining lazy-load filetype autocommands]], false)
   -- Event lazy-loads
 time([[Defining lazy-load event autocommands]], true)
-vim.cmd [[au VimEnter * ++once lua require("packer.load")({'filetype.nvim', 'move.nvim', 'harpoon', 'trouble.nvim'}, { event = "VimEnter *" }, _G.packer_plugins)]]
+vim.cmd [[au VimEnter * ++once lua require("packer.load")({'filetype.nvim', 'trouble.nvim', 'harpoon', 'move.nvim'}, { event = "VimEnter *" }, _G.packer_plugins)]]
 time([[Defining lazy-load event autocommands]], false)
 vim.cmd("augroup END")
 

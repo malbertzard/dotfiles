@@ -297,7 +297,7 @@ Hydra({
     mode = 'n',
     config = {
         invoke_on_body = true,
-        color = 'red',
+        color = 'pink',
     },
     body = '<Leader>h',
     heads = {

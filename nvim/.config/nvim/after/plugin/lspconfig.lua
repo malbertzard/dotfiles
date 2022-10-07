@@ -34,7 +34,7 @@ local on_attach = function(client, bufnr)
         },
         body = '<Leader>l',
         heads = {
-            { 'f', cmd 'lua vim.lsp.buf.formatting()' },
+            { 'f', cmd 'lua vim.lsp.buf.format { async = true }' },
             { 'i', cmd 'LspInfo' },
             { 'I', cmd 'Mason' },
             { 'a', cmd 'lua vim.lsp.buf.code_action()' },
@@ -126,6 +126,23 @@ for _, server in pairs(servers) do
                 },
             },
         }
+    end
+
+    if server == "jsonls" then
+
+        local status_ok, schemastore = pcall(require, "schemastore")
+        if status_ok then
+            opts = {
+                settings = {
+                    json = {
+                        schemas = schemastore.json.schemas {
+                            ignore = {}
+                        },
+                        validate = { enable = true },
+                    },
+                }
+            }
+        end
     end
 
     nvim_lsp[server].setup(opts)

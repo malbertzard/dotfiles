@@ -79,6 +79,7 @@ return packer.startup(function(use)
     use { "kyazdani42/nvim-web-devicons" }
     use { "karb94/neoscroll.nvim" }
     use { "stevearc/dressing.nvim" }
+    use { "xiyaowong/nvim-transparent" }
 
     -- Tmux replacment
     use { "kdheepak/tabline.nvim" }
@@ -105,6 +106,9 @@ return packer.startup(function(use)
     use { 'williamboman/mason.nvim' }
     use { 'williamboman/mason-lspconfig.nvim' }
     use { 'glepnir/lspsaga.nvim' } -- LSP UIs
+
+    -- Schema LSP
+    use { "b0o/schemastore.nvim" }
 
     use { "jose-elias-alvarez/null-ls.nvim" } -- for formatters and linters
     use { "RRethy/vim-illuminate" }
