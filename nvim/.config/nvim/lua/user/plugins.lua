@@ -59,7 +59,6 @@ return packer.startup(function(use)
     use { "fedepujol/move.nvim", event = "VimEnter" }
     use { "folke/trouble.nvim", event = "VimEnter" }
     use { "ThePrimeagen/harpoon", event = "VimEnter" }
-    use { "nathom/filetype.nvim", event = "VimEnter" }
 
     -- Colorschemes
     use { "catppuccin/nvim", as = "catppuccin" }
@@ -139,6 +138,9 @@ return packer.startup(function(use)
 
     -- CSS
     use { "NvChad/nvim-colorizer.lua", ft = { "css", "html", "scss" } }
+
+    -- Norg
+    use { "nvim-neorg/neorg", after = "nvim-treesitter",even = "BufEnter" }
 
     -- Markdown
     use { "ellisonleao/glow.nvim", ft = "markdown" }

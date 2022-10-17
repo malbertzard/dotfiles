@@ -5,5 +5,7 @@ end
 
 tabline.setup({
     enable = true,
-    show_tabs_only = true
+    options = {
+        show_tabs_only = false,
+    }
 })

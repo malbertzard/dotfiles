@@ -88,7 +88,7 @@ if status_ok then
                 end,
             },
             mode = { 'n', 'x' },
-            body = '<leader>g',
+            body = '<leader>G',
             heads = {
                 { 'J',
                     function()
@@ -317,9 +317,10 @@ Hydra({
 -- Manage Terminal
 
 local terminal_hint = [[
-     _f_: toggleTerm  _F_: toggleTerm Remote  _t_ term
+     _t_ term
+     _f_: toggleTerm  _F_: toggleTerm Remote
      _d_: dev Server  _D_: remote Dev
-     _r_: rustywind
+     _r_: rustywind   _v_: Vsplit
 ]]
 
 Hydra({
@@ -334,6 +335,7 @@ Hydra({
     heads = {
         { 'f', cmd ':ToggleTerm' },
         { 'F', cmd ':TermExec cmd="ssh dev"' },
+        { 'v', cmd ':vsplit term://zsh' },
         { 't', cmd ':tabnew | term' },
         { 'd', cmd ':tabnew | term ssh dev' },
         { 'D', cmd ':tabnew | term ssh dev-extern.nds-server.de' },
@@ -400,31 +402,6 @@ Hydra({
 })
 
 -- Neotest
-
-local terminal_hint = [[
-     _f_: toggleTerm  _F_: toggleTerm Remote  _t_ term
-     _d_: dev Server  _D_: remote Dev
-     _r_: rustywind
-]]
-
-Hydra({
-    name = 'Terminal',
-    hint = terminal_hint,
-    mode = 'n',
-    config = {
-        invoke_on_body = true,
-        color = 'blue',
-    },
-    body = '<Leader>t',
-    heads = {
-        { 'f', cmd ':ToggleTerm' },
-        { 'F', cmd ':TermExec cmd="ssh dev"' },
-        { 't', cmd ':tabnew | term' },
-        { 'd', cmd ':tabnew | term ssh dev' },
-        { 'D', cmd ':tabnew | term ssh dev-extern.nds-server.de' },
-        { 'r', cmd '!rustywind % --write<cr>' },
-    }
-})
 
 local test_hint = [[
      _r_: run       _f_: run File  _s_: stop _a_: attach
