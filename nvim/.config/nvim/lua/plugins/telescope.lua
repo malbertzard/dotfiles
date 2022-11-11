@@ -50,3 +50,4 @@ telescope.setup {
 telescope.load_extension('projects')
 telescope.load_extension('repo')
 telescope.load_extension('tmux')
+telescope.load_extension('file_browser')

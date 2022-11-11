@@ -4,7 +4,6 @@ if (not status) then return end
 saga.init_lsp_saga {
     border_style = "rounded",
     code_action_icon = "",
-    saga_winblend = 0,
     server_filetype_map = {
         typescript = 'typescript'
     },

@@ -1,8 +1,6 @@
--- General Stuff
-require "user.options"
-require "user.keymaps"
-require "user.plugins"
-
--- Settings
-require "user.autocommands"
-require "user.colorscheme"
+-- sourcing config files.
+require("options")
+require("plugins")
+require("keymaps")
+require("autocommands")
+require("colorscheme")

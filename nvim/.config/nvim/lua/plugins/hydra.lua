@@ -34,91 +34,6 @@ Hydra({
     }
 })
 
--- Mange Git
-
-local status_ok, gitsigns = pcall(require, "gitsigns")
-if status_ok then
-    local status_ok, neogit = pcall(require, "neogit")
-    if status_ok then
-
-        gitsigns.setup {
-            signs = {
-                add = { hl = "GitSignsAdd", text = "▎", numhl = "GitSignsAddNr", linehl = "GitSignsAddLn" },
-                change = { hl = "GitSignsChange", text = "▎", numhl = "GitSignsChangeNr", linehl = "GitSignsChangeLn" },
-                delete = { hl = "GitSignsDelete", text = "契", numhl = "GitSignsDeleteNr", linehl = "GitSignsDeleteLn" },
-                topdelete = { hl = "GitSignsDelete", text = "契", numhl = "GitSignsDeleteNr",
-                    linehl = "GitSignsDeleteLn" },
-                changedelete = { hl = "GitSignsChange", text = "▎", numhl = "GitSignsChangeNr",
-                    linehl = "GitSignsChangeLn" },
-            },
-        }
-
-        local hint = [[
-         _J_: next hunk   _s_: stage hunk        _d_: show deleted   _b_: blame line
-         _K_: prev hunk   _u_: undo last stage   _p_: preview hunk   _B_: blame show full
-         ^ ^              _S_: stage buffer      ^ ^                 _/_: show base file
-         ^
-         ^ ^              _<Enter>_: Neogit              _q_: exit
-        ]]
-
-        Hydra({
-            name = 'Git',
-            hint = hint,
-            config = {
-                color = 'pink',
-                invoke_on_body = true,
-                hint = {
-                    border = 'rounded'
-                },
-                on_enter = function()
-                    vim.cmd 'mkview'
-                    vim.cmd 'silent! %foldopen!'
-                    vim.bo.modifiable = false
-                    gitsigns.toggle_signs(true)
-                    gitsigns.toggle_linehl(true)
-                end,
-                on_exit = function()
-                    local cursor_pos = vim.api.nvim_win_get_cursor(0)
-                    vim.cmd 'loadview'
-                    vim.api.nvim_win_set_cursor(0, cursor_pos)
-                    vim.cmd 'normal zv'
-                    gitsigns.toggle_signs(false)
-                    gitsigns.toggle_linehl(false)
-                    gitsigns.toggle_deleted(false)
-                end,
-            },
-            mode = { 'n', 'x' },
-            body = '<leader>G',
-            heads = {
-                { 'J',
-                    function()
-                        if vim.wo.diff then return ']c' end
-                        vim.schedule(function() gitsigns.next_hunk() end)
-                        return '<Ignore>'
-                    end,
-                    { expr = true, desc = 'next hunk' } },
-                { 'K',
-                    function()
-                        if vim.wo.diff then return '[c' end
-                        vim.schedule(function() gitsigns.prev_hunk() end)
-                        return '<Ignore>'
-                    end,
-                    { expr = true, desc = 'prev hunk' } },
-                { 's', ':Gitsigns stage_hunk<CR>', { silent = true, desc = 'stage hunk' } },
-                { 'u', gitsigns.undo_stage_hunk, { desc = 'undo last stage' } },
-                { 'S', gitsigns.stage_buffer, { desc = 'stage buffer' } },
-                { 'p', gitsigns.preview_hunk, { desc = 'preview hunk' } },
-                { 'd', gitsigns.toggle_deleted, { nowait = true, desc = 'toggle deleted' } },
-                { 'b', gitsigns.blame_line, { desc = 'blame' } },
-                { 'B', function() gitsigns.blame_line { full = true } end, { desc = 'blame show full' } },
-                { '/', gitsigns.show, { exit = true, desc = 'show base file' } }, -- show the base of the file
-                { '<Enter>', '<Cmd>Neogit<CR>', { exit = true, desc = 'Neogit' } },
-                { 'q', nil, { exit = true, nowait = true, desc = 'exit' } },
-            }
-        })
-    end
-end
-
 -- Mange Telescope
 
 local hint = [[
@@ -126,8 +41,9 @@ local hint = [[
      _p_: project    _/_: search in file    _r_: repo
      _h_: vim help   _c_: execute command   _k_: keymaps
      _t_: Tmux       _b_: buffer            _?_: search history
+     _n_: Neorg      _B_: File Browser
 
-     _<Enter>_: Telescope           _<Esc>_
+     _<Enter>_: Telescope                   _<Esc>_: exit
 ]]
 
 Hydra({
@@ -147,11 +63,13 @@ Hydra({
         { 'k', cmd 'Telescope keymaps' },
         { 'r', cmd 'Telescope repo list' },
         { 't', cmd 'Telescope tmux sessions' },
+        { 'n', cmd 'Telescope neorg switch_workspace' },
         { 'p', cmd 'Telescope projects', { desc = 'projects' } },
         { '/', cmd 'Telescope current_buffer_fuzzy_find', { desc = 'search in file' } },
         { '?', cmd 'Telescope search_history', { desc = 'search history' } },
         { 'c', cmd 'Telescope commands', { desc = 'execute command' } },
         { 'b', cmd 'Telescope buffers', { desc = 'execute command' } },
+        { 'B', cmd 'Telescope file_browser', { desc = 'execute command' } },
         { '<Enter>', cmd 'Telescope', { exit = true, desc = 'list all pickers' } },
         { '<Esc>', nil, { exit = true, nowait = true } },
     }
@@ -187,7 +105,7 @@ Hydra({ -- {{{
         }
     },
     mode = { 'n', 'x' },
-    body = '<leader>o',
+    body = '<leader>O',
     heads = {
         -- { 'n', cmd 'set number!', { desc = 'number' } },
         { 'n', function() -- {{{
@@ -271,7 +189,7 @@ Hydra({
         invoke_on_body = true,
         color = 'blue',
     },
-    body = '<Leader>p',
+    body = '<Leader>P',
     heads = {
         { 'c', cmd 'PackerCompile' },
         { 'i', cmd 'PackerInstall' },
@@ -281,14 +199,37 @@ Hydra({
     }
 })
 
+-- Manage Overseer
+
+local overseer_hint = [[
+     _o_: Open        _i_: Info
+     _t_: Task Action _q_: Quick
+     _r_: Task Run 
+]]
+
+Hydra({
+    name = 'Packer',
+    hint = overseer_hint,
+    mode = 'n',
+    config = {
+        invoke_on_body = true,
+        color = 'blue',
+    },
+    body = '<Leader>o',
+    heads = {
+        { 'o', cmd 'OverseerToggle' },
+        { 'i', cmd 'OverseerInfo' },
+        { 't', cmd 'OverseerTaskAction' },
+        { 'q', cmd 'OverseerQuickAction' },
+        { 'r', cmd 'OverseerRun' },
+    }
+})
+
 -- Manage Harpoon
 
 local harpoon_hint = [[
      _a_: shoot       _l_: list
      _p_: prev        _n_: next
-
-     _<Esc>_
-
 ]]
 
 Hydra({
@@ -297,7 +238,7 @@ Hydra({
     mode = 'n',
     config = {
         invoke_on_body = true,
-        color = 'pink',
+        color = 'blue',
     },
     body = '<Leader>h',
     heads = {
@@ -317,7 +258,7 @@ Hydra({
 -- Manage Terminal
 
 local terminal_hint = [[
-     _t_ term
+     _t_: term
      _f_: toggleTerm  _F_: toggleTerm Remote
      _d_: dev Server  _D_: remote Dev
      _r_: rustywind   _v_: Vsplit
@@ -356,11 +297,11 @@ Hydra({
     mode = 'n',
     config = {
         invoke_on_body = true,
-        color = 'blue',
+        color = 'pink',
     },
     body = '<Leader>T',
     heads = {
-        { 'N', cmd ':TablineTabNew' },
+        { 'N', cmd ':tabnew' },
         { 'n', cmd ':tabnext' },
         { 'p', cmd ':tabprevious' },
         { 'q', cmd ':tabclose' },
@@ -390,7 +331,7 @@ Hydra({
         end,
     },
     mode = 'n',
-    body = '<leader>d',
+    body = '<leader>D',
     heads = {
         { 'H', '<C-v>h:VBox<CR>' },
         { 'J', '<C-v>j:VBox<CR>' },
@@ -402,7 +343,6 @@ Hydra({
 })
 
 -- Neotest
-
 local test_hint = [[
      _r_: run       _f_: run File  _s_: stop _a_: attach
      _O_: Overview  _S_: summary

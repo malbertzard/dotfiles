@@ -1,5 +1,3 @@
---vim.lsp.set_log_level("debug")
-
 local status, nvim_lsp = pcall(require, "lspconfig")
 if (not status) then return end
 
@@ -42,7 +40,7 @@ local on_attach = function(client, bufnr)
             { 'k', cmd 'lua vim.diagnostic.goto_prev({buffer=0})' },
             { 'r', cmd 'lua vim.lsp.buf.rename()' },
             { 's', cmd 'lua vim.lsp.buf.signature_help()' },
-            { 'q', cmd 'lua vim.diagnostic.setloclist()' },
+            { 'q', cmd 'TroubleToggle' },
         }
     })
 
@@ -131,23 +129,6 @@ for _, server in pairs(servers) do
         }
     end
 
-    if server == "jsonls" then
-
-        local status_ok, schemastore = pcall(require, "schemastore")
-        if status_ok then
-            opts = {
-                settings = {
-                    json = {
-                        schemas = schemastore.json.schemas {
-                            ignore = {}
-                        },
-                        validate = { enable = true },
-                    },
-                }
-            }
-        end
-    end
-
     nvim_lsp[server].setup(opts)
 end
 
@@ -176,3 +157,4 @@ vim.diagnostic.config({
         source = "always", -- Or "if_many"
     },
 })
+

@@ -21,15 +21,7 @@ keymap("n", "<leader>qq", ":Bdelete<cr>", opts)
 
 -- Clear highlights
 keymap("n", "<leader>c", "<cmd>nohlsearch<CR>", opts)
-
--- Clear CSS colors
-keymap("n", "<leader>C", ":ColorizerToggle<cr>", opts)
-
--- Transparent Toggle
-keymap("n", "<leader>V", ":TransparentToggle<cr>", opts)
-
--- Dashboard
-keymap("n", "<leader>A", ":Alpha<cr>", opts)
+keymap("n", "<leader>A", "<cmd>:Alpha<CR>", opts)
 
 -- Better paste
 keymap("v", "p", '"_dP', opts)
@@ -51,7 +43,12 @@ keymap("v", ">", ">gv", opts)
 
 -- NvimTree
 keymap("n", "<leader>e", ":NvimTreeToggle<CR>", opts)
+keymap("n", "<leader>E", ":Ex .<CR>", opts)
 
 -- Move Blocks
 keymap('v', '<A-j>', ":MoveBlock(1)<CR>", { noremap = true, silent = true })
 keymap('v', '<A-k>', ":MoveBlock(-1)<CR>", { noremap = true, silent = true })
+
+
+-- Undotree
+keymap("n", "<leader>u", ":lua require('undotree').toggle()<cr>", { noremap = true, silent = true })

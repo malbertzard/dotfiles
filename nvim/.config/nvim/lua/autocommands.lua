@@ -36,6 +36,26 @@ vim.cmd"autocmd TermOpen * setlocal nonumber norelativenumber"
 -- Highlight Yanked Text
 vim.api.nvim_create_autocmd({ "TextYankPost" }, {
   callback = function()
-    vim.highlight.on_yank { higroup = "Visual", timeout = 200 }
+    vim.highlight.on_yank { higroup = "Visual", timeout = 100 }
   end,
 })
+
+-- Auto open nvim-tree when writing (nvim .) in command line
+-- and auto open Alpha when nothing given as argument.
+if vim.fn.index(vim.fn.argv(), ".") >= 0 then
+  vim.api.nvim_create_autocmd("VimEnter", {
+    pattern = "*",
+    callback = function()
+        vim.cmd("NvimTreeOpen")
+    end,
+  })
+  vim.cmd("bd1")
+elseif vim.fn.len(vim.fn.argv()) == 0 then
+  vim.api.nvim_create_autocmd("VimEnter", {
+    pattern = "*",
+    callback = function()
+        vim.cmd("Alpha")
+        vim.cmd("bd 1")
+    end,
+  })
+end
