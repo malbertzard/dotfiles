@@ -7,6 +7,15 @@ local protocol = require('vim.lsp.protocol')
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
 
+    local opts = { noremap = true, silent = true }
+    -- vim.keymap.set('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
+    -- vim.keymap.set('n', 'gp', '<Cmd>lua vim. peek_definition<CR>', opts)
+    -- vim.keymap.set('n', 'gr', '<Cmd>lua vim.lsp.buf.rename()<CR>', opts)
+    -- vim.keymap.set('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+    -- vim.keymap.set('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+    -- vim.keymap.set('n', 'gS', '<Cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+    vim.lsp.buf.hover()
+
     local status_ok, Hydra = pcall(require, "hydra")
     if not status_ok then
         return
@@ -23,7 +32,7 @@ local on_attach = function(client, bufnr)
     ]]
 
     Hydra({
-        name = 'Tab',
+        name = 'Lsp',
         hint = lsp_hint,
         mode = 'n',
         config = {

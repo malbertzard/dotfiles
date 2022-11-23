@@ -58,12 +58,12 @@ if not status_ok then
     return
 end
 
-return require("packer").startup({
+return packer.startup({
     function()
         use({ "wbthomason/packer.nvim" })
         use({ "nvim-lua/plenary.nvim", })
 
-        use "samjwill/nvim-unception"
+        -- use "samjwill/nvim-unception"
 
         -- These two plugins make CodeArt startup faster.
         use({
@@ -75,7 +75,7 @@ return require("packer").startup({
 
         -- Keybind and modes
 
-        use { 
+        use {
             "anuvyklack/hydra.nvim", key = "<leader>",
             config = function()
                 require("plugins/hydra")
@@ -86,7 +86,6 @@ return require("packer").startup({
             "https://github.com/nat-418/scamp.nvim",
             config = function()
                 require('scamp').setup({
-                    -- see man(5) ssh_config for more control options
                     scp_options = {
                         'ConnectTimeout=5'
                     }
@@ -95,10 +94,33 @@ return require("packer").startup({
         }
 
         -- Color schemes.
-        -- use({ "folke/tokyonight.nvim", })
-        -- use({ "bluz71/vim-moonfly-colors", })
-        -- use({ "shaunsingh/nord.nvim", })
-        use { "catppuccin/nvim", as = "catppuccin" }
+        use({ "folke/tokyonight.nvim", })
+        use({ "bluz71/vim-moonfly-colors", as = "moonfly" })
+        use 'JoosepAlviste/palenightfall.nvim'
+        use({ "shaunsingh/nord.nvim", })
+        use({
+            "catppuccin/nvim", as = "catppuccin",
+            config = function()
+                vim.g.catppuccin_flavour = "mocha"
+                require("catppuccin").setup({
+                    integrations = {
+                        cmp = true,
+                        gitsigns = true,
+                        nvimtree = true,
+                        telescope = true,
+                        notify = true,
+                        harpoon = true,
+                        markdown = true,
+                        neogit = true,
+                        neotest = true,
+                        noice = true,
+                        treesitter = true,
+                        overseer = true,
+                        lsp_trouble = true,
+                    },
+                })
+            end
+        })
 
         --
         -- Editing Support
@@ -160,7 +182,6 @@ return require("packer").startup({
                 "hbs",
             },
         })
-
 
         --
         -- UI Components
@@ -247,6 +268,7 @@ return require("packer").startup({
         -- LSP, LSP installer and tab completion.
         use({
             "williamboman/mason.nvim",
+            after = "nvim-cmp",
             config = function()
                 require("mason").setup()
             end,
@@ -291,7 +313,6 @@ return require("packer").startup({
 
         use({
             "rafamadriz/friendly-snippets",
-            event = "InsertEnter",
         })
         use({
             "L3MON4D3/LuaSnip",
@@ -360,6 +381,24 @@ return require("packer").startup({
         -- Eye Candy
         --
 
+        use({
+            "karb94/neoscroll.nvim",
+            config = function()
+                require('neoscroll').setup({
+                    -- All these keys will be mapped to their corresponding default scrolling animation
+                    mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb' },
+                    hide_cursor = true, -- Hide cursor while scrolling
+                    stop_eof = true, -- Stop at <EOF> when scrolling downwards
+                    respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
+                    cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
+                    easing_function = nil, -- Default easing function
+                    pre_hook = nil, -- Function to run before the scrolling animation starts
+                    post_hook = nil, -- Function to run after the scrolling animation ends
+                    performance_mode = false, -- Disable "Performance Mode" on all buffers.
+                })
+            end
+        })
+
         -- Colorizer (for highlighting color codes).
         use({
             "NvChad/nvim-colorizer.lua",
@@ -379,18 +418,28 @@ return require("packer").startup({
             end,
         })
 
-        -- Smooth scroll.
-        use({
-            "karb94/neoscroll.nvim",
-            event = { "BufRead", "BufNewFile" },
+        use { "MunifTanjim/nui.nvim" }
+        use {
+            "rcarriga/nvim-notify",
             config = function()
-                require("plugins.neoscroll")
+                require("notify").setup({
+                    level = "WARN",
+                    renderer = "minimal",
+                })
+            end
+        }
+
+        use({
+            "folke/noice.nvim",
+            config = function()
+                require("plugins/noice")
             end,
+            requires = {
+                "MunifTanjim/nui.nvim",
+                "rcarriga/nvim-notify",
+            }
         })
 
-        use { "stevearc/dressing.nvim", config = function()
-            require('dressing').setup({})
-        end }
 
         -- todo-comments is a lua plugin for Neovim to highlight and search for
         -- todo comments like TODO, HACK, BUG in code base.
@@ -399,16 +448,6 @@ return require("packer").startup({
             event = { "BufRead", "BufNewFile" },
             config = function()
                 require("plugins/todo-comments")
-            end,
-        })
-
-        -- A plugin for neovim that automatically creates missing directories
-        -- on saving a file.
-        use({
-            "jghauser/mkdir.nvim",
-            event = { "FileWritePre", "BufWritePre" },
-            config = function()
-                require("mkdir")
             end,
         })
 
@@ -422,7 +461,10 @@ return require("packer").startup({
         -- when toggled in either of it has three different modes (Ataraxis, Minimalist and Focus).
         --
         -- Presentation
-        use { "folke/twilight.nvim" }
+        use {
+            "folke/twilight.nvim",
+            event = { "BufRead", "BufNewFile" },
+        }
         use { "folke/zen-mode.nvim", config = function()
             require("plugins/zen-mode")
         end }
@@ -457,9 +499,14 @@ return require("packer").startup({
             end
         }
 
+        -- Lua
+        use { "folke/neodev.nvim", ft = "lua" }
+
+        -- Plugins in development
+        use { "~/.config/nvim/lua/dev/luafetch/" }
+
 
         -- Run :PackerSync if packer.nvim was not installed and
-        -- CodeArt installed that.
         if packer_bootstrap then
             require("packer").sync()
         end

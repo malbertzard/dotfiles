@@ -1,5 +1,4 @@
 local color = "catppuccin"
-vim.g.catppuccin_flavour = "mocha"
 
 local status_ok, colorschema = pcall(require, color)
 if not status_ok then

@@ -37,10 +37,11 @@ Hydra({
 -- Mange Telescope
 
 local hint = [[
+  ^ ^       
      _f_: files      _o_: old files         _g_: life grep
      _p_: project    _/_: search in file    _r_: repo
      _h_: vim help   _c_: execute command   _k_: keymaps
-     _t_: Tmux       _b_: buffer            _?_: search history
+     _t_: Tmux       _b_: buffer            _?_: search history     
      _n_: Neorg      _B_: File Browser
 
      _<Enter>_: Telescope                   _<Esc>_: exit
@@ -56,9 +57,9 @@ Hydra({
     mode = 'n',
     body = '<Leader>f',
     heads = {
-        { 'f', cmd 'Telescope find_files' },
-        { 'g', cmd 'Telescope live_grep' },
-        { 'o', cmd 'Telescope oldfiles', { desc = 'recently opened files' } },
+        { 'f', cmd 'Telescope find_files theme=ivy' },
+        { 'g', cmd 'Telescope live_grep theme=ivy' },
+        { 'o', cmd 'Telescope oldfiles theme=ivy', { desc = 'recently opened files' } },
         { 'h', cmd 'Telescope help_tags', { desc = 'vim help' } },
         { 'k', cmd 'Telescope keymaps' },
         { 'r', cmd 'Telescope repo list' },
@@ -67,10 +68,10 @@ Hydra({
         { 'p', cmd 'Telescope projects', { desc = 'projects' } },
         { '/', cmd 'Telescope current_buffer_fuzzy_find', { desc = 'search in file' } },
         { '?', cmd 'Telescope search_history', { desc = 'search history' } },
-        { 'c', cmd 'Telescope commands', { desc = 'execute command' } },
+        { 'c', cmd 'Telescope commands theme=ivy', { desc = 'execute command' } },
         { 'b', cmd 'Telescope buffers', { desc = 'execute command' } },
-        { 'B', cmd 'Telescope file_browser', { desc = 'execute command' } },
-        { '<Enter>', cmd 'Telescope', { exit = true, desc = 'list all pickers' } },
+        { 'B', cmd 'Telescope file_browser theme=ivy', { desc = 'execute command' } },
+        { '<Enter>', cmd 'Telescope theme=ivy', { exit = true, desc = 'list all pickers' } },
         { '<Esc>', nil, { exit = true, nowait = true } },
     }
 })
@@ -177,8 +178,10 @@ Hydra({ -- {{{
 -- Manage Packer
 
 local packer_hint = [[
-     _c_: Compile     _i_: Install         _s_: Sync
-     _S_: Status      _u_: Update
+  ^
+    _c_: Compile     _i_: Install         _s_: Sync     
+    _S_: Status      _u_: Update
+  ^
 ]]
 
 Hydra({
@@ -202,13 +205,17 @@ Hydra({
 -- Manage Overseer
 
 local overseer_hint = [[
-     _o_: Open        _i_: Info
+  ^ ^       
+  ^
+     _o_: Open        _i_: Info     
      _t_: Task Action _q_: Quick
      _r_: Task Run 
+  ^ ^       
+  ^
 ]]
 
 Hydra({
-    name = 'Packer',
+    name = 'Overseer',
     hint = overseer_hint,
     mode = 'n',
     config = {
@@ -228,8 +235,11 @@ Hydra({
 -- Manage Harpoon
 
 local harpoon_hint = [[
-     _a_: shoot       _l_: list
+  ^ ^       
+  ^
+     _a_: shoot       _l_: list     
      _p_: prev        _n_: next
+  ^
 ]]
 
 Hydra({
@@ -258,10 +268,13 @@ Hydra({
 -- Manage Terminal
 
 local terminal_hint = [[
-     _t_: term
-     _f_: toggleTerm  _F_: toggleTerm Remote
+  ^ ^      
+  ^
+     _t_: Tab Term    _f_: toggleTerm       
+     _v_: Vsplit      _s_: Split
      _d_: dev Server  _D_: remote Dev
-     _r_: rustywind   _v_: Vsplit
+  ^ ^      
+  ^
 ]]
 
 Hydra({
@@ -275,18 +288,21 @@ Hydra({
     body = '<Leader>t',
     heads = {
         { 'f', cmd ':ToggleTerm' },
-        { 'F', cmd ':TermExec cmd="ssh dev"' },
-        { 'v', cmd ':vsplit term://zsh' },
+        { 'v', cmd ':vsplit term://bash' },
+        { 's', cmd ':split term://bash' },
         { 't', cmd ':tabnew | term' },
         { 'd', cmd ':tabnew | term ssh dev' },
         { 'D', cmd ':tabnew | term ssh dev-extern.nds-server.de' },
-        { 'r', cmd '!rustywind % --write<cr>' },
     }
 })
 
 local tab_hint = [[
-     _N_: new    _q_: Quit Term
+  ^ ^      
+  ^
+     _N_: new    _q_: Quit Term     
      _n_: next   _p_: prev
+  ^ ^     
+  ^
 ]]
 
 -- Manage Tabs
@@ -344,8 +360,13 @@ Hydra({
 
 -- Neotest
 local test_hint = [[
-     _r_: run       _f_: run File  _s_: stop _a_: attach
+  ^ ^     
+  ^
+     _r_: run       _f_: run File  _s_: stop    
+     _a_: attach
      _O_: Overview  _S_: summary
+  ^ ^     
+  ^
 
 ]]
 
