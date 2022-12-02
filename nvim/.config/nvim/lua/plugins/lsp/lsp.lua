@@ -97,7 +97,9 @@ local servers = {
     "phpactor",
     "sumneko_lua",
     "tailwindcss",
+
     "marksman",
+    -- "ltex",
 
     "pyright",
     "cssls",
@@ -133,6 +135,19 @@ for _, server in pairs(servers) do
                         library = vim.api.nvim_get_runtime_file("", true),
                         checkThirdParty = false
                     },
+                },
+            },
+        }
+    end
+
+    if server == "sumneko_lua" then
+        opts = {
+            on_attach = on_attach,
+            settings = {
+                ltex = {
+                    lang = {"de-De"},
+                    filetypes = {"markdown", "text", "md", "tex", "txt", "org", "norg"},
+                    flags = {debounce_text_changes = 300}
                 },
             },
         }

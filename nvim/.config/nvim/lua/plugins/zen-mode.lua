@@ -38,11 +38,11 @@ zen_mode.setup(
   },
   -- callback where you can add custom code when the Zen window opens
   on_open = function()
-        vim.opt.cursorline = false
+        require('lualine').hide({place = {'statusline', 'tabline', 'winbar'}})
   end,
   -- callback where you can add custom code when the Zen window closes
   on_close = function()
-        vim.opt.cursorline = true
+        require('lualine').hide({unhide=true})
   end,
 }
 )

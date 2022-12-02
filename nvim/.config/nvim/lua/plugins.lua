@@ -94,10 +94,10 @@ return packer.startup({
         }
 
         -- Color schemes.
-        use({ "folke/tokyonight.nvim", })
-        use({ "bluz71/vim-moonfly-colors", as = "moonfly" })
-        use 'JoosepAlviste/palenightfall.nvim'
-        use({ "shaunsingh/nord.nvim", })
+        -- use({ "folke/tokyonight.nvim", })
+        -- use({ "bluz71/vim-moonfly-colors", as = "moonfly" })
+        -- use 'JoosepAlviste/palenightfall.nvim'
+        -- use({ "shaunsingh/nord.nvim", })
         use({
             "catppuccin/nvim", as = "catppuccin",
             config = function()
@@ -129,13 +129,19 @@ return packer.startup({
         -- This plugin adds indentation guides to all lines (including empty lines).
         use({
             "lukas-reineke/indent-blankline.nvim",
-            event = { "BufRead", "BufNewFile" },
+            after = "nvim-treesitter",
             config = function()
                 require("plugins/indent-blankline")
             end,
         })
 
-        use { "kylechui/nvim-surround", config = function() require('nvim-surround').setup() end }
+        use {
+            after = "nvim-treesitter",
+            "kylechui/nvim-surround",
+            config = function()
+                require('nvim-surround').setup()
+            end
+        }
         use { "moll/vim-bbye" }
         use { "fedepujol/move.nvim", event = { "BufRead", "BufNewFile" } }
         use { "ThePrimeagen/harpoon", event = { "BufRead", "BufNewFile" } }
@@ -235,6 +241,7 @@ return packer.startup({
         -- TreeSitter.
         use({
             "nvim-treesitter/nvim-treesitter",
+            after = "telescope.nvim",
             run = ":TSUpdate",
             config = function()
                 require("plugins/treesitter")
@@ -254,11 +261,24 @@ return packer.startup({
         })
 
         -- Telescope
-        use { "cljoly/telescope-repo.nvim", }
-        use { "camgraff/telescope-tmux.nvim", }
-        use { "nvim-neorg/neorg-telescope", }
-        use { "nvim-telescope/telescope-file-browser.nvim" }
+        use {
+            event = { "BufRead", "BufNewFile" },
+            "cljoly/telescope-repo.nvim",
+        }
+        use {
+            event = { "BufRead", "BufNewFile" },
+            "camgraff/telescope-tmux.nvim",
+        }
+        use {
+            event = { "BufRead", "BufNewFile" },
+            "nvim-neorg/neorg-telescope",
+        }
+        use {
+            event = { "BufRead", "BufNewFile" },
+            "nvim-telescope/telescope-file-browser.nvim"
+        }
         use({
+            cmd = {"Telescope"},
             "nvim-telescope/telescope.nvim",
             config = function()
                 require("plugins/telescope")
@@ -293,6 +313,7 @@ return packer.startup({
         })
 
         use({
+            after = { "mason.nvim" },
             "glepnir/lspsaga.nvim",
             config = function()
                 require("plugins.lsp.lspsaga")
@@ -342,9 +363,13 @@ return packer.startup({
         })
 
         -- Neotest
-        use { "nvim-neotest/neotest", event = { "BufRead", "BufNewFile" }, config = function()
-            require("plugins/neotest")
-        end }
+        use {
+            "nvim-neotest/neotest",
+            event = { "BufRead", "BufNewFile" },
+            config = function()
+                require("plugins/neotest")
+            end
+        }
         use { "nvim-neotest/neotest-plenary", event = { "BufRead", "BufNewFile" } }
         use { "nvim-neotest/neotest-vim-test", event = { "BufRead", "BufNewFile" } }
         use { "olimorris/neotest-phpunit", ft = { "php" } }
@@ -353,6 +378,7 @@ return packer.startup({
         -- Terminal.
         use({
             "akinsho/toggleterm.nvim",
+            event = { "BufRead", "BufNewFile" },
             config = function()
                 require("plugins/toggleterm")
             end,
@@ -381,23 +407,23 @@ return packer.startup({
         -- Eye Candy
         --
 
-        use({
-            "karb94/neoscroll.nvim",
-            config = function()
-                require('neoscroll').setup({
-                    -- All these keys will be mapped to their corresponding default scrolling animation
-                    mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb' },
-                    hide_cursor = true, -- Hide cursor while scrolling
-                    stop_eof = true, -- Stop at <EOF> when scrolling downwards
-                    respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
-                    cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
-                    easing_function = nil, -- Default easing function
-                    pre_hook = nil, -- Function to run before the scrolling animation starts
-                    post_hook = nil, -- Function to run after the scrolling animation ends
-                    performance_mode = false, -- Disable "Performance Mode" on all buffers.
-                })
-            end
-        })
+        -- use({
+        --     "karb94/neoscroll.nvim",
+        --     config = function()
+        --         require('neoscroll').setup({
+        --             -- All these keys will be mapped to their corresponding default scrolling animation
+        --             mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb' },
+        --             hide_cursor = true, -- Hide cursor while scrolling
+        --             stop_eof = true, -- Stop at <EOF> when scrolling downwards
+        --             respect_scrolloff = false, -- Stop scrolling when the cursor reaches the scrolloff margin of the file
+        --             cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
+        --             easing_function = nil, -- Default easing function
+        --             pre_hook = nil, -- Function to run before the scrolling animation starts
+        --             post_hook = nil, -- Function to run after the scrolling animation ends
+        --             performance_mode = false, -- Disable "Performance Mode" on all buffers.
+        --         })
+        --     end
+        -- })
 
         -- Colorizer (for highlighting color codes).
         use({
@@ -465,9 +491,12 @@ return packer.startup({
             "folke/twilight.nvim",
             event = { "BufRead", "BufNewFile" },
         }
-        use { "folke/zen-mode.nvim", config = function()
-            require("plugins/zen-mode")
-        end }
+        use {
+            event = { "BufRead", "BufNewFile" },
+            "folke/zen-mode.nvim", config = function()
+                require("plugins/zen-mode")
+            end
+        }
 
         --
         -- File Type
