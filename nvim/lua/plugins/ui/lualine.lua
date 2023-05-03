@@ -1,6 +1,6 @@
 local M = {
 	"nvim-lualine/lualine.nvim",
-	event = "VeryLazy",
+	event = "VimEnter",
 	opts = function()
 		local colors = require("utils").git_colors
 		local function diff_source()

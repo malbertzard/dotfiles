@@ -4,10 +4,10 @@ return {
         cmd = { "TroubleToggle", "Trouble" },
         opts = { use_diagnostic_signs = true },
         keys = {
-            { "<leader>xx", "<cmd>TroubleToggle document_diagnostics<cr>", desc = "Document Diagnostics (Trouble)" },
-            { "<leader>xX", "<cmd>TroubleToggle workspace_diagnostics<cr>", desc = "Workspace Diagnostics (Trouble)" },
-            { "<leader>xL", "<cmd>TroubleToggle loclist<cr>", desc = "Location List (Trouble)" },
-            { "<leader>xQ", "<cmd>TroubleToggle quickfix<cr>", desc = "Quickfix List (Trouble)" },
+            { "<leader>qx", "<cmd>TroubleToggle document_diagnostics<cr>", desc = "Document Diagnostics (Trouble)" },
+            { "<leader>qX", "<cmd>TroubleToggle workspace_diagnostics<cr>", desc = "Workspace Diagnostics (Trouble)" },
+            { "<leader>qL", "<cmd>TroubleToggle loclist<cr>", desc = "Location List (Trouble)" },
+            { "<leader>qQ", "<cmd>TroubleToggle quickfix<cr>", desc = "Quickfix List (Trouble)" },
             {
                 "[q",
                 function()
@@ -43,9 +43,9 @@ return {
         keys = {
             { "]t", function() require("todo-comments").jump_next() end, desc = "Next todo comment" },
             { "[t", function() require("todo-comments").jump_prev() end, desc = "Previous todo comment" },
-            { "<leader>xt", "<cmd>TodoTrouble<cr>", desc = "Todo (Trouble)" },
-            { "<leader>xT", "<cmd>TodoTrouble keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme (Trouble)" },
-            { "<leader>st", "<cmd>TodoTelescope<cr>", desc = "Todo" },
+            { "<leader>qt", "<cmd>TodoTrouble<cr>", desc = "Todo (Trouble)" },
+            { "<leader>qT", "<cmd>TodoTrouble keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme (Trouble)" },
+            { "<leader>qt", "<cmd>TodoTelescope<cr>", desc = "Todo" },
         },
     },
 }

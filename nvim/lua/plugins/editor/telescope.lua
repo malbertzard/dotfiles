@@ -6,6 +6,7 @@ return {
             { "camgraff/telescope-tmux.nvim" },
             { "nvim-telescope/telescope-file-browser.nvim" },
             { "nvim-telescope/telescope-node-modules.nvim" },
+            { "malbertzard/telescope-vendor.nvim" },
             { "tsakirist/telescope-lazy.nvim" },
         },
         cmd = "Telescope",
@@ -25,6 +26,8 @@ return {
             { "<leader>fn", "<cmd>Telescope node_modules list<cr>", desc = "Node" },
             { "<leader>fl", "<cmd>Telescope lazy<cr>", desc = "Lazy" },
             { "<leader>f<enter>", "<cmd>Telescope<cr>", desc = "Commands" },
+
+            { "<leader>fh", "<cmd>Telescope harpoon marks<cr>", desc = "Harpoon" },
             -- git
             { "<leader>gc", "<cmd>Telescope git_commits<CR>", desc = "commits" },
             { "<leader>gs", "<cmd>Telescope git_status<CR>", desc = "status" },
@@ -41,6 +44,7 @@ return {
             { "<leader>sm", "<cmd>Telescope marks<cr>", desc = "Jump to Mark" },
             { "<leader>so", "<cmd>Telescope vim_options theme=dropdown<cr>", desc = "Options" },
             { "<leader>sR", "<cmd>Telescope resume<cr>", desc = "Resume" },
+            -- Neorg
         },
         config = function(_, opts)
             local telescope = require("telescope")
@@ -81,6 +85,13 @@ return {
                                 "~/code/",
                             },
                         }
+                    },
+
+                    fzf = {
+                        fuzzy = true,                    -- false will only do exact matching
+                        override_generic_sorter = true,  -- override the generic sorter
+                        override_file_sorter = true,     -- override the file sorter
+                        case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
                     }
                 }
             }
@@ -91,6 +102,9 @@ return {
             telescope.load_extension("file_browser")
             telescope.load_extension("lazy")
             telescope.load_extension("node_modules")
+            telescope.load_extension("vendor")
+            telescope.load_extension("harpoon")
+            telescope.load_extension("fzf")
         end,
     },
 }

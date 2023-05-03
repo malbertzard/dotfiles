@@ -1,6 +1,6 @@
 local M = {
     "ggandor/leap.nvim",
-    enabled = false,
+    enabled = true,
     event = "VeryLazy",
     config = function(_, opts)
         local leap = require("leap")

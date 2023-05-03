@@ -18,7 +18,7 @@ require("lazy").setup({
 
         -- File Types
     { import = "plugins/filetypes/python" },
-    { import = "plugins/filetypes/json" },
+    { import = "plugins/filetypes/neorg" },
     { import = "plugins/filetypes/markdown" },
     { import = "plugins/filetypes/php" },
   },

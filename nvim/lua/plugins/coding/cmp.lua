@@ -6,6 +6,10 @@ local M = {
         "hrsh7th/cmp-buffer",
         "hrsh7th/cmp-cmdline",
         "hrsh7th/cmp-path",
+        "petertriho/cmp-git",
+        "saadparwaiz1/cmp_luasnip",
+        "L3MON4D3/LuaSnip",
+        "lukas-reineke/cmp-under-comparator",
     },
     opts = function()
         local cmp = require("cmp")
@@ -70,36 +74,55 @@ local M = {
             }),
             sources = {
                 { name = "nvim_lsp" },
+                { name = 'luasnip' },
                 { name = "path" },
                 { name = "buffer" },
             },
-            window = {
-                completion = cmp.config.window.bordered(),
-                documentation = cmp.config.window.bordered(),
+            sorting = {
+                comparators = {
+                    cmp.config.compare.offset,
+                    cmp.config.compare.exact,
+                    cmp.config.compare.score,
+                    require "cmp-under-comparator".under,
+                    cmp.config.compare.kind,
+                    cmp.config.compare.sort_text,
+                    cmp.config.compare.length,
+                    cmp.config.compare.order,
+                },
             },
-            experimental = { ghost_text = {
-                hl_group = "LspCodeLens",
-            } },
         }
     end,
     config = function(_, opts)
         local cmp = require("cmp")
         local lspkind = require('lspkind')
         cmp.setup(opts)
-        cmp.setup.cmdline({ "/", "?" }, {
-            mapping = cmp.mapping.preset.cmdline(),
-            sources = {
-                { name = "buffer" },
-            },
-        })
-        cmp.setup.cmdline(":", {
-            mapping = cmp.mapping.preset.cmdline(),
+
+        -- cmp.setup.cmdline({ "/", "?" }, {
+        --     mapping = cmp.mapping.preset.cmdline(),
+        --     sources = {
+        --         { name = "buffer" },
+        --     },
+        -- })
+
+        -- Set configuration for specific filetype.
+        cmp.setup.filetype('gitcommit', {
             sources = cmp.config.sources({
-                { name = "path" },
-            }, {
-                    { name = "cmdline" },
-                }),
+                { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
+            },
+                {
+                    { name = 'buffer' },
+                })
         })
+
+        -- cmp.setup.cmdline(":", {
+        --     mapping = cmp.mapping.preset.cmdline(),
+        --     sources = cmp.config.sources({
+        --         { name = "path" },
+        --     }, {
+        --             { name = "cmdline" },
+        --         }),
+        -- })
+
     end,
 }
 
