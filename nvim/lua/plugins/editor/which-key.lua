@@ -2,7 +2,16 @@ return {
     "folke/which-key.nvim",
     event = "VeryLazy",
     opts = {
-        plugins = { spelling = true },
+        plugins = { 
+            spelling = true
+        },
+        key_labels = {
+            ["<space>"] = "SPC",
+            ["<cr>"] = "RET",
+            ["<CR>"] = "RET",
+            ["<tab>"] = "TAB",
+        },
+        hidden = { "<silent>", "<cmd>", "<Cmd>", "<CR>", "^:", "^ ", "^call ", "^lua " },
     },
     config = function(_, opts)
         local wk = require("which-key")
@@ -24,16 +33,15 @@ return {
         wk.register(keymaps)
 
         wk.register({
+            ["<leader>"] = {
+                ["1"] = { "<cmd>:lua require('harpoon.ui').nav_file(1)<cr>", "Jump to Mark 1" },
+                ["2"] = { "<cmd>:lua require('harpoon.ui').nav_file(2)<cr>", "Jump to Mark 2" },
+                ["3"] = { "<cmd>:lua require('harpoon.ui').nav_file(3)<cr>", "Jump to Mark 3" },
+                ["4"] = { "<cmd>:lua require('harpoon.ui').nav_file(4)<cr>", "Jump to Mark 4" },
+            }
+        })
 
-            ["1"] = { "<cmd>:lua require('harpoon.ui').nav_file(1)<cr>", "Jump to Mark 1" },
-            ["2"] = { "<cmd>:lua require('harpoon.ui').nav_file(2)<cr>", "Jump to Mark 2" },
-            ["3"] = { "<cmd>:lua require('harpoon.ui').nav_file(3)<cr>", "Jump to Mark 3" },
-            ["4"] = { "<cmd>:lua require('harpoon.ui').nav_file(4)<cr>", "Jump to Mark 4" },
-            ["5"] = { "<cmd>:lua require('harpoon.ui').nav_file(5)<cr>", "Jump to Mark 5" },
-            ["6"] = { "<cmd>:lua require('harpoon.ui').nav_file(6)<cr>", "Jump to Mark 6" },
-            ["7"] = { "<cmd>:lua require('harpoon.ui').nav_file(7)<cr>", "Jump to Mark 7" },
-            ["8"] = { "<cmd>:lua require('harpoon.ui').nav_file(8)<cr>", "Jump to Mark 8" },
-            ["9"] = { "<cmd>:lua require('harpoon.ui').nav_file(9)<cr>", "Jump to Mark 9" },
+        wk.register({
 
             ["<leader>"] = {
                 t = {
@@ -73,8 +81,8 @@ return {
                     ["9"] = { "<cmd>:lua require('harpoon.ui').nav_file(9)<cr>", "Jump to Mark 9" },
                 },
                 Ba = {
-                    name = "+artisan",
                     c = { "<cmd>!php artisan cache:clear<cr>", "Artisan Cache Clear" },
+                    name = "+artisan",
                 },
                 Bc = {
                     name = "+composer",

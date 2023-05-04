@@ -28,7 +28,7 @@ return {
         dashboard.section.header.opts.hl = "AlphaHeader"
         dashboard.section.buttons.opts.hl = "AlphaButtons"
         dashboard.section.footer.opts.hl = "AlphaFooter"
-        dashboard.opts.layout[1].val = 8
+        dashboard.opts.layout[1].val = 4
         return dashboard
     end,
     config = function(_, dashboard)

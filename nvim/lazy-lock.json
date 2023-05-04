@@ -27,7 +27,7 @@
   "mason.nvim": { "branch": "main", "commit": "057ac5ca159c83e302a55bd839a96ff1ea2396db" },
   "move.nvim": { "branch": "main", "commit": "d663b74b4e38f257aae757541c9076b8047844d6" },
   "neogit": { "branch": "master", "commit": "d7c66e5e8752e0cc76336a78c4432648cf3102e1" },
-  "noice.nvim": { "branch": "main", "commit": "d31fe940e0866686718822aaac45527412c45134" },
+  "noice.nvim": { "branch": "main", "commit": "6a7649413ef61123c333f422ee95840c04ece161" },
   "nui.nvim": { "branch": "main", "commit": "698e75814cd7c56b0dd8af4936bcef2d13807f3c" },
   "nvim": { "branch": "main", "commit": "a7e279d6e019f35dd042670f00748b602fff5568" },
   "nvim-autopairs": { "branch": "master", "commit": "7747bbae60074acf0b9e3a4c13950be7a2dff444" },
@@ -60,5 +60,6 @@
   "trouble.nvim": { "branch": "main", "commit": "d56bfc0c501ced4002a57cb60433362fb2ce9c4d" },
   "vim-composer": { "branch": "master", "commit": "7ad79699a52f9974d8cc133d4a6c9bf988bb578c" },
   "vim-test": { "branch": "master", "commit": "c19be85a9b3d8b86f37533bfeb82cbe189cd895e" },
-  "which-key.nvim": { "branch": "main", "commit": "4acffc92953a90a790603bfdab7c92319ab167b1" }
+  "vim-tmux-navigator": { "branch": "master", "commit": "cdd66d6a37d991bba7997d593586fc51a5b37aa8" },
+  "which-key.nvim": { "branch": "main", "commit": "af8f26bfbb61b5f722c9fbc72b296dc9db0bcfdc" }
 }
