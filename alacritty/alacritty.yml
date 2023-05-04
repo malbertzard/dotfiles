@@ -1,21 +1,22 @@
 font:
   size: 12
   offset:
-    y: 16
+    y: 18
   glyph_offset:
     y: 9
+
   normal:
     family: "Hack Nerd Font Mono"
 shell:
-  program: ssh dev -t tmux new-session -A -s notes
+  #program: ssh dev -t tmux new-session -A -s notes
   #program: ssh dev-extern.nds-server.de  -t tmux new-session -A -s notes
   #program: cmd
-  #program: C:\Windows\system32\wsl.exe -d Debian
-
+  program: Debian run cd ~ && tmux new-session -A -s notes 
+ 
 window:
   padding:
-    x: 5
-    y: 5
+    x: 6
+    y: 6
   dimensions:
     columns: 120
     lines: 40

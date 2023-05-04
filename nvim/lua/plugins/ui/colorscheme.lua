@@ -1,6 +1,6 @@
 local M = {
-	"catppuccin/nvim",
 	lazy = false,
+    "catppuccin/nvim",
 	priority = 1000,
 	opts = function()
 		local colors = require("utils").git_colors

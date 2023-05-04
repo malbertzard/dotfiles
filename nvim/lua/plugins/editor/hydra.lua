@@ -132,20 +132,8 @@ Hydra({
     mode = {'n','x'},
     body = '<leader>G',
     heads = {
-        { 'J',
-            function()
-                if vim.wo.diff then return ']c' end
-                vim.schedule(function() gitsigns.next_hunk() end)
-                return '<Ignore>'
-            end,
-            { expr = true, desc = 'next hunk' } },
-        { 'K',
-            function()
-                if vim.wo.diff then return '[c' end
-                vim.schedule(function() gitsigns.prev_hunk() end)
-                return '<Ignore>'
-            end,
-            { expr = true, desc = 'prev hunk' } },
+        { 'K', ':Gitsigns prev_hunk<CR>', { silent = true, desc = 'Prev hunk' } },
+        { 'J', ':Gitsigns next_hunk<CR>', { silent = true, desc = 'Next hunk' } },
         { 's', ':Gitsigns stage_hunk<CR>', { silent = true, desc = 'stage hunk' } },
         { 'u', ':Gitsigns undo_stage_hunk<CR>', { desc = 'undo last stage' } },
         { 'S', ':Gitsigns stage_buffer<CR>', { desc = 'stage buffer' } },
