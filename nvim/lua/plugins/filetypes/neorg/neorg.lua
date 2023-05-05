@@ -4,27 +4,24 @@ local M = {
         build = ":Neorg sync-parsers",
         ft = "norg",
         cmd = "Neorg",
-        enabled = false,
+        enabled = true,
         opts = {
             load = {
                 ["core.defaults"] = {}, -- Loads default behaviour
-                ["core.journal"] = {
-                    config = {
-                        template = '~/notes/journal/template.norg',
-                        journal_folder = '~/notes/journal',
-
-                    }
-                },
                 ["core.completion"] = {
                     config = {
                         engine = "nvim-cmp"
                     }
                 },
                 ["core.concealer"] = {}, -- Adds pretty icons to your documents
+                ["core.integrations.telescope"] = {},
                 ["core.dirman"] = { -- Manages Neorg workspaces
                     config = {
                         workspaces = {
-                            notes = '~/notes/etc',
+                            general = '~/Notes/notes',
+                            work = '~/Notes/work',
+                            school = '~/Notes/school',
+                            foss = '~/Notes/foss',
                         },
                     },
                 },

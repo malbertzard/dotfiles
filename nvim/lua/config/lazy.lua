@@ -21,6 +21,7 @@ require("lazy").setup({
     { import = "plugins/filetypes/neorg" },
     { import = "plugins/filetypes/markdown" },
     { import = "plugins/filetypes/php" },
+    { import = "plugins/filetypes/lua" },
   },
   defaults = {
     lazy = false,

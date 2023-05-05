@@ -7,37 +7,9 @@ M.git_colors = {
 }
 
 M.mason_packages = {
-    "bash-language-server",
-    "black",
-    "cspell",
-    "css-lsp",
-    "eslint-lsp",
-    "html-lsp",
-    "json-lsp",
-    "lua-language-server",
-    "markdownlint",
-    "prettier",
-    "pyright",
-    "shfmt",
-    "stylua",
-    "tailwindcss-language-server",
-    "typescript-language-server",
-    "yaml-language-server",
-    "gopls",
-    "editorconfig-checker"
 }
 
 M.lsp_servers = {
-    "tsserver",
-    "pyright",
-    "lua_ls",
-    "bashls",
-    "yamlls",
-    "jsonls",
-    "cssls",
-    "html",
-    "tailwindcss",
-    "gopls",
 }
 
 function M.on_attach(on_attach)

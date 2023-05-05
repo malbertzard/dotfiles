@@ -28,10 +28,7 @@ local M = {
 			},
 			sections = {
 				lualine_a = { "branch" },
-				lualine_b = {
-					{ "diff", source = diff_source },
-					"diagnostics",
-				},
+                lualine_b = {'branch', 'diff', 'diagnostics'},
 				lualine_c = {
 					{
 						function()
