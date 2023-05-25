@@ -1,9 +1,7 @@
 local M = {
     "vim-test/vim-test",
+    enabled = true,
     event = "InsertEnter",
-    opt = {
-
-    }
 }
 vim.api.nvim_exec(
     [[

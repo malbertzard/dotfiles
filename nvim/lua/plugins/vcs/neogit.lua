@@ -12,6 +12,13 @@ return {
                 hunk = { "", "" },
             },
             integrations = { diffview = true }, -- adds integration with diffview.nvim
+            mappings = {
+                -- modify status buffer mappings
+                status = {
+                    -- Adds a mapping with "B" as key that does the "BranchPopup" command
+                    ["B"] = "BranchPopup",
+                }
+            }
         })
     end,
 }

@@ -1,7 +1,7 @@
 local M = {
     "folke/noice.nvim",
     event = "VeryLazy",
-    enabled = true,
+    enabled = false,
     dependencies = {
         "MunifTanjim/nui.nvim",
     },
@@ -26,13 +26,10 @@ local M = {
         views = {
             cmdline_popup = {
                 border = {
-                    style = "none",
-                    padding = { 1, 2 },
+                    style = "rounded",
+                    -- padding = { 1, 2 },
                 },
                 filter_options = {},
-                win_options = {
-                    winhighlight = { NormalFloat = "PMenu", FloatBorder="FloatBorder"},
-                },
             },
             popupmenu = {
                 relative = "editor",
@@ -45,11 +42,8 @@ local M = {
                     height = 10,
                 },
                 border = {
-                    style = "none",
-                    padding = { 0, 1 },
-                },
-                win_options = {
-                    winhighlight = { Normal = "PMenu", FloatBorder = "DiagnosticInfo" },
+                    style = "rounded",
+                    padding = { 0, 0 },
                 },
             },
         },

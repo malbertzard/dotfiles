@@ -17,11 +17,9 @@ require("lazy").setup({
     { import = "plugins/ui/lsp" },
 
         -- File Types
-    { import = "plugins/filetypes/python" },
     { import = "plugins/filetypes/neorg" },
     { import = "plugins/filetypes/markdown" },
     { import = "plugins/filetypes/php" },
-    { import = "plugins/filetypes/lua" },
   },
   defaults = {
     lazy = false,
@@ -36,7 +34,7 @@ require("lazy").setup({
         "gzip",
         "matchit",
         "matchparen",
-        -- "netrwPlugin",
+        "netrwPlugin",
         "tarPlugin",
         "tohtml",
         "tutor",

@@ -4,6 +4,7 @@ return {
     opts = function()
         local dashboard = require("alpha.themes.dashboard")
         local logo = [[
+                               __
   ___     ___    ___   __  __ /\_\    ___ ___ 
  / _ `\  / __`\ / __`\/\ \/\ \\/\ \  / __` __`\
 /\ \/\ \/\  __//\ \_\ \ \ \_/ |\ \ \/\ \/\ \/\ \

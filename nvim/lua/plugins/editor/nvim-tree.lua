@@ -55,6 +55,7 @@ local M = {
             },
             view = {
                 side = "right",
+                width = 50,
             },
         }
     end,

@@ -4,6 +4,7 @@ local M =  {
     config = function()
 
         local Hydra = require('hydra')
+
         -- Options selction menu
 
         local hint = [[
@@ -94,9 +95,7 @@ local M =  {
             }
         })
 
-        gitsigns = require("plugins.vcs.gitsigns")
-
-        local hint = [[
+        local git_hint = [[
         _J_: next hunk   _s_: stage hunk        _d_: show deleted   _b_: blame line
         _K_: prev hunk   _u_: undo last stage   _p_: preview hunk   
         ^ ^              _S_: stage buffer      ^ ^                 _/_: show base file
@@ -106,9 +105,8 @@ local M =  {
 
         Hydra({
             name = 'Git',
-            hint = hint,
+            hint = git_hint,
             config = {
-                buffer = bufnr,
                 color = 'pink',
                 invoke_on_body = true,
                 hint = {
@@ -142,7 +140,7 @@ local M =  {
                 { 'q', nil, { exit = true, nowait = true, desc = 'exit' } },
             }
         })
-    end,
+    end
 }
 
 

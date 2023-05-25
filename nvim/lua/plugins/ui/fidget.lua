@@ -2,10 +2,9 @@ return {
     "j-hui/fidget.nvim",
     event = "VeryLazy",
     enabled = false,
-    config = {},
-    opt = {
+    opts = {
         function()
-            require("fidget").setup(config)
+            require("fidget").setup()
         end
     }
 }
