@@ -1,6 +1,7 @@
 return {
     {
-        "nvim-telescope/telescope.nvim", tag = '0.1.1',
+        "nvim-telescope/telescope.nvim",
+        tag = '0.1.1',
         dependencies = {
             { "cljoly/telescope-repo.nvim" },
             { "camgraff/telescope-tmux.nvim" },
@@ -9,13 +10,12 @@ return {
             { "LinArcX/telescope-env.nvim" },
             -- { "malbertzard/telescope-vendor.nvim" },
             { "tsakirist/telescope-lazy.nvim" },
+            { "lpoto/telescope-docker.nvim" },
         },
         cmd = "Telescope",
         version = false, -- telescope did only one release, so use HEAD for now
         keys = {
             { "<leader>,",        "<cmd>Telescope buffers show_all_buffers=true<cr>",              desc = "Switch Buffer" },
-            { "<leader>:",        "<cmd>Telescope command_history<cr>",                            desc =
-                "Command History" },
             -- find
             { "<leader>fF",       "<cmd>Telescope find_files no_ignore_parent=true theme=ivy<cr>", desc = "Find Files" },
             { "<leader>ff",       "<cmd>Telescope find_files theme=ivy<cr>",                       desc = "Find Files" },
@@ -30,6 +30,7 @@ return {
             { "<leader>fl",       "<cmd>Telescope lazy<cr>",                                       desc = "Lazy" },
             { "<leader>f<enter>", "<cmd>Telescope<cr>",                                            desc = "Commands" },
             { "<leader>fh",       "<cmd>Telescope harpoon marks<cr>",                              desc = "Harpoon" },
+            { "<leader>fd",       "<cmd>Telescope docker<cr>",                                     desc = "Docker" },
             -- git
             { "<leader>gc",       "<cmd>Telescope git_commits<CR>",                                desc = "commits" },
             { "<leader>gs",       "<cmd>Telescope git_status<CR>",                                 desc = "status" },
@@ -37,18 +38,17 @@ return {
             { "<leader>sa",       "<cmd>Telescope autocommands<cr>",                               desc = "Auto Commands" },
             { "<leader>sb",       "<cmd>Telescope current_buffer_fuzzy_find<cr>",                  desc = "Buffer" },
             { "<leader>sc",       "<cmd>Telescope command_history theme=dropdown<cr>",             desc =
-                "Command History" },
+            "Command History" },
             { "<leader>sC",       "<cmd>Telescope commands theme=dropdown<cr>",                    desc = "Commands" },
             { "<leader>sd",       "<cmd>Telescope diagnostics<cr>",                                desc = "Diagnostics" },
             { "<leader>sh",       "<cmd>Telescope help_tags theme=dropdown<cr>",                   desc = "Help Pages" },
             { "<leader>sH",       "<cmd>Telescope highlights<cr>",                                 desc =
-                "Search Highlight Groups" },
+            "Search Highlight Groups" },
             { "<leader>sk",       "<cmd>Telescope keymaps<cr>",                                    desc = "Key Maps" },
             { "<leader>sM",       "<cmd>Telescope man_pages<cr>",                                  desc = "Man Pages" },
             { "<leader>sm",       "<cmd>Telescope marks<cr>",                                      desc = "Jump to Mark" },
             { "<leader>so",       "<cmd>Telescope vim_options theme=dropdown<cr>",                 desc = "Options" },
             { "<leader>sR",       "<cmd>Telescope resume<cr>",                                     desc = "Resume" },
-            -- Neorg
         },
         config = function(_, opts)
             local telescope = require("telescope")
@@ -69,8 +69,10 @@ return {
                 mappings = {
                     i = {
                         ["<c-t>"] = function(...) return require("trouble.providers.telescope").open_with_trouble(...) end,
-                        ["<a-t>"] = function(...) return require("trouble.providers.telescope")
-                        .open_selected_with_trouble(...) end,
+                        ["<a-t>"] = function(...)
+                            return require("trouble.providers.telescope")
+                                .open_selected_with_trouble(...)
+                        end,
                         ["<C-Down>"] = function(...) return require("telescope.actions").cycle_history_next(...) end,
                         ["<C-Up>"] = function(...) return require("telescope.actions").cycle_history_prev(...) end,
                         ["<C-f>"] = function(...) return require("telescope.actions").preview_scrolling_down(...) end,
@@ -109,6 +111,7 @@ return {
             telescope.load_extension("lazy")
             telescope.load_extension("node_modules")
             telescope.load_extension("harpoon")
+            telescope.load_extension("docker")
             telescope.load_extension("fzf")
         end,
     },

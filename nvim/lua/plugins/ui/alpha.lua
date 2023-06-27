@@ -18,7 +18,7 @@ return {
             dashboard.button("r", " " .. " Search Git Repos", ":Telescope repo list<CR>"),
             dashboard.button("c", " " .. " Config", ":e $MYVIMRC <CR>"),
             dashboard.button("p", "⌅ " .. " Find Project", ":Telescope projects<cr>"),
-            dashboard.button("s", " " .. " Restore Session", [[:lua require("persistence").load() <cr>]]),
+            -- dashboard.button("s", " " .. " Restore Session", [[:lua require("persistence").load() <cr>]]),
             dashboard.button("l", " " .. " Lazy", ":Lazy<CR>"),
             dashboard.button("q", " " .. " Quit", ":qa<CR>"),
         }

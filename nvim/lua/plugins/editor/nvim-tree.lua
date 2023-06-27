@@ -6,7 +6,7 @@ local M = {
         "nvim-tree/nvim-web-devicons",
     },
     keys = {
-      { "<leader>fe", "<cmd>NvimTreeToggle<cr>", desc = "NvimTree" },
+        { "<leader>fe", "<cmd>NvimTreeToggle<cr>", desc = "NvimTree" },
     },
     config = function()
         require("nvim-tree").setup {
@@ -41,16 +41,6 @@ local M = {
                             ignored = "◌",
                         },
                     },
-                },
-            },
-            diagnostics = {
-                enable = true,
-                show_on_dirs = true,
-                icons = {
-                    hint = "",
-                    info = "",
-                    warning = "",
-                    error = "",
                 },
             },
             view = {

@@ -1,7 +1,7 @@
 local M = {
     {
         "nvimdev/lspsaga.nvim",
-        event = "BufRead",
+        event = "LspAttach",
         commit = "b45579fa4f2a4548125781e144d58361b70261f0",
         enabled = true,
         dependencies = {
@@ -20,25 +20,25 @@ local M = {
             { "<leader>K",  "<cmd>Lspsaga hover_doc ++keep<cr>",     desc = "Hover keep" },
             { "K",          "<cmd>Lspsaga hover_doc<cr>",            desc = "Hover" },
         },
-        opts = {
-            config = {
-                ui = {
-                    border = "rounded",
-                    code_action = "",
-                    title = false,
-                },
-                diagnostic = {
-                    show_code_action = false,
-                },
-                lightbulb = {
-                    enable = true,
-                    enable_in_insert = false,
-                    sign = false,
-                    sign_priority = 40,
-                    virtual_text = false,
-                },
-                winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+        config = {
+            ui = {
+                border = "rounded",
+                code_action = "",
+                title = false,
             },
+            diagnostic = {
+                show_code_action = false,
+            },
+            lightbulb = {
+                enable = true,
+                enable_in_insert = false,
+                sign = false,
+                sign_priority = 40,
+                virtual_text = false,
+            },
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+        },
+        opt = {
             function()
                 require("lspsaga").setup(config)
             end

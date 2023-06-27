@@ -23,6 +23,7 @@ M.mason_packages = {
     "typescript-language-server",
     "yaml-language-server",
     "gopls",
+    "glow",
     "editorconfig-checker"
 }
 

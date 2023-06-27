@@ -47,8 +47,9 @@ return {
                 t = {
                     name = "+term",
                     v = { "<cmd>vsplit term://bash<cr>", "vSplit Term" },
-                    s = { "<cmd>split term://bash<cr>", "vSplit Term" },
-                    t = { "<cmd>tabnew | term<cr>", "vSplit Term" },
+                    s = { "<cmd>split term://bash<cr>", "sSplit Term" },
+                    T = { "<cmd>term<cr>", "Term" },
+                    t = { "<cmd>tabnew | term<cr>", "Tab Term" },
                 },
                 T = {
                     name = "+tests",
@@ -58,12 +59,12 @@ return {
                     l = { "<cmd>:TestLast<cr>", "Test Last" },
                     g = { "<cmd>:TestVisit<cr>", "Test Visit" },
                 },
-                N = {
-                    name = "+notes",
-                    t = { "<cmd>:Neorg journal today<cr>", "Today" },
-                    T = { "<cmd>:Neorg journal tomorrow<cr>", "Tomorrow" },
-                    y = { "<cmd>:Neorg journal yesterday<cr>", "Yesterday" },
-                },
+                -- N = {
+                --     name = "+notes",
+                --     t = { "<cmd>:Neorg journal today<cr>", "Today" },
+                --     T = { "<cmd>:Neorg journal tomorrow<cr>", "Tomorrow" },
+                --     y = { "<cmd>:Neorg journal yesterday<cr>", "Yesterday" },
+                -- },
                 h = {
                     name = "+harpoon",
                     a = { "<cmd>:lua require('harpoon.mark').add_file()<cr>", "Add Mark" },
