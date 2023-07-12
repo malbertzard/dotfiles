@@ -46,11 +46,19 @@ local M = {
     },
     {
         'weilbith/nvim-code-action-menu',
-        cmd = 'CodeActionMenu',
+        event = "LspAttach",
         enabled = true,
         keys = {
             { "<leader>ca", "<cmd>CodeActionMenu<cr>", desc = "Code Action" },
         }
+    },
+    {
+        enabled = true,
+        event = "LspAttach",
+        "VidocqH/lsp-lens.nvim",
+        config = function()
+            require 'lsp-lens'.setup({})
+        end
     }
 }
 

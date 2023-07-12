@@ -1,6 +1,7 @@
 local M = {
     "gbprod/phpactor.nvim",
     enabled = true,
+    ft = "php",
     dependencies = {
         "nvim-lua/plenary.nvim", -- required to update phpactor
         "neovim/nvim-lspconfig" -- required to automaticly register lsp serveur

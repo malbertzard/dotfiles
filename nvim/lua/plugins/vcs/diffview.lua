@@ -1,4 +1,6 @@
-return {
-    "sindrets/diffview.nvim",
-    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles" },
+local M = {
+    enabled = false,
+   "sindrets/diffview.nvim"
 }
+
+return M

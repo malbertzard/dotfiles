@@ -24,9 +24,9 @@ return {
             ["["] = { name = "+prev" },
             ["<leader>c"] = { name = "+code" },
             ["<leader>f"] = { name = "+file/find" },
+            ["<leader>fl"] = { name = "+lsp" },
             ["<leader>g"] = { name = "+git" },
             ["<leader>s"] = { name = "+search" },
-            ["<leader>u"] = { name = "+ui" },
             ["<leader>B"] = { name = "+builds" },
             ["<leader>q"] = { name = "+quickfix" },
         }
@@ -81,9 +81,13 @@ return {
                     ["8"] = { "<cmd>:lua require('harpoon.ui').nav_file(8)<cr>", "Jump to Mark 8" },
                     ["9"] = { "<cmd>:lua require('harpoon.ui').nav_file(9)<cr>", "Jump to Mark 9" },
                 },
+                u = {
+                    name = "+ui",
+                    i = { "<cmd>:InlineFoldToggle<cr>", "Inline Fold" }
+                },
                 Ba = {
-                    c = { "<cmd>!php artisan cache:clear<cr>", "Artisan Cache Clear" },
                     name = "+artisan",
+                    c = { "<cmd>!php artisan cache:clear<cr>", "Artisan Cache Clear" },
                 },
                 Bc = {
                     name = "+composer",

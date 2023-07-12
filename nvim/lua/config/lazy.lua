@@ -17,15 +17,16 @@ require("lazy").setup({
     { import = "plugins/ui/lsp" },
 
         -- File Types
-    { import = "plugins/filetypes/neorg" },
     { import = "plugins/filetypes/markdown" },
     { import = "plugins/filetypes/php" },
+    { import = "plugins/filetypes/ts" },
+    { import = "plugins/filetypes/yaml" },
+    { import = "plugins/filetypes/go" },
   },
   defaults = {
     lazy = false,
     version = false, -- always use the latest git commit
   },
-  install = { colorscheme = { "tokyonight", "habamax" } },
   checker = { enabled = true }, -- automatically check for plugin updates
   performance = {
     rtp = {

@@ -1,7 +1,7 @@
 local M = {
     "jose-elias-alvarez/null-ls.nvim",
     event = "BufReadPre",
-    enabled = false,
+    enabled = true,
     opts = function()
         local null_ls = require("null-ls")
         local formatting = null_ls.builtins.formatting
@@ -11,9 +11,6 @@ local M = {
         return {
             sources = {
                 formatting.stylua,
-                formatting.gofumpt,
-                formatting.goimporty_reviser,
-                formatting.golines,
                 formatting.phpcsfixer,
             },
         }
