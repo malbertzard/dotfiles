@@ -1,7 +1,7 @@
 local M = {}
 
 M._keys = {
-  { "<leader>lD", vim.lsp.buf.declaration, desc = "Goto Declaration" },
+  { "<leader>lD", vim.lsp.buf.declaration,   desc = "Goto Declaration" },
   { "<leader>ll", vim.diagnostic.open_float, desc = "Line Diagnostics" },
   {
     "<leader>lr",
@@ -13,30 +13,32 @@ M._keys = {
     desc = "Rename",
     has = "rename",
   },
-  { "<leader>li", "<cmd>LspInfo<cr>", desc = "Lsp Info" },
+  { "<leader>lI", "<cmd>LspInfo<cr>",                        desc = "Lsp Info" },
   { "gd", "<cmd>Telescope lsp_definitions<cr>", desc = "Goto Definition", has = "definition" },
   { "<leader>ld", "<cmd>Telescope lsp_definitions<cr>", desc = "Goto Definition", has = "definition" },
-  { "<leader>lr", "<cmd>Telescope lsp_references<cr>", desc = "References" },
-  { "<leader>lI", "<cmd>Telescope lsp_implementations<cr>", desc = "Goto Implementation" },
-  { "gD", "<cmd>Telescope lsp_type_definitions<cr>", desc = "Goto Type Definition" },
+  { "<leader>lR", "<cmd>Telescope lsp_references<cr>",       desc = "References" },
+  { "<leader>li", "<cmd>Telescope lsp_implementations<cr>",  desc = "Goto Implementation" },
+  { "gD",         "<cmd>Telescope lsp_type_definitions<cr>", desc = "Goto Type Definition" },
   { "<leader>lt", "<cmd>Telescope lsp_type_definitions<cr>", desc = "Goto Type Definition" },
-  { "K", vim.lsp.buf.hover, desc = "Hover" },
-  { "<leader>lk", vim.lsp.buf.hover, desc = "Hover" },
+  { "K",          vim.lsp.buf.hover,                         desc = "Hover" },
+  { "<leader>lk", vim.lsp.buf.hover,                         desc = "Hover" },
   { "<leader>lS", vim.lsp.buf.signature_help, desc = "Signature Help", has = "signatureHelp" },
   { "<c-k>", vim.lsp.buf.signature_help, mode = "i", desc = "Signature Help", has = "signatureHelp" },
   { "<leader>ln", vim.diagnostic.goto_next, desc = "Next Diagnostic" },
   { "<leader>lp", vim.diagnostic.goto_prev, desc = "Prev Diagnostic" },
   { "<leader>la", vim.lsp.buf.code_action, desc = "Code Action", mode = { "n", "v" }, has = "codeAction" },
   { "<leader>ls", "<cmd>Telescope lsp_document_symbols<cr>", desc = "Document Symbols" },
-  { "<leader>le", "<cmd>Telescope diagnostics bufnr=0<cr>", desc = "Document Diagnostics" },
+  { "<leader>le", "<cmd>Telescope diagnostics bufnr=0<cr>",  desc = "Document Diagnostics" },
   { "<leader>lq", vim.diagnostic.setloclist, desc = "Diagnostics in qflist" },
-  { "<leader>lws", "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>", desc = "Workspace Symbols" },
-  { "<leader>lwd", "<cmd>Telescope diagnostics<cr>", desc = "Workspace Symbols" },
-  { "<leader>lwa", vim.lsp.buf.add_workspace_folder, desc = "Add Folder" },
+  { "<leader>lws", "<cmd>Telescope lsp_dynamic_workspace_symbols<cr>",                      desc = "Workspace Symbols" },
+  { "<leader>lwd", "<cmd>Telescope diagnostics<cr>",                                        desc = "Workspace Symbols" },
+  { "<leader>lwa", vim.lsp.buf.add_workspace_folder,                                        desc = "Add Folder" },
   { "<leader>lwl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<cr>", desc = "List Folders" },
-  { "<leader>lwr", vim.lsp.buf.remove_workspace_folder, desc = "Remove Folder" },
+  { "<leader>lwr", vim.lsp.buf.remove_workspace_folder,                                     desc = "Remove Folder" },
+  { "<leader>lf",  vim.lsp.buf.format,                                                      desc = "Format Buffer" },
 
-  { "<leader>lf", vim.lsp.buf.format, desc = "Format Buffer" },
+  { "<leader>lr",  vim.lsp.buf.rename,                                                      desc = "Rename" },
+  { "<leader>mC",  "<cmd>lua print(vim.inspect(vim.lsp.get_active_clients()))<cr>",         desc = "Lsp Server Config" },
 }
 
 function M.on_attach(client, buffer)

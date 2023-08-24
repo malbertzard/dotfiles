@@ -10,7 +10,6 @@ local M = {
   enabled = settings.enable_noice,
 }
 
--- FIX: can't refactor to 'opts'
 function M.config()
   require("noice").setup({
     cmdline = {
@@ -19,11 +18,6 @@ function M.config()
       opts = {}, -- global options for the cmdline. See section on views
       ---@type table<string, CmdlineFormat>
       format = {
-        -- conceal: (default=true) This will hide the text in the cmdline that matches the pattern.
-        -- view: (default is cmdline view)
-        -- opts: any options passed to the view
-        -- icon_hl_group: optional hl_group for the icon
-        -- title: set to anything or empty string to hide
         cmdline = { pattern = "^:", icon = "", lang = "vim" },
         search_down = { kind = "search", pattern = "^/", icon = " ", lang = "regex" },
         search_up = { kind = "search", pattern = "^%?", icon = " ", lang = "regex" },
@@ -35,8 +29,6 @@ function M.config()
       },
     },
     messages = {
-      -- NOTE: If you enable messages, then the cmdline is enabled automatically.
-      -- This is a current Neovim limitation.
       enabled = false, -- enables the Noice messages UI
       view = "notify", -- default view for messages
       view_error = "notify", -- view for errors
@@ -94,11 +86,6 @@ function M.config()
       },
     },
     notify = {
-      -- Noice can be used as `vim.notify` so you can route any notification like other messages
-      -- Notification messages have their level and other properties set.
-      -- event is always "notify" and kind can be any log level as a string
-      -- The default routes will forward notifications to nvim-notify
-      -- Benefit of using Noice for this is the routing and consistent history view
       enabled = true,
       view = "notify",
     },
@@ -115,11 +102,8 @@ function M.config()
         view = "mini",
       },
       override = {
-        -- override the default lsp markdown formatter with Noice
         ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-        -- override the lsp markdown formatter with Noice
         ["vim.lsp.util.stylize_markdown"] = true,
-        -- override cmp documentation with Noice (needs the other options to work)
         ["cmp.entry.get_documentation"] = true,
       },
       hover = {
@@ -173,19 +157,12 @@ function M.config()
         ["{%S-}"] = "@parameter",
       },
     },
-    health = {
-      checker = true, -- Disable if you don't want health checks to run
-    },
     smart_move = {
-      -- noice tries to move out of the way of existing floating windows.
       enabled = true, -- you can disable this behaviour here
-      -- add any filetypes here, that shouldn't trigger smart move.
       excluded_filetypes = { "cmp_menu", "cmp_docs", "notify" },
     },
     ---@type NoicePresets
     presets = {
-      -- you can enable a preset by setting it to true, or a table that will override the preset config
-      -- you can also add custom presets that you can enable/disable with enabled=true
       bottom_search = false, -- use a classic bottom cmdline for search
       command_palette = true, -- position the cmdline and popupmenu together
       long_message_to_split = true, -- long messages will be sent to a split

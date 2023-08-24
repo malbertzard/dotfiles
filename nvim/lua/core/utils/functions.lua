@@ -55,16 +55,6 @@ M.path_exists = function(path)
   return vim.loop.fs_stat(path)
 end
 
--- Return telescope files command
-M.project_files = function()
-  local path = vim.loop.cwd() .. "/.git"
-  if M.path_exists(path) then
-    return "Telescope git_files"
-  else
-    return "Telescope find_files"
-  end
-end
-
 -- toggle quickfixlist
 M.toggle_qf = function()
   local windows = fn.getwininfo()
@@ -115,22 +105,6 @@ M.escapePair = function()
   else
     vim.api.nvim_win_set_cursor(0, { row, col + 1 })
   end
-end
-
--- @author kikito
--- @see https://codereview.stackexchange.com/questions/268130/get-list-of-buffers-from-current-neovim-instance
--- currently not used
-function M.get_listed_buffers()
-  local buffers = {}
-  local len = 0
-  for buffer = 1, vim.fn.bufnr("$") do
-    if vim.fn.buflisted(buffer) == 1 then
-      len = len + 1
-      buffers[len] = buffer
-    end
-  end
-
-  return buffers
 end
 
 function M.map(mode, l, r, opts)

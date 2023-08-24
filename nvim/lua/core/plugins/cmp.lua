@@ -5,12 +5,13 @@ local M = {
     "hrsh7th/cmp-buffer",
     "hrsh7th/cmp-path",
     "hrsh7th/cmp-cmdline",
-    "hrsh7th/cmp-calc",
-    "lukas-reineke/cmp-rg",
     "hrsh7th/cmp-nvim-lsp-signature-help",
-    "saadparwaiz1/cmp_luasnip",
-  },
 
+    "petertriho/cmp-git",
+    "lukas-reineke/cmp-rg",
+    "saadparwaiz1/cmp_luasnip",
+    "lukas-reineke/cmp-under-comparator",
+  },
   config = function()
     local cmp = require("cmp")
     local lspkind = require("lspkind")
@@ -27,7 +28,6 @@ local M = {
             nvim_lsp = "LSP",
             path = "PATH",
             luasnip = "SNIP",
-            calc = "CALC",
           },
         }),
       },
@@ -70,15 +70,25 @@ local M = {
           end
         end, { "i", "s" }),
       },
+      sorting = {
+        comparators = {
+          cmp.config.compare.offset,
+          cmp.config.compare.exact,
+          cmp.config.compare.score,
+          require "cmp-under-comparator".under,
+          cmp.config.compare.kind,
+          cmp.config.compare.sort_text,
+          cmp.config.compare.length,
+          cmp.config.compare.order,
+        },
+      },
       sources = {
         { name = "nvim_lsp" },
         { name = "nvim_lsp_signature_help" },
         { name = "buffer",                 keyword_length = 5 },
         { name = "luasnip" },
-        { name = "calc" },
         { name = "path" },
         { name = "rg",                     keyword_length = 5 },
-        -- { omni = true }, -- completion for vimtex - is this necessary?
       },
     })
 
@@ -98,6 +108,16 @@ local M = {
       }, {
         { name = "cmdline" },
       }),
+    })
+
+    -- Set configuration for specific filetype.
+    cmp.setup.filetype('gitcommit', {
+      sources = cmp.config.sources({
+          { name = 'cmp_git' },
+        },
+        {
+          { name = 'buffer' },
+        })
     })
   end,
 }

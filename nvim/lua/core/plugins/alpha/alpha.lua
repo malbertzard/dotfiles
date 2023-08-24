@@ -14,9 +14,9 @@ local buttons = {
     dashboard.button("b", "  File Browser", ":Telescope file_browser grouped=true <CR>"),
     dashboard.button("r", " " .. " Search Git Repos", ":Telescope repo list theme=ivy<CR>"),
     dashboard.button("p", "  Search Projects", ":Telescope projects theme=ivy<CR>"),
-    dashboard.button("e", "  New File", ":ene <BAR> startinsert <CR>"),
+    -- dashboard.button("R", " " .. " Repo Config", ":e ~/.config/rw/config.yaml <CR>"),
     dashboard.button("c", " " .. " Config", ":e $MYVIMRC <CR>"),
-    dashboard.button("l", "  Lazy", ":Lazy check<CR>"),
+    dashboard.button("l", "💤 Lazy", ":Lazy<CR>"),
     dashboard.button("q", "  Quit", ":qa<CR>"),
   },
   opts = {
@@ -40,8 +40,7 @@ local layout = {}
 layout[0] = { type = "padding", val = 4 }
 layout[1] = header
 layout[2] = { type = "padding", val = 4 }
-layout[3] = { type = "padding", val = 4 }
-layout[4] = buttons
+layout[3] = buttons
 
 local opts = {
   layout = layout,

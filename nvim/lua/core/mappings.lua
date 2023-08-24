@@ -5,8 +5,13 @@ local map = vim.keymap.set
 map("v", "<", "<gv")
 map("v", ">", ">gv")
 
+map("n", "q:", "")
+
 -- Better paste
 map("v", "p", '"_dP')
+
+-- Remove Man
+map("n", "K", '')
 
 -- Cancel search highlighting with ESC
 map({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear hlsearch and ESC" })
@@ -48,7 +53,7 @@ map("n", "<leader>TS", "<cmd>windo set scb!<cr>", { desc = "Toggle Scrollbind" }
 
 -- Quickfix List
 
-map("n","<leader>qC",
+map("n", "<leader>qC",
   function()
     vim.fn.setqflist({})
   end,
@@ -67,23 +72,11 @@ local wk = require("which-key")
 
 wk.register({
   ["<leader>"] = {
-    ["1"] = { "<cmd>:lua require('harpoon.ui').nav_file(1)<cr>", "Jump to Mark 1" },
-    ["2"] = { "<cmd>:lua require('harpoon.ui').nav_file(2)<cr>", "Jump to Mark 2" },
-    ["3"] = { "<cmd>:lua require('harpoon.ui').nav_file(3)<cr>", "Jump to Mark 3" },
-    ["4"] = { "<cmd>:lua require('harpoon.ui').nav_file(4)<cr>", "Jump to Mark 4" },
+    ["1"] = { "<cmd>:lua require('harpoon.ui').nav_file(1)<cr>", "which_key_ignore" },
+    ["2"] = { "<cmd>:lua require('harpoon.ui').nav_file(2)<cr>", "which_key_ignore" },
+    ["3"] = { "<cmd>:lua require('harpoon.ui').nav_file(3)<cr>", "which_key_ignore" },
+    ["4"] = { "<cmd>:lua require('harpoon.ui').nav_file(4)<cr>", "which_key_ignore" },
   }
-})
-
--- register non leader based mappings
-wk.register({
-  sa = "Add surrounding",
-  sd = "Delete surrounding",
-  sh = "Highlight surrounding",
-  sn = "Surround update n lines",
-  sr = "Replace surrounding",
-  sF = "Find left surrounding",
-  sf = "Replace right surrounding",
-  st = { "<cmd>lua require('tsht').nodes()<cr>", "TS hint textobject" },
 })
 
 -- Register leader based mappings
@@ -95,32 +88,51 @@ wk.register({
       "Close all but the current buffer",
     },
   },
-  l = { "LSP" }, -- core.plugins.lsp.keys
+  l = { name = "+LSP" },         -- core.plugins.lsp.keys
   lw = { "Workspaces" }, -- core.plugins.lsp.keys
   f = {
-    name = "Files",
+    name = "+Files",
   },
+  F = { name = "Format" },
+
+  M = { "<cmd>make<cr>", "Make" },
   m = {
     name = "Misc",
-    l = { "<cmd>source ~/.config/nvim/snippets/*<cr>", "Reload snippets" },
+    s = { "<cmd>source ~/.config/nvim/snippets/*<cr>", "Reload snippets" },
+    a = { "<cmd>Alpha<cr>", "Alpha" },
     p = { "<cmd>Lazy check<cr>", "Lazy check" },
   },
   q = {
-    name = "Quickfix",
+    name = "+Quickfix",
     j = { "<cmd>cnext<cr>", "Next Quickfix Item" },
     k = { "<cmd>cprevious<cr>", "Previous Quickfix Item" },
     q = { "<cmd>lua require('core.utils.functions').toggle_qf()<cr>", "Toggle quickfix list" },
     t = { "<cmd>TodoQuickFix<cr>", "Show TODOs" },
   },
   t = {
-    name = "+term",
+    name = "+Term",
     v = { "<cmd>vsplit term://bash<cr>", "vSplit Term" },
     s = { "<cmd>split term://bash<cr>", "sSplit Term" },
     T = { "<cmd>term<cr>", "Term" },
     t = { "<cmd>tabnew | term<cr>", "Tab Term" },
   },
+  w = {
+    -- Work Intern Tools
+    name = "+Work",
+    u = { "<cmd>tabnew | term nds update <cr>", "Up" },
+    U = { "<cmd>tabnew | term nds upgrade <cr>", "Upgrade" },
+    i = { "<cmd>tabnew | term nds info <cr>", "Info" },
+    r = { "<cmd>tabnew | term nds restart <cr>", "Restart" },
+    E = { "<cmd>tabnew | term nds enter <cr>", "Enter" },
+    S = { "<cmd>tabnew | term nds down <cr>", "Shutdown" },
+    D = {
+      name = "Database",
+      i = { "<cmd>tabnew | term nds db:import <cr>", "Database Import" },
+    }
+
+  },
   h = {
-    name = "+harpoon",
+    name = "+Harpoon",
     a = { "<cmd>:lua require('harpoon.mark').add_file()<cr>", "Add Mark" },
     l = { "<cmd>:lua require('harpoon.ui').toggle_quick_menu()<cr>", "List Marks" },
     n = { "<cmd>:lua require('harpoon.ui').nav_next()<cr>", "Prev Mark" },
@@ -135,9 +147,7 @@ wk.register({
     ["8"] = { "<cmd>:lua require('harpoon.ui').nav_file(8)<cr>", "Jump to Mark 8" },
     ["9"] = { "<cmd>:lua require('harpoon.ui').nav_file(9)<cr>", "Jump to Mark 9" },
   },
-  T = { name = "Toggles" },
-  -- hydra heads
-  s = { "Search" },
-  w = { "Windows" },
+  T = { name = "+Toggles" },
+  s = { name = "+Search" },
   z = { "Spelling" },
 }, { prefix = "<leader>", mode = "n", {} })

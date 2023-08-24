@@ -1,9 +1,9 @@
 local settings = require("core.settings")
 local nvim_lsp = require("lspconfig")
+
 local lsp_settings = require("core.plugins.lsp.settings")
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
--- enable autoclompletion via nvim-cmp
 capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
 require("core.utils.functions").on_attach(function(client, buffer)
@@ -36,13 +36,13 @@ end
 
 for _, lsp in ipairs(settings.lsp_servers) do
   if lsp == "rust_analyzer" then
-    -- vim.notify("rust_analyzer is managed by rust-tools", vim.log.levels.INFO, { title = "LSP config" })
     goto continue
   end
   nvim_lsp[lsp].setup({
     capabilities = capabilities,
     flags = { debounce_text_changes = 150 },
     settings = {
+      lua = lsp_settings.lua,
       json = lsp_settings.json,
       yaml = lsp_settings.yaml,
     },

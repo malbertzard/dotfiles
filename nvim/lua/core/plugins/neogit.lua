@@ -19,11 +19,6 @@ local M = {
     },
     integrations = { diffview = true },
     use_telescope = true,
-    mappings = {
-      status = {
-        ["B"] = "BranchPopup",
-      },
-    },
   },
 }
 

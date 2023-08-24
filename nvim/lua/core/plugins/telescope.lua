@@ -1,14 +1,12 @@
 local M = {
   "nvim-telescope/telescope.nvim",
-  tag = '0.1.1',
   cmd = "Telescope",
+  tag = '0.1.1',
   dependencies = {
     "crispgm/telescope-heading.nvim",
     "nvim-telescope/telescope-symbols.nvim",
     "nvim-telescope/telescope-file-browser.nvim",
     "nvim-telescope/telescope-ui-select.nvim",
-    -- "ptethng/telescope-makefile",
-    "nvim-telescope/telescope-node-modules.nvim",
     "lpoto/telescope-docker.nvim",
     "cljoly/telescope-repo.nvim",
     "tsakirist/telescope-lazy.nvim",
@@ -17,7 +15,7 @@ local M = {
   keys = {
     -- Search stuff
     { "<leader>sc", "<cmd>Telescope commands<cr>",                                        desc = "Commands" },
-    { "<leader>st", "<cmd>Telescope live_grep theme=ivy<cr>",                             desc = "Strings" },
+    { "<leader>sg", "<cmd>Telescope live_grep theme=ivy<cr>",                             desc = "Strings" },
     { "<leader>s?", "<cmd>Telescope help_tags<cr>",                                       desc = "Help" },
     { "<leader>sh", "<cmd>Telescope heading<cr>",                                         desc = "Headings" },
     { "<leader>sk", "<cmd>Telescope keymaps<cr>",                                         desc = "Keymaps" },
@@ -33,15 +31,13 @@ local M = {
     { "<leader>s;", "<cmd>Telescope command_history<cr>",                                 desc = "Command history" },
     -- Git
     { "<leader>gh", "<cmd>Telescope git_branches theme=ivy<cr>",                          desc = "Branches" },
-    { "<leader>gg", "<cmd>Telescope git_status theme=ivy<cr>",                            desc = "Status" },
     { "<leader>gm", "<cmd>Telescope git_commits theme=ivy<cr>",                           desc = "Commits" },
     -- files
     { "<leader>fb", "<cmd>Telescope file_browser theme=ivy grouped=true<cr>",             desc = "Filebrowser" },
-    { "<leader>ff", "<cmd>" .. require("core.utils.functions").project_files() .. "<cr>", desc = "Open file" },
-    { "<leader>fF", "<cmd>Telescope find_files theme=ivy<cr>",                            desc = "Open file (ignore git)" },
+    { "<leader>ff", "<cmd>Telescope git_files theme=ivy<cr>", desc = "Open file" },
+    { "<leader>fF", "<cmd>Telescope find_files no_ignore=true theme=ivy<cr>",             desc = "Open file (ignore git)" },
     { "<leader>fr", "<cmd>Telescope oldfiles<cr>",                                        desc = "Recent files" },
     -- misc
-    { "<leader>mm", "<cmd>Telescope make<cr>",                                            desc = "Run make" },
     { "<leader>mt", "<cmd>Telescope<cr>",                                                 desc = "Telescope" },
     -- Other
     { "<leader>bb", "<cmd>Telescope buffers<cr>",                                         desc = "Bufferlist" },
@@ -54,8 +50,6 @@ local M = {
     local action_layout = require("telescope.actions.layout")
     local fb_actions = require("telescope").extensions.file_browser.actions
     local icons = require("core.utils.icons")
-
-    local vimgrep_arguments = {}
 
     telescope.setup({
       extensions = {
@@ -92,7 +86,7 @@ local M = {
       pickers = {
         find_files = {
           theme = "ivy",
-          hidden = false,
+          hidden = true,
         },
         oldfiles = {
           cwd_only = true,
@@ -111,7 +105,6 @@ local M = {
       },
       defaults = {
         file_ignore_patterns = settings.telescope_file_ignore_patterns,
-        vimgrep_arguments = vimgrep_arguments,
         mappings = {
           i = {
             -- Close on first esc instead of going to normal mode
@@ -173,14 +166,12 @@ local M = {
     })
 
     telescope.load_extension("docker")
-    telescope.load_extension("node_modules")
     telescope.load_extension("lazy")
     telescope.load_extension("tmux")
     telescope.load_extension("repo")
     telescope.load_extension("projects")
     telescope.load_extension("heading")
     telescope.load_extension("ui-select")
-    -- telescope.load_extension("make")
     if settings.enable_noice then
       telescope.load_extension("noice")
     end

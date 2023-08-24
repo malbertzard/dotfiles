@@ -1,8 +1,17 @@
 local M = {
   "malbertzard/inline-fold.nvim",
-  ft = "html",
+  -- dir = "~/repositories/inline-fold.nvim",
   opts = {
-    placeholder = "@"
+    defaultPlaceholder = "…",
+    queries = {
+
+      -- Some examples you can use
+      html = {
+        { pattern = 'class="([^"]*)"', placeholder = "@" }, -- classes in html
+        { pattern = 'href="(.-)"' }, -- hrefs in html
+        { pattern = 'src="(.-)"' }, -- HTML img src attribute
+      }
+    },
   }
 }
 

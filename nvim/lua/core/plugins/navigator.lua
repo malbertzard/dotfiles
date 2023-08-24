@@ -1,7 +1,8 @@
 local M = {
   "numToStr/Navigator.nvim",
-  config = function()
-    require("Navigator").setup({})
+  opts = {},
+  config = function(_, opts)
+    require("Navigator").setup(opts)
     local map = vim.api.nvim_set_keymap
     local default_options = { noremap = true, silent = true }
     -- tmux navigation

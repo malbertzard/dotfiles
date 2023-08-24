@@ -28,9 +28,8 @@ local function configure()
 end
 
 local function configure_exts()
-  -- require("dapui").setup()
   local dap, dapui = require("dap"), require("dapui")
-  dapui.setup({}) -- use default
+  dapui.setup() -- use default
   dap.listeners.after.event_initialized["dapui_config"] = function()
     dapui.open({})
   end

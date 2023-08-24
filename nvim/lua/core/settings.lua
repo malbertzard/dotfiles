@@ -2,16 +2,18 @@ local M = {}
 
 -- theme: nightfox, tokyonight, tundra, kanagawa, gruvbox, oxocarbon; default is catppuccin
 -- refer to the themes settings file for different styles
-M.theme = "tundra"
+M.theme = "gruvbox"
+M.enable_noice = false
+M.enable_dap = false
+
+M.showtabline = 1
 M.global_statusline = true
+M.mouse = "nv"
+
 -- set numbered lines
 M.number = true
 M.relative_number = true
-M.mouse = "nv"
-M.showtabline = 1
-M.list = false
-M.listchars = "eol:¬,tab:>·,trail:~,extends:>,precedes:<"
-M.enable_noice = true
+
 M.treesitter_ensure_installed = {
   "bash",
   "go",
@@ -41,20 +43,24 @@ M.treesitter_ensure_installed = {
 -- LSPs that should be installed by Mason-lspconfig
 M.lsp_servers = {
   "gopls",
-  "phpactor",
   "pyright",
   "lua_ls",
-  "rust_analyzer",
   "tsserver",
+
+  "phpactor",
+  "antlersls",
 
   "jsonls",
   "yamlls",
   "marksman",
+
   "tailwindcss",
+  "cssls",
 }
 
--- Tools that should be installed by Mason
+-- Non LSP Tools that should be installed by Mason
 M.tools = {
+  "glow"
 }
 
 -- enable greping in hidden files
@@ -105,13 +111,9 @@ M.telescope_file_ignore_patterns = {
   ".vale/",
   ".vscode/",
   "__pycache__/*",
-  "build/",
-  "env/",
   "gradle/",
-  "node_modules/",
   "smalljre_*/*",
   "target/",
-  "vendor/*",
 }
 
 return M
