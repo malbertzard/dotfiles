@@ -23,6 +23,7 @@ M.treesitter_ensure_installed = {
   "python",
   "php",
   "rust",
+  "c",
 
   "regex",
   "query",

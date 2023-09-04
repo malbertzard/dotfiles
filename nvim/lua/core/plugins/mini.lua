@@ -3,7 +3,6 @@ local M = {
   {
     "echasnovski/mini.align",
     event = { "BufReadPre", "BufNewFile" },
-    -- is not loaded without explicitly saying it
     config = true,
   },
 
@@ -19,6 +18,28 @@ local M = {
       }
     end,
   },
+
+  {
+    "echasnovski/mini.files",
+    version = false,
+    keys = {
+      { "<leader>fe", "<cmd>lua MiniFiles.open()<cr>", desc = "File Explorer" }
+
+    },
+    opts = {}
+  },
+
+  {
+    "echasnovski/mini.pairs",
+    version = false,
+    opts = {}
+  },
+
+  {
+    "echasnovski/mini.move",
+    version = false,
+    opts = {}
+  }
 }
 
 return M
