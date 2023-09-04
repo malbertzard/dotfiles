@@ -58,7 +58,7 @@ local M = {
         },
         file_browser = {
           theme = "ivy",
-          hijack_netrw = false,
+          hijack_netrw = true,
           hidden = true,
           mappings = {
             i = {

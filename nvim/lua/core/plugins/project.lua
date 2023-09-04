@@ -1,5 +1,6 @@
 local M = {
   "ahmedkhalf/project.nvim",
+  event = "UIEnter",
   config = function()
     require("project_nvim").setup({
       patterns = {
