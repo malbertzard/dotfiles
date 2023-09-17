@@ -8,8 +8,7 @@ local M = {
     require("refactoring").setup()
   end,
   keys = {
-
-    { "<leader>f",  "",                                                       desc = "+Refactor" },
+    { "<leader>r",  "",                                                       desc = "+Refactor" },
   }
 }
 

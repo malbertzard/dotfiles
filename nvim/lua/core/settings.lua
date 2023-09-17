@@ -3,7 +3,7 @@ local M = {}
 -- theme: nightfox, tokyonight, tundra, kanagawa, gruvbox, caret, oxocarbon; default is catppuccin
 -- refer to the themes settings file for different styles
 M.theme = "gruvbox"
-M.enable_noice = true
+M.enable_noice = false
 M.enable_dap = false
 
 M.showtabline = 1
