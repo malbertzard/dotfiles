@@ -1,1 +1,1 @@
-vim.keymap.set("n", "<leader>Fb", "<cmd>!rustywind % --write<cr>", { desc = "Rustywind" })
+vim.keymap.set("n", "<leader>Ff", "<cmd>!rustywind % --write<cr>", { desc = "Format/Rustywind" })

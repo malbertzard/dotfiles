@@ -11,37 +11,42 @@ local M = {
     "cljoly/telescope-repo.nvim",
     "tsakirist/telescope-lazy.nvim",
     "camgraff/telescope-tmux.nvim",
+    "debugloop/telescope-undo.nvim"
   },
   keys = {
+    { "<leader>s",  "",                                                       desc = "+Search" },
+    { "<leader>f",  "",                                                       desc = "+Files" },
+
     -- Search stuff
-    { "<leader>sc", "<cmd>Telescope commands<cr>",                                        desc = "Commands" },
-    { "<leader>sg", "<cmd>Telescope live_grep theme=ivy<cr>",                             desc = "Strings" },
-    { "<leader>s?", "<cmd>Telescope help_tags<cr>",                                       desc = "Help" },
-    { "<leader>sh", "<cmd>Telescope heading<cr>",                                         desc = "Headings" },
-    { "<leader>sk", "<cmd>Telescope keymaps<cr>",                                         desc = "Keymaps" },
-    { "<leader>sO", "<cmd>Telescope vim_options<cr>",                                     desc = "Vim Options" },
-    { "<leader>sp", "<cmd>Telescope projects<cr>",                                        desc = "Projects" },
-    { "<leader>sR", "<cmd>Telescope repo list theme=ivy<cr>",                             desc = "Repo" },
-    { "<leader>st", "<cmd>Telescope tmux sessions theme=ivy<cr>",                         desc = "Tmux" },
-    { "<leader>sd", "<cmd>Telescope docker<cr>",                                          desc = "Docker" },
-    { "<leader>sG", "<cmd>Telescope registers<cr>",                                       desc = "Registers" },
-    { "<leader>ss", "<cmd>Telescope grep_string<cr>",                                     desc = "Text under cursor" },
-    { "<leader>sS", "<cmd>Telescope symbols<cr>",                                         desc = "Emoji" },
-    { "<leader>s:", "<cmd>Telescope search_history<cr>",                                  desc = "Search History" },
-    { "<leader>s;", "<cmd>Telescope command_history<cr>",                                 desc = "Command history" },
+    { "<leader>sc", "<cmd>Telescope commands<cr>",                            desc = "Commands" },
+    { "<leader>sg", "<cmd>Telescope live_grep theme=ivy<cr>",                 desc = "Strings" },
+    { "<leader>s?", "<cmd>Telescope help_tags<cr>",                           desc = "Help" },
+    { "<leader>sh", "<cmd>Telescope heading<cr>",                             desc = "Headings" },
+    { "<leader>sk", "<cmd>Telescope keymaps<cr>",                             desc = "Keymaps" },
+    { "<leader>sO", "<cmd>Telescope vim_options<cr>",                         desc = "Vim Options" },
+    { "<leader>sp", "<cmd>Telescope projects<cr>",                            desc = "Projects" },
+    { "<leader>sR", "<cmd>Telescope repo list theme=ivy<cr>",                 desc = "Repo" },
+    { "<leader>st", "<cmd>Telescope tmux sessions theme=ivy<cr>",             desc = "Tmux" },
+    { "<leader>sd", "<cmd>Telescope docker<cr>",                              desc = "Docker" },
+    { "<leader>sG", "<cmd>Telescope registers<cr>",                           desc = "Registers" },
+    { "<leader>ss", "<cmd>Telescope grep_string<cr>",                         desc = "Text under cursor" },
+    { "<leader>sS", "<cmd>Telescope symbols<cr>",                             desc = "Emoji" },
+    { "<leader>s:", "<cmd>Telescope search_history<cr>",                      desc = "Search History" },
+    { "<leader>s;", "<cmd>Telescope command_history<cr>",                     desc = "Command history" },
+    { "<leader>su", "<cmd>Telescope undo<cr>",                                desc = "Undo" },
     -- Git
-    { "<leader>gh", "<cmd>Telescope git_branches theme=ivy<cr>",                          desc = "Branches" },
-    { "<leader>gm", "<cmd>Telescope git_commits theme=ivy<cr>",                           desc = "Commits" },
+    { "<leader>gh", "<cmd>Telescope git_branches theme=ivy<cr>",              desc = "Branches" },
+    { "<leader>gm", "<cmd>Telescope git_commits theme=ivy<cr>",               desc = "Commits" },
     -- files
-    { "<leader>fb", "<cmd>Telescope file_browser theme=ivy grouped=true<cr>",             desc = "Filebrowser" },
-    { "<leader>ff", "<cmd>Telescope git_files theme=ivy<cr>", desc = "Open file" },
-    { "<leader>fF", "<cmd>Telescope find_files no_ignore=true theme=ivy<cr>",             desc = "Open file (ignore git)" },
-    { "<leader>fr", "<cmd>Telescope oldfiles<cr>",                                        desc = "Recent files" },
+    { "<leader>fb", "<cmd>Telescope file_browser theme=ivy grouped=true<cr>", desc = "Filebrowser" },
+    { "<leader>ff", "<cmd>Telescope git_files theme=ivy<cr>",                 desc = "Open file" },
+    { "<leader>fF", "<cmd>Telescope find_files no_ignore=true theme=ivy<cr>", desc = "Open file (ignore git)" },
+    { "<leader>fr", "<cmd>Telescope oldfiles<cr>",                            desc = "Recent files" },
     -- misc
-    { "<leader>mt", "<cmd>Telescope<cr>",                                                 desc = "Telescope" },
+    { "<leader>mt", "<cmd>Telescope<cr>",                                     desc = "Telescope" },
     -- Other
-    { "<leader>bb", "<cmd>Telescope buffers<cr>",                                         desc = "Bufferlist" },
-    { "<C-f>",      "<cmd>Telescope current_buffer_fuzzy_find theme=ivy<cr>",             desc = "Search in buffer" },
+    { "<leader>bb", "<cmd>Telescope buffers<cr>",                             desc = "Bufferlist" },
+    { "<C-f>",      "<cmd>Telescope current_buffer_fuzzy_find theme=ivy<cr>", desc = "Search in buffer" },
   },
   config = function()
     local settings = require("core.settings")
@@ -78,6 +83,7 @@ local M = {
               "--no-ignore-vcs",
             },
             search_dirs = {
+              "/mnt/c/Users/Albertzard/Documents/GitHub/",
               "~/code/",
             },
           },
@@ -172,6 +178,7 @@ local M = {
     telescope.load_extension("projects")
     telescope.load_extension("heading")
     telescope.load_extension("ui-select")
+    telescope.load_extension("undo")
     if settings.enable_noice then
       telescope.load_extension("noice")
     end

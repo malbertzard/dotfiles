@@ -10,7 +10,7 @@ local M = {
       "leoluz/nvim-dap-go",
       "rcarriga/nvim-dap-ui",
     },
-  },
+  }
 }
 
 return M

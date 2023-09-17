@@ -23,7 +23,8 @@ local themes = {
     kanagawa = {
         "rebelot/kanagawa.nvim",
         config = function()
-            require("lua.core.plugins.themes.kanagawa")
+            vim.opt.background = "dark" -- set this to dark or light
+            vim.cmd("colorscheme kanagawa")
         end
     },
     oxocarbon = {
@@ -38,6 +39,13 @@ local themes = {
         config = function()
             vim.opt.background = "dark" -- set this to dark or light
             vim.cmd [[colorscheme gruvbox-baby]]
+        end
+    },
+    caret = {
+        "projekt0n/caret.nvim",
+        config = function()
+            vim.opt.background = "dark"
+            vim.cmd [[colorscheme caret]]
         end
     },
     default = {

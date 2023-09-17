@@ -23,8 +23,8 @@ local M = {
     "echasnovski/mini.files",
     version = false,
     keys = {
-      { "<leader>fe", "<cmd>lua MiniFiles.open()<cr>", desc = "File Explorer" }
-
+      { "<leader>fe",  '<cmd>lua MiniFiles.open(vim.fn.expand("%:p:h"))<cr>', desc = "File Explorer" },
+      { "<leader>fE", "<cmd>lua MiniFiles.open()<cr>", desc = "File Explorer in Root" }
     },
     opts = {}
   },

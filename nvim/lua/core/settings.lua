@@ -1,9 +1,9 @@
 local M = {}
 
--- theme: nightfox, tokyonight, tundra, kanagawa, gruvbox, oxocarbon; default is catppuccin
+-- theme: nightfox, tokyonight, tundra, kanagawa, gruvbox, caret, oxocarbon; default is catppuccin
 -- refer to the themes settings file for different styles
 M.theme = "gruvbox"
-M.enable_noice = false
+M.enable_noice = true
 M.enable_dap = false
 
 M.showtabline = 1
@@ -43,18 +43,23 @@ M.treesitter_ensure_installed = {
 
 -- LSPs that should be installed by Mason-lspconfig
 M.lsp_servers = {
+  -- General Purpose Langs
   "gopls",
   "pyright",
   "lua_ls",
-  "tsserver",
+  "denols",
+  "clangd",
 
+  -- Work Php stuff
   "phpactor",
   "antlersls",
 
+  -- Markup Langs
   "jsonls",
   "yamlls",
   "marksman",
 
+  -- CSS Stuff
   "tailwindcss",
   "cssls",
 }

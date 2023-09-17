@@ -47,7 +47,6 @@ map(
   "<cmd>lua require('core.utils.functions').toggle_colorcolumn()<cr>",
   { desc = "Toggle colorcolumn" }
 )
-map("n", "<leader>Ts", "<cmd>SymbolsOutline<cr>", { desc = "Toggle SymbolsOutline" })
 map("n", "<leader>TS", "<cmd>windo set scb!<cr>", { desc = "Toggle Scrollbind" })
 
 
@@ -70,15 +69,6 @@ map("t", "<Esc>", "<C-\\><C-n>")
 
 local wk = require("which-key")
 
-wk.register({
-  ["<leader>"] = {
-    ["1"] = { "<cmd>:lua require('harpoon.ui').nav_file(1)<cr>", "which_key_ignore" },
-    ["2"] = { "<cmd>:lua require('harpoon.ui').nav_file(2)<cr>", "which_key_ignore" },
-    ["3"] = { "<cmd>:lua require('harpoon.ui').nav_file(3)<cr>", "which_key_ignore" },
-    ["4"] = { "<cmd>:lua require('harpoon.ui').nav_file(4)<cr>", "which_key_ignore" },
-  }
-})
-
 -- Register leader based mappings
 wk.register({
   b = {
@@ -88,19 +78,11 @@ wk.register({
       "Close all but the current buffer",
     },
   },
-  l = { name = "+LSP" },         -- core.plugins.lsp.keys
-  lw = { "Workspaces" }, -- core.plugins.lsp.keys
-  f = {
-    name = "+Files",
-  },
-  F = { name = "Format" },
-
-  M = { "<cmd>make<cr>", "Make" },
   m = {
     name = "Misc",
     s = { "<cmd>source ~/.config/nvim/snippets/*<cr>", "Reload snippets" },
     a = { "<cmd>Alpha<cr>", "Alpha" },
-    p = { "<cmd>Lazy check<cr>", "Lazy check" },
+    l = { "<cmd>Lazy<cr>", "Lazy" },
   },
   q = {
     name = "+Quickfix",
@@ -111,43 +93,29 @@ wk.register({
   },
   t = {
     name = "+Term",
-    v = { "<cmd>vsplit term://bash<cr>", "vSplit Term" },
-    s = { "<cmd>split term://bash<cr>", "sSplit Term" },
+    v = { "<cmd>vsplit | term<cr>", "vSplit Term" },
+    s = { "<cmd>split | term<cr>", "sSplit Term" },
     T = { "<cmd>term<cr>", "Term" },
     t = { "<cmd>tabnew | term<cr>", "Tab Term" },
-  },
-  w = {
-    -- Work Intern Tools
-    name = "+Work",
-    u = { "<cmd>tabnew | term nds update <cr>", "Up" },
-    U = { "<cmd>tabnew | term nds upgrade <cr>", "Upgrade" },
-    i = { "<cmd>tabnew | term nds info <cr>", "Info" },
-    r = { "<cmd>tabnew | term nds restart <cr>", "Restart" },
-    E = { "<cmd>tabnew | term nds enter <cr>", "Enter" },
-    S = { "<cmd>tabnew | term nds down <cr>", "Shutdown" },
-    D = {
-      name = "Database",
-      i = { "<cmd>tabnew | term nds db:import <cr>", "Database Import" },
-    }
-
-  },
-  h = {
-    name = "+Harpoon",
-    a = { "<cmd>:lua require('harpoon.mark').add_file()<cr>", "Add Mark" },
-    l = { "<cmd>:lua require('harpoon.ui').toggle_quick_menu()<cr>", "List Marks" },
-    n = { "<cmd>:lua require('harpoon.ui').nav_next()<cr>", "Prev Mark" },
-    p = { "<cmd>:lua require('harpoon.ui').nav_prev()<cr>", "Next Mark" },
-    ["1"] = { "<cmd>:lua require('harpoon.ui').nav_file(1)<cr>", "Jump to Mark 1" },
-    ["2"] = { "<cmd>:lua require('harpoon.ui').nav_file(2)<cr>", "Jump to Mark 2" },
-    ["3"] = { "<cmd>:lua require('harpoon.ui').nav_file(3)<cr>", "Jump to Mark 3" },
-    ["4"] = { "<cmd>:lua require('harpoon.ui').nav_file(4)<cr>", "Jump to Mark 4" },
-    ["5"] = { "<cmd>:lua require('harpoon.ui').nav_file(5)<cr>", "Jump to Mark 5" },
-    ["6"] = { "<cmd>:lua require('harpoon.ui').nav_file(6)<cr>", "Jump to Mark 6" },
-    ["7"] = { "<cmd>:lua require('harpoon.ui').nav_file(7)<cr>", "Jump to Mark 7" },
-    ["8"] = { "<cmd>:lua require('harpoon.ui').nav_file(8)<cr>", "Jump to Mark 8" },
-    ["9"] = { "<cmd>:lua require('harpoon.ui').nav_file(9)<cr>", "Jump to Mark 9" },
+    h = { "<cmd>tabnew | term htop <cr>", "htop" },
+    N = {
+      -- Work Intern Tools
+      name = "+NDS",
+      u = { "<cmd>tabnew | term nds update <cr>", "Up" },
+      U = { "<cmd>tabnew | term nds upgrade <cr>", "Upgrade" },
+      i = { "<cmd>tabnew | term nds info <cr>", "Info" },
+      r = { "<cmd>tabnew | term nds restart <cr>", "Restart" },
+      E = { "<cmd>tabnew | term nds enter <cr>", "Enter" },
+      S = { "<cmd>tabnew | term nds down <cr>", "Shutdown" },
+      D = {
+        name = "Database",
+        i = { "<cmd>tabnew | term nds db:import <cr>", "Database Import" },
+      }
+    },
   },
   T = { name = "+Toggles" },
-  s = { name = "+Search" },
+  d = { name = "+DAP" },
+  F = { name = "+Filetype" },
+
   z = { "Spelling" },
 }, { prefix = "<leader>", mode = "n", {} })

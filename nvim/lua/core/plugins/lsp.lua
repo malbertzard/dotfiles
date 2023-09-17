@@ -9,6 +9,11 @@ local M = {
   config = function()
     require("core.plugins.lsp.lsp")
   end,
+
+  keys = {
+    { "<leader>l", "", desc = "+Lsp" },
+    { "<leader>l", "", desc = "+Workspaces" },
+  }
 }
 
 return M
