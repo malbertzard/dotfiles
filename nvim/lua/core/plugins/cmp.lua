@@ -9,7 +9,6 @@ local M = {
     "hrsh7th/cmp-nvim-lsp-signature-help",
 
     "petertriho/cmp-git",
-    "lukas-reineke/cmp-rg",
     "saadparwaiz1/cmp_luasnip",
     "lukas-reineke/cmp-under-comparator",
   },
@@ -25,7 +24,6 @@ local M = {
           mode = "symbol",
           menu = {
             buffer = "BUF",
-            rg = "RG",
             nvim_lsp = "LSP",
             path = "PATH",
             luasnip = "SNIP",
@@ -89,7 +87,6 @@ local M = {
         { name = "buffer",                 keyword_length = 5 },
         { name = "luasnip" },
         { name = "path" },
-        { name = "rg",                     keyword_length = 5 },
       },
     })
 

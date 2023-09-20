@@ -6,6 +6,9 @@ M.theme = "gruvbox"
 M.enable_noice = false
 M.enable_dap = false
 
+-- random or see alpha/headers
+M.alpha_header = "octopus"
+
 M.showtabline = 1
 M.global_statusline = true
 M.mouse = "nv"

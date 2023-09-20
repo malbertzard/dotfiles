@@ -3,18 +3,24 @@ local settings = require("core.settings")
 local themes = {
     nightfox = {
         "EdenEast/nightfox.nvim",
+        lazy = false, -- make sure we load this during startup if it is your main colorscheme
+        priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
             require("core.plugins.themes.nightfox")
         end
     },
     tundra = {
         "sam4llis/nvim-tundra",
+        lazy = false, -- make sure we load this during startup if it is your main colorscheme
+        priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
             require("core.plugins.themes.tundra")
         end
     },
     tokyonight = {
         "folke/tokyonight.nvim",
+        lazy = false, -- make sure we load this during startup if it is your main colorscheme
+        priority = 1000, -- make sure to load this before all the other start plugins
         branch = "main",
         config = function()
             require("core.plugins.themes.tokyonight")
@@ -22,6 +28,8 @@ local themes = {
     },
     kanagawa = {
         "rebelot/kanagawa.nvim",
+        lazy = false, -- make sure we load this during startup if it is your main colorscheme
+        priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
             vim.opt.background = "dark" -- set this to dark or light
             vim.cmd("colorscheme kanagawa")
@@ -29,6 +37,8 @@ local themes = {
     },
     oxocarbon = {
         "nyoom-engineering/oxocarbon.nvim",
+        lazy = false, -- make sure we load this during startup if it is your main colorscheme
+        priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
             vim.opt.background = "dark" -- set this to dark or light
             vim.cmd("colorscheme oxocarbon")
@@ -36,6 +46,8 @@ local themes = {
     },
     gruvbox = {
         "luisiacc/gruvbox-baby",
+        lazy = false, -- make sure we load this during startup if it is your main colorscheme
+        priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
             vim.opt.background = "dark" -- set this to dark or light
             vim.cmd [[colorscheme gruvbox-baby]]
@@ -43,6 +55,8 @@ local themes = {
     },
     caret = {
         "projekt0n/caret.nvim",
+        lazy = false, -- make sure we load this during startup if it is your main colorscheme
+        priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
             vim.opt.background = "dark"
             vim.cmd [[colorscheme caret]]
@@ -50,6 +64,8 @@ local themes = {
     },
     default = {
         "catppuccin/nvim",
+        lazy = false, -- make sure we load this during startup if it is your main colorscheme
+        priority = 1000, -- make sure to load this before all the other start plugins
         name = "catppuccin",
         config = function()
             require("core.plugins.themes.catppuccin")
