@@ -23,8 +23,8 @@ local M = {
     "echasnovski/mini.files",
     version = false,
     keys = {
-      { "<leader>fe",  '<cmd>lua MiniFiles.open(vim.fn.expand("%:p:h"))<cr>', desc = "File Explorer" },
-      { "<leader>fE", "<cmd>lua MiniFiles.open()<cr>", desc = "File Explorer in Root" }
+      { "<leader>fe", '<cmd>lua MiniFiles.open(vim.fn.expand("%:p:h"))<cr>', desc = "File Explorer" },
+      { "<leader>fE", "<cmd>lua MiniFiles.open()<cr>",                       desc = "File Explorer in Root" }
     },
     opts = {}
   },
@@ -33,6 +33,27 @@ local M = {
     "echasnovski/mini.pairs",
     version = false,
     opts = {}
+  },
+
+  {
+    'echasnovski/mini.comment',
+    version = false,
+    opts = {
+      -- Options which control module behavior
+      options = {
+        -- Function to compute custom 'commentstring' (optional)
+        custom_commentstring = nil,
+        ignore_blank_line = false,
+        start_of_line = false,
+        pad_comment_parts = true,
+      },
+      mappings = {
+        comment = 'gc',
+        comment_line = 'gcc',
+        comment_visual = 'gc',
+        textobject = 'gc',
+      }
+    }
   },
 
   {

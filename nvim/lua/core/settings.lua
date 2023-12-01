@@ -2,6 +2,7 @@ local M = {}
 
 -- theme: nightfox, tokyonight, tundra, kanagawa, gruvbox, caret, oxocarbon; default is catppuccin
 -- refer to the themes settings file for different styles
+M.brightness = "dark"
 M.theme = "gruvbox"
 M.enable_noice = false
 M.enable_dap = false
@@ -23,10 +24,13 @@ M.treesitter_ensure_installed = {
   "java",
   "javascript",
   "lua",
-  "python",
   "php",
   "rust",
   "c",
+
+  "python",
+  "julia",
+  "r",
 
   "regex",
   "query",
@@ -50,10 +54,12 @@ M.lsp_servers = {
   "gopls",
   "pyright",
   "lua_ls",
-  "denols",
   "clangd",
 
-  -- Work Php stuff
+  -- Work JS Stuff
+  "tsserver",
+
+  -- Work Php Stuff
   "phpactor",
   "antlersls",
 
@@ -69,7 +75,13 @@ M.lsp_servers = {
 
 -- Non LSP Tools that should be installed by Mason
 M.tools = {
-  "glow"
+  "glow",
+
+  -- Formatters
+  "flake8",
+  "rustywind"
+
+  -- Debugger
 }
 
 -- enable greping in hidden files

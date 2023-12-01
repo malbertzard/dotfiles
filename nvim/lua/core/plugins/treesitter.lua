@@ -6,6 +6,7 @@ local M = {
   dependencies = {
     "nvim-treesitter/nvim-treesitter-textobjects",
     "windwp/nvim-ts-autotag",
+    "nvim-treesitter/playground",
   },
   opts = {
     ensure_installed = settings.treesitter_ensure_installed,

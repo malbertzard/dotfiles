@@ -1,5 +1,6 @@
 local M = {
   'declancm/cinnamon.nvim',
+  enabled = true,
   config = function()
     require('cinnamon').setup({
       -- KEYMAPS:

@@ -11,7 +11,7 @@ local M = {
   end,
 
   keys = {
-    { "<leader>l", "", desc = "+Lsp" },
+    { "<leader>l", "", desc = "+LSP" },
     { "<leader>lw", "", desc = "+Workspaces" },
   }
 }

@@ -24,7 +24,6 @@ local M = {
     { "<leader>sh", "<cmd>Telescope heading<cr>",                             desc = "Headings" },
     { "<leader>sk", "<cmd>Telescope keymaps<cr>",                             desc = "Keymaps" },
     { "<leader>sO", "<cmd>Telescope vim_options<cr>",                         desc = "Vim Options" },
-    { "<leader>sp", "<cmd>Telescope projects<cr>",                            desc = "Projects" },
     { "<leader>sR", "<cmd>Telescope repo list theme=ivy<cr>",                 desc = "Repo" },
     { "<leader>st", "<cmd>Telescope tmux sessions theme=ivy<cr>",             desc = "Tmux" },
     { "<leader>sd", "<cmd>Telescope docker<cr>",                              desc = "Docker" },
@@ -44,6 +43,8 @@ local M = {
     { "<leader>fr", "<cmd>Telescope oldfiles<cr>",                            desc = "Recent files" },
     -- misc
     { "<leader>mt", "<cmd>Telescope<cr>",                                     desc = "Telescope" },
+    -- Docs
+    { "<leader>Hm", "<cmd>Telescope man_pages<cr>",                           desc = "Telescope man" },
     -- Other
     { "<leader>bb", "<cmd>Telescope buffers<cr>",                             desc = "Bufferlist" },
     { "<C-f>",      "<cmd>Telescope current_buffer_fuzzy_find theme=ivy<cr>", desc = "Search in buffer" },
@@ -83,8 +84,7 @@ local M = {
               "--no-ignore-vcs",
             },
             search_dirs = {
-              "/mnt/c/Users/Albertzard/Documents/GitHub/",
-              "~/code/",
+              "~/GitHub/",
             },
           },
         },
@@ -177,7 +177,8 @@ local M = {
     telescope.load_extension("repo")
     telescope.load_extension("projects")
     telescope.load_extension("heading")
-    telescope.load_extension("ui-select")
+    -- Uncomment until https://github.com/nvim-telescope/telescope-ui-select.nvim/issues/35
+    -- telescope.load_extension("ui-select")
     telescope.load_extension("undo")
     if settings.enable_noice then
       telescope.load_extension("noice")

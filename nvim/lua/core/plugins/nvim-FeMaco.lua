@@ -1,6 +1,6 @@
 local M = {
   "AckslD/nvim-FeMaco.lua",
-  ft = "markdown",
+  ft = {"markdown", "quarto"},
   keys = {
     { "<leader>Fe", "<cmd>FeMaco<cr>", "Edit Code Block" }
   },

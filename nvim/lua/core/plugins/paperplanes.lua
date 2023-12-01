@@ -7,6 +7,12 @@ local M = {
       ":PP<CR>",
       mode = "n",
       desc = "Send Buffer to Pastebin Client",
+    },
+    {
+      "<leader>mp",
+      ":PP<CR>",
+      mode = "v",
+      desc = "Send Buffer to Pastebin Client",
     }
   }
 }

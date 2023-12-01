@@ -113,6 +113,7 @@ wk.register({
       }
     },
   },
+
   T = { name = "+Toggles" },
   d = { name = "+DAP" },
   F = { name = "+Filetype" },

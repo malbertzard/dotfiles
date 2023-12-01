@@ -1,5 +1,6 @@
 local M = {
   "malbertzard/inline-fold.nvim",
+  enabled = false,
   -- dir = "~/repositories/inline-fold.nvim",
   opts = {
     defaultPlaceholder = "…",

@@ -31,7 +31,7 @@ local themes = {
         lazy = false, -- make sure we load this during startup if it is your main colorscheme
         priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
-            vim.opt.background = "dark" -- set this to dark or light
+            vim.opt.background = settings.brightness
             vim.cmd("colorscheme kanagawa")
         end
     },
@@ -40,7 +40,7 @@ local themes = {
         lazy = false, -- make sure we load this during startup if it is your main colorscheme
         priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
-            vim.opt.background = "dark" -- set this to dark or light
+            vim.opt.background = settings.brightness
             vim.cmd("colorscheme oxocarbon")
         end
     },
@@ -49,7 +49,7 @@ local themes = {
         lazy = false, -- make sure we load this during startup if it is your main colorscheme
         priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
-            vim.opt.background = "dark" -- set this to dark or light
+            vim.opt.background = settings.brightness
             vim.cmd [[colorscheme gruvbox-baby]]
         end
     },
@@ -58,7 +58,7 @@ local themes = {
         lazy = false, -- make sure we load this during startup if it is your main colorscheme
         priority = 1000, -- make sure to load this before all the other start plugins
         config = function()
-            vim.opt.background = "dark"
+            vim.opt.background = settings.brightness
             vim.cmd [[colorscheme caret]]
         end
     },
