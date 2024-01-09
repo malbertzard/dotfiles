@@ -1,4 +1,5 @@
 local M = {
-  "lervag/vimtex"
+  "lervag/vimtex",
+  enabled = false
 }
 return M

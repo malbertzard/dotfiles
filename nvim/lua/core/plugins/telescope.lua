@@ -3,10 +3,12 @@ local M = {
   cmd = "Telescope",
   tag = '0.1.1',
   dependencies = {
-    "crispgm/telescope-heading.nvim",
+    {
+      "telescope-ui-select.nvim",
+      dir = "/mnt/c/Users/Albertzard/Documents/GitHub/telescope-ui-select.nvim",
+    },
     "nvim-telescope/telescope-symbols.nvim",
-    "nvim-telescope/telescope-file-browser.nvim",
-    "nvim-telescope/telescope-ui-select.nvim",
+    -- "nvim-telescope/telescope-ui-select.nvim",
     "lpoto/telescope-docker.nvim",
     "cljoly/telescope-repo.nvim",
     "tsakirist/telescope-lazy.nvim",
@@ -21,7 +23,6 @@ local M = {
     { "<leader>sc", "<cmd>Telescope commands<cr>",                            desc = "Commands" },
     { "<leader>sg", "<cmd>Telescope live_grep theme=ivy<cr>",                 desc = "Strings" },
     { "<leader>s?", "<cmd>Telescope help_tags<cr>",                           desc = "Help" },
-    { "<leader>sh", "<cmd>Telescope heading<cr>",                             desc = "Headings" },
     { "<leader>sk", "<cmd>Telescope keymaps<cr>",                             desc = "Keymaps" },
     { "<leader>sO", "<cmd>Telescope vim_options<cr>",                         desc = "Vim Options" },
     { "<leader>sR", "<cmd>Telescope repo list theme=ivy<cr>",                 desc = "Repo" },
@@ -37,7 +38,6 @@ local M = {
     { "<leader>gh", "<cmd>Telescope git_branches theme=ivy<cr>",              desc = "Branches" },
     { "<leader>gm", "<cmd>Telescope git_commits theme=ivy<cr>",               desc = "Commits" },
     -- files
-    { "<leader>fb", "<cmd>Telescope file_browser theme=ivy grouped=true<cr>", desc = "Filebrowser" },
     { "<leader>ff", "<cmd>Telescope git_files theme=ivy<cr>",                 desc = "Open file" },
     { "<leader>fF", "<cmd>Telescope find_files no_ignore=true theme=ivy<cr>", desc = "Open file (ignore git)" },
     { "<leader>fr", "<cmd>Telescope oldfiles<cr>",                            desc = "Recent files" },
@@ -54,7 +54,6 @@ local M = {
     local telescope = require("telescope")
     local actions = require("telescope.actions")
     local action_layout = require("telescope.actions.layout")
-    local fb_actions = require("telescope").extensions.file_browser.actions
     local icons = require("core.utils.icons")
 
     telescope.setup({
@@ -62,28 +61,13 @@ local M = {
         ["ui-select"] = {
           require("telescope.themes").get_dropdown({}),
         },
-        file_browser = {
-          theme = "ivy",
-          hijack_netrw = true,
-          hidden = true,
-          mappings = {
-            i = {
-              ["<c-n>"] = fb_actions.create,
-              ["<c-r>"] = fb_actions.rename,
-              ["<c-h>"] = fb_actions.toggle_hidden,
-              ["<c-x>"] = fb_actions.remove,
-              ["<c-p>"] = fb_actions.move,
-              ["<c-y>"] = fb_actions.copy,
-              ["<c-a>"] = fb_actions.select_all,
-            },
-          },
-        },
         repo = {
           list = {
             fd_opts = {
               "--no-ignore-vcs",
             },
             search_dirs = {
+              "~/code/",
               "~/GitHub/",
             },
           },
@@ -176,9 +160,8 @@ local M = {
     telescope.load_extension("tmux")
     telescope.load_extension("repo")
     telescope.load_extension("projects")
-    telescope.load_extension("heading")
     -- Uncomment until https://github.com/nvim-telescope/telescope-ui-select.nvim/issues/35
-    -- telescope.load_extension("ui-select")
+    telescope.load_extension("ui-select")
     telescope.load_extension("undo")
     if settings.enable_noice then
       telescope.load_extension("noice")

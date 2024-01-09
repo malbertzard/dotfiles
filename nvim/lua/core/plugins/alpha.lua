@@ -7,7 +7,6 @@ local M = {
   config = function()
     require("core.plugins.alpha.alpha")
   end,
-
 }
 
 return M
