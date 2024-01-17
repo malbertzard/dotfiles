@@ -46,6 +46,7 @@ M.treesitter_ensure_installed = {
   "yaml",
   "markdown",
   "markdown_inline",
+  "latex",
 }
 
 -- LSPs that should be installed by Mason-lspconfig
@@ -55,6 +56,7 @@ M.lsp_servers = {
   "pyright",
   "lua_ls",
   "clangd",
+  "bashls",
 
   -- Work JS Stuff
   "tsserver",
@@ -67,6 +69,7 @@ M.lsp_servers = {
   "jsonls",
   "yamlls",
   "marksman",
+  "texlab",
 
   -- CSS Stuff
   "tailwindcss",

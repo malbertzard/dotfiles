@@ -28,7 +28,7 @@ vim.opt.termguicolors = true                    -- set term gui colors (most ter
 vim.opt.showtabline = 1
 vim.opt.timeoutlen = 1000                       -- time to wait for a mapped sequence to complete (in milliseconds)
 vim.opt.undofile = true                         -- enable persistent undo
-vim.opt.updatetime = 300                        -- faster completion (4000ms default)
+vim.opt.updatetime = 50                         -- faster completion (4000ms default)
 vim.opt.writebackup = false                     -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
 vim.opt.expandtab = true                        -- convert tabs to spaces
 vim.opt.shiftwidth = 4                          -- the number of spaces inserted for each indentation
@@ -49,10 +49,11 @@ vim.opt.shortmess:append("c")
 vim.opt.whichwrap:append("<,>,[,],h,l")
 vim.opt.iskeyword:append("-")
 vim.opt.foldlevel = 99
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.opt.foldmethod = "syntax"
 vim.opt.fileformats = { "unix", "dos" }
 vim.opt.wildignorecase = true          -- When set case is ignored when completing file names and directories
 vim.opt.wildmode = "longest:full,full" -- Command-line completion mode
 vim.opt.winminwidth = 5                -- minimum window width
 vim.opt.mouse = "a"                    -- allow the mouse to be used in neovim
+
+vim.opt.spelllang = 'de'

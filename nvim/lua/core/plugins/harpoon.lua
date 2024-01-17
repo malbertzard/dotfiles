@@ -10,10 +10,10 @@ local M = {
     { "<leader>hn", "<cmd>:lua require('harpoon.ui').nav_next()<cr>",          desc = "Prev Mark" },
     { "<leader>hp", "<cmd>:lua require('harpoon.ui').nav_prev()<cr>",          desc = "Next Mark" },
 
-    { "1", "<cmd>:lua require('harpoon.ui').nav_file(1)<cr>",         desc = "which_key_ignore" },
-    { "2", "<cmd>:lua require('harpoon.ui').nav_file(2)<cr>",         desc = "which_key_ignore" },
-    { "3", "<cmd>:lua require('harpoon.ui').nav_file(3)<cr>",         desc = "which_key_ignore" },
-    { "4", "<cmd>:lua require('harpoon.ui').nav_file(4)<cr>",         desc = "which_key_ignore" },
+    { "<leader>1", "<cmd>:lua require('harpoon.ui').nav_file(1)<cr>",         desc = "which_key_ignore" },
+    { "<leader>2", "<cmd>:lua require('harpoon.ui').nav_file(2)<cr>",         desc = "which_key_ignore" },
+    { "<leader>3", "<cmd>:lua require('harpoon.ui').nav_file(3)<cr>",         desc = "which_key_ignore" },
+    { "<leader>4", "<cmd>:lua require('harpoon.ui').nav_file(4)<cr>",         desc = "which_key_ignore" },
 
     { "<leader>h1", "<cmd>:lua require('harpoon.ui').nav_file(1)<cr>",         desc = "Jump to Mark 1" },
     { "<leader>h2", "<cmd>:lua require('harpoon.ui').nav_file(2)<cr>",         desc = "Jump to Mark 2" },
