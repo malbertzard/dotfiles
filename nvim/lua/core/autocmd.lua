@@ -8,7 +8,7 @@ api.nvim_create_autocmd("BufWritePre", {
 })
 
 -- Turn off line numbers in terminal
-vim.cmd"autocmd TermOpen * setlocal nonumber norelativenumber"
+vim.cmd "autocmd TermOpen * setlocal nonumber norelativenumber"
 
 -- don't auto comment new line
 api.nvim_create_autocmd("BufEnter", { command = [[set formatoptions-=cro]] })
@@ -105,6 +105,17 @@ api.nvim_create_autocmd("User", {
       vim.api.nvim_command(event.buf .. "bwipeout")
     end
   end,
+})
+
+api.nvim_create_autocmd('BufWritePost', {
+	desc = 'build tex file to pdf',
+
+	group = vim.api.nvim_create_augroup('user', { clear = true }),
+	callback = function (opts)
+		if vim.bo[opts.buf].filetype == 'tex' then
+			vim.cmd 'TexlabBuild'
+		end
+	end,
 })
 
 -- Enable spell checking for certain file types

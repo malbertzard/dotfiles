@@ -27,6 +27,7 @@ local M = {
             nvim_lsp = "LSP",
             path = "PATH",
             luasnip = "SNIP",
+            codeium = "AI",
           },
         }),
       },
@@ -87,6 +88,7 @@ local M = {
         { name = "buffer",                 keyword_length = 5 },
         { name = "luasnip" },
         { name = "path" },
+        { name = "codeium" }
       },
     })
 

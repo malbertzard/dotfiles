@@ -45,6 +45,7 @@ for _, lsp in ipairs(settings.lsp_servers) do
       lua = lsp_settings.lua,
       json = lsp_settings.json,
       yaml = lsp_settings.yaml,
+      python = lsp_settings.python,
     },
   })
   ::continue::
