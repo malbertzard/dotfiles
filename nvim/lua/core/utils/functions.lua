@@ -17,8 +17,10 @@ M.getOS = function()
     return "Darwin"
   elseif uname == "Linux" then
     return "Linux"
+  elseif package.config:sub(1, 1) == '\\' then
+    return "Windows"
   else
-    return
+    return "Unknown"
   end
 end
 
@@ -121,6 +123,29 @@ function M.on_attach(on_attach)
       on_attach(client, buffer)
     end,
   })
+end
+
+-- Define a list of languages for spell checking
+local spell_langs = { 'en', 'de' }
+
+-- Function to switch between spell languages
+function M.switch_spell_lang()
+  local current_lang = vim.api.nvim_get_option_value("spelllang", {})
+  -- Find the index of the current language in the list
+  local idx = vim.fn.index(spell_langs, current_lang)+1
+
+  -- Calculate the index for the next language
+  local next_idx = (idx + 1)
+  if (next_idx > #spell_langs) then
+    next_idx = next_idx - #spell_langs
+  end
+
+  -- Get the next language from the list
+  local next_lang = spell_langs[next_idx]
+
+  vim.api.nvim_set_option_value("spelllang", next_lang, {})
+
+  vim.api.nvim_out_write('Spell checking language switched to ' .. next_lang .. '\n')
 end
 
 return M

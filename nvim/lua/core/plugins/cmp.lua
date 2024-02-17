@@ -88,7 +88,7 @@ local M = {
         { name = "buffer",                 keyword_length = 5 },
         { name = "luasnip" },
         { name = "path" },
-        { name = "codeium" }
+        { name = "codeium" },
       },
     })
 

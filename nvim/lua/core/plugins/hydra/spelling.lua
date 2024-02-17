@@ -1,4 +1,5 @@
 local Hydra = require("hydra")
+local utils = require("core.utils.functions")
 
 local function cmd(command)
   return table.concat({ "<Cmd>", command, "<CR>" })
@@ -6,8 +7,8 @@ end
 
 local hint = [[
  _J_: next                 _K_: previous
- _l_: list suggestions     _f_: use first suggestion
- _a_: add word
+ _L_: list suggestions     _f_: use first suggestion
+ _A_: add word             _S_: switch spelllang
 
  ^
  _q_: Exit
@@ -37,9 +38,12 @@ Hydra({
   heads = {
     { "J", "]s" },
     { "K", "[s" },
-    { "a", "zg" },
-    { "l", cmd("Telescope spell_suggest") },
+    { "A", "zg" },
+    { "L", cmd("Telescope spell_suggest") },
+    { "S", function()
+      utils.switch_spell_lang()
+    end },
     { "f", "1z=" },
-    { "q", nil,                           { exit = true, nowait = true } },
+    { "q", nil,  { exit = true, nowait = true } },
   },
 })

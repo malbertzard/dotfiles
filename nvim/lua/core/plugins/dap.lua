@@ -9,7 +9,7 @@ local M = {
       "mfussenegger/nvim-dap-python",
       "leoluz/nvim-dap-go",
       "rcarriga/nvim-dap-ui",
-    },
+    }
   }
 }
 

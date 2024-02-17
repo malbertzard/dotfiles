@@ -56,11 +56,6 @@ local M = {
     }
   },
 
-  {
-    "echasnovski/mini.move",
-    version = false,
-    opts = {}
-  }
 }
 
 return M
