@@ -1,0 +1,131 @@
+[user]
+    email = malbertzard@gmail.com
+    name = Mathis Albertzard
+    signingKey = "~/.ssh/gh_ed25519"
+
+[alias]
+    ;
+    ; Reporting
+    ;
+    l = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+    last = log -1 HEAD --stat
+    st = status -sb
+
+    daily = log --since '1 day ago' --oneline --author "$(git config user.email)"
+    daily-all = log --since '1 day ago' --oneline
+
+    weekly = log --since '7 day ago' --oneline --author "$(git config user.email)"
+    weekly-all = log --since '7 day ago' --oneline
+
+    #shows the commits made on this branch that are not present on the other branch specified as an argument
+    branch-log = !git log --oneline --decorate --graph --first-parent --topo-order --no-merges $1..HEAD
+    #same as branch-log but includes merge commits, too
+    branch-full-log = !git log --oneline --decorate --graph --first-parent --topo-order $1..HEAD
+
+    ;
+    ; Checkout
+    ;
+    cl = checkout -
+    co = checkout
+    cob = checkout -b
+
+    a = add
+    ap = add -p
+
+    ;
+    ; Commiting
+    ;
+    c = commit --verbose
+    ca = commit -a --verbose
+    cm = commit -m
+    cam = commit -a -m
+    cAe = commit --amend --no-edit
+    cA = commit --amend --verbose
+
+    fpush = push --force-with-lease
+
+    ;
+    ; Diff stuff
+    ;
+    d = diff
+    dS = diff -C -C -C
+    ds = diff --stat
+    dc = diff --cached
+
+    ;
+    ; Merges
+    ;
+    # Merges local branch and deletes it
+    mgd = "!git merge $1 && git branch -d $1; #"
+
+    # Checkout pull request localy
+    pr = "!f() { git fetch -fu ${2:-origin} refs/pull/$1/head:pr/$1 && git checkout pr/$1; }; f"
+    pr-clean = "!default_branch=$(git symbolic-ref --short HEAD 2>/dev/null) && git checkout $default_branch && git for-each-ref refs/heads/pr/* --format='%(refname)' | while read ref ; do branch=${ref#refs/heads/} ; git branch -D $branch ; done"
+
+    ;
+    ; Worktree
+    ;
+    wa = worktree add
+    wl = worktree list
+    wr = worktree remove
+    wm = worktree move
+    # Convert repository to bare for worktrees
+    convert-to-bare = "!f() { \
+        if [ $# -eq 0 ]; then \
+        echo 'Usage: git convert-to-bare <directory>'; \
+        return 1; \
+        fi; \
+        cd $1; \
+        mv .git ../$1.git; \
+        cd ..; \
+        rm -fr $1; \
+        cd $1.git; \
+        git config --bool core.bare true; \
+        }; f"
+
+    ;
+    ; Etc
+    ;
+    # list branches sorted by last modified
+    b = !git for-each-ref --sort='-authordate' --format='%(authordate)%09%(objectname:short)%09%(refname)' refs/heads | sed -e 's-refs/heads/--'
+
+    # list aliases
+    la = !git config -l | grep alias | cut -c 7-
+
+    # Removes all local branches that doen't have a remote anymore
+    pl = !git remote prune origin && git branch -vv | grep ': entfernt]' | awk '{print $1}' | xargs -r git branch -D
+
+
+[init]
+    defaultBranch = main
+
+[rebase]
+    autosquash = true
+
+[credential "https://github.com"]
+    helper =
+    helper = !/usr/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+    helper =
+    helper = !/usr/bin/gh auth git-credential
+
+[branch]
+    sort = -committerdate
+
+[rerere]
+    enabled = true
+    autoUpdate = true
+
+[maintenance]
+    auto = true
+    strategy = incremental
+    repo = !ls ~/GitHub
+
+[gpg]
+    format = ssh
+
+[commit]
+    gpgsign = true
