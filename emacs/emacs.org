@@ -1,0 +1,1167 @@
+#+TITLE: Emacs Configuration
+* Villian Emacs :toc_3:
+  - [[#todo][TODO]]
+  - [[#required-stuff][Required Stuff]]
+    - [[#automatically-tangle][Automatically Tangle]]
+    - [[#performance-tweaks][Performance Tweaks]]
+    - [[#package-manager][Package Manager]]
+    - [[#better-gc][Better GC]]
+  - [[#settings-without-corresponding-packages][Settings without corresponding packages]]
+  - [[#configuration-for-built-in-packages][Configuration for built-in packages]]
+    - [[#treesitter][Treesitter]]
+    - [[#eldoc][Eldoc]]
+    - [[#tramp][Tramp]]
+    - [[#mouse-wheel-track-pad-scroll-speed][Mouse wheel (track-pad) scroll speed]]
+    - [[#show-matching-parentheses][Show matching parentheses]]
+    - [[#setting-up-some-frame-defaults][Setting up some frame defaults]]
+    - [[#ediff-tweaks][Ediff tweaks]]
+    - [[#auto-pairing-quotes-and-parentheses-etc][Auto-pairing quotes and parentheses etc.]]
+    - [[#clean-up-whitespace-on-save][Clean up whitespace on save]]
+    - [[#dired-tweaks][Dired tweaks]]
+    - [[#modernize-selection-behavior][Modernize selection behavior]]
+    - [[#disable-scroll-bar][Disable scroll-bar]]
+    - [[#file-related-tweaks][File-related tweaks]]
+    - [[#term][Term]]
+    - [[#automatically-refreshes-the-buffer-for-changes-outside-of-emacs][Automatically refreshes the buffer for changes outside of Emacs]]
+    - [[#dump-custom-set-variables-to-a-garbage-file-and-dont-load-it][Dump custom-set-variables to a garbage file and don’t load it]]
+    - [[#keybinds][Keybinds]]
+    - [[#org-mode-settings][Org Mode Settings]]
+  - [[#third-party-packages][Third-party packages]]
+    - [[#gui][GUI]]
+    - [[#evil][Evil]]
+    - [[#keybindings][Keybindings]]
+    - [[#completions][Completions]]
+    - [[#editing][Editing]]
+    - [[#project-management][Project Management]]
+    - [[#etc][ETC]]
+  - [[#lsp-and-language-modes][LSP and Language Modes]]
+    - [[#lsp-setup][LSP Setup]]
+    - [[#programming-langs][Programming Langs]]
+    - [[#markup-langs][Markup Langs]]
+
+** TODO
+- [X] Treesitter Objects
+- [ ] Embark?
+  - [ ] Open in split
+  - [ ] Open in vsplit
+- [ ] Check latex
+- [ ] DevOps
+  - [ ] Docker
+
+** Required Stuff
+*** Automatically Tangle
+First there is a property defined on the file:
+#+BEGIN_SRC :tangle no
+header-args :tangle yes
+#+END_SRC
+*** Performance Tweaks
+Adjust garbage collection and process output settings for improved performance on modern machines.
+#+BEGIN_SRC emacs-lisp
+  (setq file-name-handler-alist-original file-name-handler-alist)
+  (setq file-name-handler-alist nil)
+
+  (require 'package)
+  (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/"))
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+  (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/"))
+  (setq package-enable-at-startup nil)
+  (package-initialize)
+#+END_SRC
+
+#+RESULTS:
+
+*** Package Manager
+
+#+BEGIN_SRC emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+  (eval-and-compile
+    (setq use-package-always-ensure t))
+
+  (unless (package-installed-p 'vc-use-package)
+    (package-vc-install "https://github.com/slotThe/vc-use-package"))
+
+  (use-package no-littering)
+#+END_SRC
+
+#+RESULTS:
+
+*** Better GC
+
+#+BEGIN_SRC emacs-lisp
+  (use-package gcmh
+    :diminish gcmh-mode)
+  (gcmh-mode 1)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Settings without corresponding packages
+#+BEGIN_SRC emacs-lisp
+  (use-package emacs
+    :preface
+    (defvar malb/indent-width 4)
+    :config
+    (setq frame-title-format '("Villainous-Emacs")
+          ring-bell-function 'ignore
+          frame-resize-pixelwise t
+          default-directory "~/")
+
+    (tool-bar-mode -1)
+    (menu-bar-mode -1)
+
+    (setq-default truncate-lines t)
+
+    ;; better scrolling experience
+    (setq scroll-margin 10
+          scroll-conservatively 101 ; > 100
+          scroll-preserve-screen-position t
+          auto-window-vscroll nil)
+
+    ;; Always use spaces for indentation
+    (setq-default indent-tabs-mode nil
+                  tab-width malb/indent-width)
+
+    ;; Omit default startup screen
+    (setq inhibit-startup-screen t))
+
+  ;; Line numbers
+  (global-display-line-numbers-mode 1)
+  (setq display-line-numbers-type 'relative)
+  ;; Disable line numbers for some modes
+  (dolist (mode '(org-mode-hook
+                  term-mode-hook
+                  shell-mode-hook
+                  treemacs-mode-hook
+                  eshell-mode-hook))
+
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
+  (prefer-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  ;; backwards compatibility as default-buffer-file-coding-system
+  ;; is deprecated in 23.2.
+  (if (boundp 'buffer-file-coding-system)
+      (setq-default buffer-file-coding-system 'utf-8)
+    (setq default-buffer-file-coding-system 'utf-8))
+
+  ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
+  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+#+END_SRC
+
+#+RESULTS:
+| UTF8_STRING | COMPOUND_TEXT | TEXT | STRING |
+
+** Configuration for built-in packages
+*** Treesitter
+#+BEGIN_SRC emacs-lisp
+  (setq treesit-language-source-alist
+        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+          (cmake "https://github.com/uyha/tree-sitter-cmake")
+          (css "https://github.com/tree-sitter/tree-sitter-css")
+          (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+          (html "https://github.com/tree-sitter/tree-sitter-html")
+          (php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src")
+          (go "https://github.com/tree-sitter/tree-sitter-go")
+          (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+          (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+          (json "https://github.com/tree-sitter/tree-sitter-json")
+          (make "https://github.com/alemuller/tree-sitter-make")
+          (python "https://github.com/tree-sitter/tree-sitter-python")
+          (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+          (toml "https://github.com/tree-sitter/tree-sitter-toml")
+          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+  ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+
+  (setq major-mode-remap-alist
+        '((yaml-mode . yaml-ts-mode)
+          (bash-mode . bash-ts-mode)
+          (go-mode . go-ts-mode)
+          (typescript-mode . typescript-ts-mode)
+          (json-mode . json-ts-mode)
+          (php-mode . php-ts-mode)
+          (yaml-mode . yaml-ts-mode)
+          (css-mode . css-ts-mode)
+          (python-mode . python-ts-mode)))
+
+
+  (use-package tree-sitter
+    :config
+    (global-tree-sitter-mode)
+    (setq treesit-font-lock-level 5)
+    (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+  (use-package tree-sitter-langs
+    :after tree-sitter)
+
+  (global-tree-sitter-mode)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Eldoc
+#+BEGIN_SRC emacs-lisp
+  (setq eldoc-echo-area-use-multiline-p nil)
+#+END_SRC
+
+#+RESULTS:
+
+*** Tramp
+#+BEGIN_SRC emacs-lisp
+  (require 'tramp)
+  (add-to-list 'tramp-remote-path 'tramp-default-remote-path)
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+#+END_SRC
+
+#+RESULTS:
+| tramp-own-remote-path | tramp-default-remote-path | /bin | /usr/bin | /sbin | /usr/sbin | /usr/local/bin | /usr/local/sbin | /local/bin | /local/freeware/bin | /local/gnu/bin | /usr/freeware/bin | /usr/pkg/bin | /usr/contrib/bin | /opt/bin | /opt/sbin | /opt/local/bin |
+
+*** Mouse wheel (track-pad) scroll speed
+
+By default, the scrolling is way too fast to be precise and helpful, let’s tune it down a little bit.
+#+BEGIN_SRC emacs-lisp
+  (use-package mwheel
+    :ensure nil
+    :config (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))
+                  mouse-wheel-progressive-speed nil))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Show matching parentheses
+Reduce the highlight delay to instantly.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package paren
+    :ensure nil
+    :init (setq show-paren-delay 0)
+    :config (show-paren-mode +1))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Setting up some frame defaults
+Maximize the frame by default on start-up. Set the font
+
+#+BEGIN_SRC emacs-lisp
+  (use-package frame
+    :preface
+    (defun malb/set-default-font ()
+      (interactive)
+      (when (member "Consolas" (font-family-list))
+        (set-face-attribute 'default nil :family "Consolas"))
+      (set-face-attribute 'default nil
+                          :height 160
+                          :weight 'normal))
+    :ensure nil
+    :config
+    (setq initial-frame-alist '((fullscreen . maximized)))
+    (malb/set-default-font))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Ediff tweaks
+Enter ediff with side-by-side buffers to better compare the differences.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ediff
+    :ensure nil
+    :config
+    (setq ediff-window-setup-function #'ediff-setup-windows-plain)
+    (setq ediff-split-window-function #'split-window-horizontally))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Auto-pairing quotes and parentheses etc.
+Electric-pair-mode has improved quite a bit in recent Emacs versions. No longer need an extra package for this. It also takes care of the new-line-and-push-brace feature.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package elec-pair
+    :hook (prog-mode . electric-pair-mode))
+#+END_SRC
+
+#+RESULTS:
+| tempel-setup-capf | electric-pair-mode | editorconfig-major-mode-hook |
+
+*** Clean up whitespace on save
+#+BEGIN_SRC emacs-lisp
+  (use-package whitespace
+    :ensure nil
+    :hook (before-save . whitespace-cleanup))
+#+END_SRC
+
+#+RESULTS:
+| whitespace-cleanup |
+
+*** Dired tweaks
+Delete intermediate buffers when navigating through dired.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package dired
+    :after evil-collection
+    :ensure nil
+    :commands (dired dired-jump)
+    :custom
+    (setq delete-by-moving-to-trash t)
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-up-directory
+      "l" 'dired-find-file
+      dired-listing-switches "-agho --group-directories-first"))
+
+  (use-package dired-open
+    :commands (dired dired-jump)
+    :config
+    (setq dired-open-extensions '(("png" . "feh")
+                                  ("mkv" . "mpv"))))
+
+  (use-package dired-hide-dotfiles
+    :hook (dired-mode . dired-hide-dotfiles-mode)
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map "H" 'dired-hide-dotfiles-mode))
+#+END_SRC
+
+#+RESULTS:
+| dired-hide-dotfiles-mode |
+
+*** Modernize selection behavior
+Replace the active region just by typing text, just like modern editors.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package delsel
+    :ensure nil
+    :config (delete-selection-mode +1))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Disable scroll-bar
+#+BEGIN_SRC emacs-lisp
+  (use-package scroll-bar
+    :ensure nil
+    :config (scroll-bar-mode -1))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** File-related tweaks
+Don’t bother confirming killing processes and don’t let backup~ files scatter around.
+
+#+BEGIN_SRC emacs-lisp
+  (setq confirm-kill-processes nil
+        create-lockfiles nil
+        make-backup-files nil)
+#+END_SRC
+
+#+RESULTS:
+
+*** Term
+#+BEGIN_SRC emacs-lisp
+  (use-package term
+    :commands term
+    :config
+    ;; Change this to zsh, etc
+    (setq explicit-shell-file-name "bash"))
+#+END_SRC
+
+#+RESULTS:
+
+*** Automatically refreshes the buffer for changes outside of Emacs
+Auto refreshes every 2 seconds. Don’t forget to refresh the version control status as well.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package autorevert
+    :ensure nil
+    :config
+    (global-auto-revert-mode +1)
+    (setq auto-revert-interval 2
+          auto-revert-check-vc-info t
+          global-auto-revert-non-file-buffers t
+          auto-revert-verbose nil))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Dump custom-set-variables to a garbage file and don’t load it
+
+#+BEGIN_SRC emacs-lisp
+  (use-package cus-edit
+    :ensure nil
+    :config
+    (setq custom-file (concat user-emacs-directory "to-be-dumped.el")))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Keybinds
+**** Zooming in out
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-=") 'text-scale-increase)
+  (global-set-key (kbd "C-+") 'text-scale-increase)
+  (global-set-key (kbd "C--") 'text-scale-decrease)
+  (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
+  (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+#+END_SRC
+
+#+RESULTS:
+: text-scale-decrease
+
+*** Org Mode Settings
+
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure toc-org for table of contents in org mode.
+  (use-package toc-org
+    :init (add-hook 'org-mode-hook 'toc-org-enable))
+
+  ;; Customize org mode heading levels appearance.
+  (custom-set-faces
+   '(org-level-1 ((t (:inherit outline-1 :height 1.7))))
+   '(org-level-2 ((t (:inherit outline-2 :height 1.6))))
+   '(org-level-3 ((t (:inherit outline-3 :height 1.5))))
+   '(org-level-4 ((t (:inherit outline-4 :height 1.4))))
+   '(org-level-5 ((t (:inherit outline-5 :height 1.3))))
+   '(org-level-6 ((t (:inherit outline-5 :height 1.2))))
+   '(org-level-7 ((t (:inherit outline-5 :height 1.1)))))
+#+END_SRC
+
+#+RESULTS:
+
+**** Babel Code Execution
+#+BEGIN_SRC emacs-lisp
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '(
+     (python . t)
+     ;; Include other languages here...
+     ))
+
+  (setq org-confirm-babel-evaluate nil)
+#+END_SRC
+
+#+RESULTS:
+
+**** Denote Package Configuration
+
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure denote for note-taking and organization.
+  (use-package denote
+    :ensure t
+    :custom
+    (denote-known-keywords '("Project" "Area" "Resource" "Archive"))
+    (denote-directory (expand-file-name "~/denote/")))
+#+END_SRC
+
+** Third-party packages
+*** GUI
+**** Themes
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure doom-themes for a modern look.
+  (use-package doom-themes
+    :ensure t
+    :config
+    (setq doom-themes-enable-bold t
+          doom-themes-enable-italic t)
+    (load-theme 'doom-gruvbox t)
+    (doom-themes-org-config))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Which Key
+#+BEGIN_SRC emacs-lisp
+  ;; Configure which-key for keybinding discovery.
+  (use-package which-key
+    :diminish which-key-mode
+    :config
+    (which-key-mode)
+    (setq which-key-idle-delay 1))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+***** Icons
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-completion
+    :ensure t
+    :config
+    (all-the-icons-completion-mode)
+    (add-hook 'marginalia-mode-hook #'all-the-icons-completion-marginalia-setup))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Dashboard
+#+BEGIN_SRC emacs-lisp
+  (use-package dashboard
+    :config
+    (dashboard-setup-startup-hook)
+    (setq dashboard-startup-banner 'logo
+          dashboard-banner-logo-title "Villainous Emacs!"
+          dashboard-items nil
+          dashboard-set-footer nil))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Modeline
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure doom-modeline for a feature-rich mode line.
+  (use-package doom-modeline
+    :init (doom-modeline-mode 1)
+    :config
+    (setq doom-modeline-height 64
+          doom-modeline-percent-position nil
+          doom-modeline-position-line-format nil
+          doom-modeline-buffer-encoding nil
+          doom-modeline-position-column-format nil
+          doom-modeline-icon nil
+          doom-modeline-bar-width 5))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Git
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure magit for Git integration.
+  (use-package magit
+    :defer t)
+
+  (use-package git-gutter
+    :defer t)
+
+  (global-git-gutter-mode +1)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Org Bullets
+#+BEGIN_SRC emacs-lisp
+  (use-package org-bullets
+    :defer t
+    :hook (org-mode . org-bullets-mode)
+    :custom
+    (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+#+END_SRC
+
+#+RESULTS:
+| #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | malb/org-mode-visual-fill | org-bullets-mode | toc-org-enable | (lambda nil (display-line-numbers-mode 0)) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+
+**** Center Org Buffer
+#+BEGIN_SRC emacs-lisp
+  (defun malb/org-mode-visual-fill ()
+    (setq visual-fill-column-width 150
+          visual-fill-column-center-text t)
+    (visual-fill-column-mode 1))
+
+  (use-package visual-fill-column
+    :hook (org-mode . malb/org-mode-visual-fill))
+#+END_SRC
+
+#+RESULTS:
+| #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | malb/org-mode-visual-fill | org-bullets-mode | toc-org-enable | (lambda nil (display-line-numbers-mode 0)) | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+
+*** Evil
+
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure evil mode.
+  (use-package evil
+    :init
+    (setq evil-want-integration t
+          evil-undo-system 'undo-fu
+          evil-want-keybinding nil)
+    :config
+    (evil-mode 1)
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal)
+    :custom
+    (evil-want-C-u-scroll t))
+
+
+  (evil-define-key 'insert 'prog-mode-map (kbd "C-p") 'evil-paste-after-cursor-after)
+
+  (use-package evil-surround
+    :config
+    (global-evil-surround-mode 1))
+
+  (use-package evil-numbers
+    :config
+    (evil-define-key 'normal 'prog-mode-map (kbd "C-a") 'evil-numbers/inc-at-pt)
+    (evil-define-key 'normal 'prog-mode-map (kbd "C-x") 'evil-numbers/dec-at-pt))
+
+  ;; Install and configure evil-collection for additional evil keybindings.
+  (use-package evil-collection
+    :after evil
+    :config (evil-collection-init))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Evil Commentary
+Emulates tpope’s vim commentary package (Use gcc to comment out a line, gc to comment out the target of a motion (for example, gcap to comment out a paragraph), gc in visual mode to comment out the selection etc.)
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-commentary
+    :after evil
+    :diminish
+    :config (evil-commentary-mode +1))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-textobj-tree-sitter
+    :after tree-sitter evil
+    :config
+    (define-key evil-outer-text-objects-map "m" (evil-textobj-tree-sitter-get-textobj "import"
+                                                  '((python-mode . [(import_statement) @import])
+                                                    (go-mode . [(import_spec) @import])
+                                                    (rust-mode . [(use_declaration) @import]))))
+    (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
+    (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
+    (define-key evil-outer-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "class.outer"))
+    (define-key evil-inner-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "class.inner"))
+    (define-key evil-outer-text-objects-map "C" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
+    (define-key evil-inner-text-objects-map "C" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
+    (define-key evil-outer-text-objects-map "o" (evil-textobj-tree-sitter-get-textobj "loop.outer"))
+    (define-key evil-inner-text-objects-map "o" (evil-textobj-tree-sitter-get-textobj "loop.inner"))
+    (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj "conditional.outer"))
+    (define-key evil-inner-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj "conditional.inner"))
+    (define-key evil-inner-text-objects-map "r" (evil-textobj-tree-sitter-get-textobj "parameter.inner"))
+    (define-key evil-outer-text-objects-map "r" (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
+    (define-key evil-normal-state-map (kbd "]r") (lambda () (interactive) (meain/goto-and-recenter "parameter.inner")))
+    (define-key evil-normal-state-map (kbd "[r") (lambda () (interactive) (meain/goto-and-recenter "parameter.inner" t)))
+    (define-key evil-normal-state-map (kbd "]R") (lambda () (interactive) (meain/goto-and-recenter "parameter.inner" nil t)))
+    (define-key evil-normal-state-map (kbd "[R") (lambda () (interactive) (meain/goto-and-recenter "parameter.inner" t t)))
+    (define-key evil-normal-state-map (kbd "]a") (lambda () (interactive) (meain/goto-and-recenter "conditional.outer")))
+    (define-key evil-normal-state-map (kbd "[a") (lambda () (interactive) (meain/goto-and-recenter "conditional.outer" t)))
+    (define-key evil-normal-state-map (kbd "]A") (lambda () (interactive) (meain/goto-and-recenter "conditional.outer" nil t)))
+    (define-key evil-normal-state-map (kbd "[A") (lambda () (interactive) (meain/goto-and-recenter "conditional.outer" t t)))
+    (define-key evil-normal-state-map (kbd "]c") (lambda () (interactive) (meain/goto-and-recenter "class.outer")))
+    (define-key evil-normal-state-map (kbd "[c") (lambda () (interactive) (meain/goto-and-recenter "class.outer" t)))
+    (define-key evil-normal-state-map (kbd "]C") (lambda () (interactive) (meain/goto-and-recenter "class.outer" nil t)))
+    (define-key evil-normal-state-map (kbd "[C") (lambda () (interactive) (meain/goto-and-recenter "class.outer" t t)))
+    (define-key evil-normal-state-map (kbd "]f") (lambda () (interactive) (meain/goto-and-recenter "function.outer")))
+    (define-key evil-normal-state-map (kbd "[f") (lambda () (interactive) (meain/goto-and-recenter "function.outer" t)))
+    (define-key evil-normal-state-map (kbd "]F") (lambda () (interactive) (meain/goto-and-recenter "function.outer" nil t)))
+    (define-key evil-normal-state-map (kbd "[F") (lambda () (interactive) (meain/goto-and-recenter "function.outer" t t))))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Keybindings
+
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "M-x") #'execute-extended-command)
+
+  (use-package general
+    :config
+    (general-evil-setup)
+
+    ;; set up 'SPC' as the global leader key
+    (general-create-definer malb/leader-keys
+      :states '(normal insert visual emacs)
+      :keymaps 'override
+      :prefix "SPC" ;; set leader
+      :global-prefix "M-SPC") ;; access leader in insert mode
+
+    (malb/leader-keys
+      "." '(find-file :wk "Find file"))
+
+    (malb/leader-keys
+      "b" '(:ignore t :wk "All Buffers")
+      "b b" '(switch-to-buffer :wk "Switch to buffer")
+      "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+      "b C" '(clean-buffer-list :wk "Clean buffer list")
+      "b i" '(ibuffer :wk "Ibuffer")
+      "b k" '(kill-current-buffer :wk "Kill current buffer")
+      "b K" '(kill-some-buffers :wk "Kill multiple buffers")
+      "b n" '(next-buffer :wk "Next buffer")
+      "b p" '(previous-buffer :wk "Previous buffer")
+      "b r" '(revert-buffer :wk "Reload buffer")
+      "b R" '(rename-buffer :wk "Rename buffer")
+      "b s" '(basic-save-buffer :wk "Save buffer")
+      "b S" '(save-some-buffers :wk "Save multiple buffers"))
+
+    (malb/leader-keys
+      "d" '(:ignore t :wk "Dired")
+      "d d" '(dired :wk "Open dired")
+      "d j" '(dired-jump :wk "Dired jump to current")
+      "d w" '(wdired-change-to-wdired-mode :wk "Writable dired")
+      "d f" '(wdired-finish-edit :wk "Writable dired finish edit"))
+
+    (malb/leader-keys
+      "H" '(:ignore t :wk "Help")
+      "H d" '(devdocs-lookup :wk "DevDocs")
+      "H c" #'(helpful-command :wk "Command")
+      "H f" #'(helpful-function :wk "Function")
+      "H a" #'(helpful-at-point :wk "At point")
+      "H k" #'(helpful-key :wk "Key")
+      "H C" #'(helpful-callable :wk "Callable")
+      "H m" '(woman :wk "Man pages")
+      "H v" #'(helpful-variable :wk "Variable"))
+
+    (malb/leader-keys
+      :keymaps 'eglot-mode-map
+      "l" '(:ignore t :wk "LSP")
+      "l d" '(eglot-find-declaration :wk "Find Declaration")
+      "l i" '(eglot-find-implementation :wk "Find Implementation")
+      "l t" '(eglot-find-type-definition :wk "Find Type definition")
+      "l I" '(eglot-code-action-organize-imports :wk "Organize Imports")
+      "l a" '(eglot-code-actions :wk "Code Actions")
+      "l f" '(eglot-format-buffer :wk "Format Buffer")
+      "l r" '(eglot-rename  :wk "Rename"))
+
+    (malb/leader-keys
+      :keymaps 'prog-mode-map
+      "e" '(:ignore t :wk "Errors")
+      "e j" '(flycheck-next-error :wk "Next Error")
+      "e k" '(flycheck-previous-error :wk "Next Error")
+      "e l" '(flycheck-list-errors :wk "List Errors in Buffer")
+      "e e" '(flycheck-explain-error-at-point :wk "Explain Error")
+      "e d" '(flycheck-display-error-at-point :wk "Disply Error"))
+
+    (malb/leader-keys
+      "h" '(:ignore t :wk "Harpoon")
+      "1" '(harpoon-go-to-1 :wk "1")
+      "2" '(harpoon-go-to-2 :wk "2")
+      "3" '(harpoon-go-to-3 :wk "3")
+      "4" '(harpoon-go-to-4 :wk "4")
+      "5" '(harpoon-go-to-5 :wk "5")
+      "6" '(harpoon-go-to-6 :wk "6")
+      "7" '(harpoon-go-to-7 :wk "7")
+      "8" '(harpoon-go-to-8 :wk "8")
+      "9" '(harpoon-go-to-9 :wk "9")
+      "h a" '(harpoon-add-file :wk "Add file")
+      "h t" '(harpoon-toggle-file :wk "Toggle file")
+      "h c" '(harpoon-clear :wk "Clear")
+      "h h" '(harpoon-toggle-quick-menu :wk "Menu"))
+
+
+    (malb/leader-keys
+      "N" '(:ignore t :wk "Notes")
+      "N n" '(denote-open-or-create :wk "Open or Create")
+      "N c" '(denote-create-note :wk "New Note")
+      "N r" '(denote-rename-file :wk "Rename Note")
+      "N l" '(denote-link  :wk "Link Note"))
+
+    (malb/leader-keys
+      "E" '(:ignore t :wk "Ediff/Eshell/Eval/EWW")
+      "E b" '(eval-buffer :wk "Evaluate elisp in buffer")
+      "E d" '(eval-defun :wk "Evaluate defun containing or after point")
+      "E e" '(eval-expression :wk "Evaluate and elisp expression")
+      "E f" '(ediff-files :wk "Run ediff on a pair of files")
+      "E F" '(ediff-files3 :wk "Run ediff on three files")
+      "E h" '(counsel-esh-history :which-key "Eshell history")
+      "E l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+      "E r" '(eval-region :wk "Evaluate elisp in region")
+      "E R" '(eww-reload :which-key "Reload current page in EWW")
+      "E s" '(eshell :which-key "Eshell")
+      "E w" '(eww :which-key "EWW emacs web wowser"))
+
+    (malb/leader-keys
+      "g" '(:ignore t :wk "Git")
+      "g /" '(magit-displatch :wk "Magit dispatch")
+      "g ." '(magit-file-displatch :wk "Magit file dispatch")
+      "g b" '(magit-branch-checkout :wk "Switch branch")
+      "g c" '(:ignore t :wk "Create")
+      "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+      "g c c" '(magit-commit-create :wk "Create commit")
+      "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+      "g C" '(magit-clone :wk "Clone repo")
+      "g f" '(:ignore t :wk "Find")
+      "g f c" '(magit-show-commit :wk "Show commit")
+      "g f f" '(magit-find-file :wk "Magit find file")
+      "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+      "g F" '(magit-fetch :wk "Git fetch")
+      "g g" '(magit-status :wk "Magit status")
+      "g i" '(magit-init :wk "Initialize git repo")
+      "g l" '(magit-log-buffer-file :wk "Magit buffer log")
+      "g r" '(vc-revert :wk "Git revert file")
+      "g s" '(magit-stage-file :wk "Git stage file")
+      "g t" '(git-timemachine :wk "Git time machine")
+      "g u" '(magit-stage-file :wk "Git unstage file"))
+
+    (malb/leader-keys
+      "O" '(:ignore t :wk "Open")
+      "O d" '(dashboard-open :wk "Dashboard")
+      "O f" '(make-frame :wk "Open buffer in new frame"))
+
+    (malb/leader-keys
+      "p" '(projectile-command-map :wk "Projectile"))
+
+    (malb/leader-keys
+      "s" '(:ignore t :wk "Search"))
+
+    (malb/leader-keys
+      "t" '(:ignore t :wk "Toggle")
+      "t e" '(eshell-toggle :wk "Toggle eshell")
+      "t f" '(flycheck-mode :wk "Toggle flycheck")
+      "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
+      "t o" '(org-mode :wk "Toggle org mode")
+      "t r" '(rainbow-mode :wk "Toggle rainbow mode")
+      "t t" '(visual-line-mode :wk "Toggle truncated lines"))
+    )
+#+END_SRC
+
+#+RESULTS:
+: t
+
+*** Completions
+**** Vertico
+#+BEGIN_SRC emacs-lisp
+  ;; Configure vertico for a vertical completion interface.
+  (use-package vertico
+    :bind (:map vertico-map
+                ("<tab>" . vertico-insert)
+                ("C-j" . vertico-next)
+                ("C-K" . vertico-previous))
+    :custom
+    (vertico-cycle t)
+    (vertico-count 13)                    ; Number of candidates to display
+    (vertico-resize t)
+    (read-buffer-completion-ignore-case t)
+    (read-file-name-completion-ignore-case t)
+    (completion-styles '(basic substring partial-completion flex))
+    :init
+    (vertico-mode))
+#+END_SRC
+
+#+RESULTS:
+: vertico-previous
+
+**** Corfu
+#+BEGIN_SRC emacs-lisp
+  ;; Configure corfu for company-mode completion.
+  (use-package corfu
+    :bind (:map corfu-map
+                ("<tab>" . corfu-insert)
+                ("C-q" . corfu-quit)
+                ("C-j" . corfu-next)
+                ("C-K" . corfu-previous)
+                ("C-n" . corfu-popupinfo-scroll-down)
+                ("C-p" . corfu-popupinfo-scroll-up))
+    :init (global-corfu-mode) (corfu-popupinfo-mode)
+    :custom
+    (corfu-auto t)
+    (corfu-auto-prefix 2)
+    (corfu-auto-delay 0.15)
+
+    (corfu-min-width 60)
+    (corfu-max-width corfu-min-width)
+    (corfu-count 14)
+    (corfu-scroll-margin 4)
+    (corfu-cycle nil)
+
+    (corfu-quit-at-boundary nil)
+    (corfu-preselect-first t)        ; Preselect first candidate?
+
+    (completion-styles '(orderless basic)))
+
+  (defun corfu-enable-always-in-minibuffer ()
+    (unless (or (bound-and-true-p mct--active) ; Useful if I ever use MCT
+                (bound-and-true-p vertico--input))
+      (setq-local corfu-auto nil)       ; Ensure auto completion is disabled
+      (corfu-mode 1)))
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
+#+END_SRC
+
+#+RESULTS:
+| marginalia--minibuffer-setup | rfn-eshadow-setup-minibuffer | minibuffer-error-initialize | minibuffer-history-isearch-setup | minibuffer-history-initialize | corfu-enable-always-in-minibuffer |
+
+***** Kind Icons
+
+#+BEGIN_SRC emacs-lisp
+  (use-package kind-icon
+    :after corfu
+    :custom
+    (kind-icon-use-icons t)
+    (kind-icon-default-face 'corfu-default) ; Have background color be the same as `corfu' face background
+    (kind-icon-blend-background nil)  ; Use midpoint color between foreground and background colors ("blended")?
+    (kind-icon-blend-frac 0.08)
+    :config
+    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Marginalia
+#+BEGIN_SRC emacs-lisp
+  (use-package marginalia
+    :custom
+    (marginalia-max-relative-age 0)
+    (marginalia-align 'right)
+    :init
+    (marginalia-mode))
+
+  (use-package all-the-icons-completion
+    :after (marginalia all-the-icons)
+    :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+    :init
+    (all-the-icons-completion-mode))
+#+END_SRC
+
+#+RESULTS:
+| all-the-icons-completion-marginalia-setup |
+
+***** Orderless
+#+BEGIN_SRC emacs-lisp
+  ;; Configure orderless for flexible completion matching.
+  (use-package orderless
+    :init
+    (setq completion-styles '(orderless basic)
+          completion-category-defaults nil
+          completion-category-overrides '((file (styles partial-completion)))))
+#+END_SRC
+
+#+RESULTS:
+
+**** Templates
+#+BEGIN_SRC emacs-lisp
+  ;; Configure tempel for templating support.
+  (use-package tempel
+    :defer t
+    :bind (("M-." . tempel-complete))
+    :init
+    ;; Set up tempel for different modes.
+    (defun tempel-setup-capf ()
+      (setq-local completion-at-point-functions
+                  (cons #'tempel-expand
+                        completion-at-point-functions)))
+    (add-hook 'conf-mode-hook 'tempel-setup-capf)
+    (add-hook 'prog-mode-hook 'tempel-setup-capf)
+    (add-hook 'text-mode-hook 'tempel-setup-capf))
+
+  ;; Install tempel-collection for additional templates.
+  (use-package tempel-collection
+    :after tempel)
+#+END_SRC
+
+#+RESULTS:
+
+*** Editing
+
+**** Editor Conf
+#+BEGIN_SRC emacs-lisp
+  (use-package editorconfig
+    :diminish editorconfig-mode
+    :config
+    (editorconfig-mode 1))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Drag Stuff
+
+#+BEGIN_SRC emacs-lisp
+  (use-package drag-stuff
+    :config
+    (evil-define-key 'normal 'prog-mode-map (kbd "C-j") 'drag-stuff-down)
+    (evil-define-key 'normal 'prog-mode-map (kbd "C-k") 'drag-stuff-up))
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Harpoon
+
+#+BEGIN_SRC emacs-lisp
+  (use-package harpoon)
+#+END_SRC
+
+#+RESULTS:
+
+;; And the vanilla commands
+**** Undo Tree
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-fu)
+  (use-package undo-fu-session
+    :config
+    (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
+
+  (undo-fu-session-global-mode)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+**** Error
+#+BEGIN_SRC emacs-lisp
+  (use-package flycheck)
+
+  (use-package flycheck-eglot
+    :after (flycheck eglot)
+    :config
+    (global-flycheck-eglot-mode 1))
+#+END_SRC
+
+#+RESULTS:
+
+*** Project Management
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure projectile for project management.
+  (use-package projectile
+    :diminish projectile-mode
+    :init
+    (projectile-mode +1))
+  (setq projectile-indexing-method 'alien)
+  (setq projectile-sort-order 'recently-active)
+  (setq projectile-enable-caching t)
+  (setq projectile-project-search-path '(("~/GitHub" . 2) ("C:/Users/Albertzard/Documents/Github". 2)))
+#+END_SRC
+
+#+RESULTS:
+: ((~/GitHub . 2) (C:/Users/Albertzard/Documents/Github . 2))
+
+*** ETC
+
+**** Verb
+#+BEGIN_SRC emacs-lisp
+  (use-package verb)
+  (with-eval-after-load 'org
+    (define-key org-mode-map (kbd "C-c C-r") verb-command-map))
+#+END_SRC
+**** Diminish
+#+BEGIN_SRC emacs-lisp
+  (use-package diminish)
+  (diminish 'evil-collection-unimpaired-mode)
+#+END_SRC
+
+**** Eldoc
+#+BEGIN_SRC emacs-lisp
+  (use-package eldoc-box
+    :config
+    (setq eldoc-box-cleanup-interval 3))
+#+END_SRC
+
+**** Helpful
+#+BEGIN_SRC emacs-lisp
+  (use-package helpful)
+#+END_SRC
+**** Dev Docs
+#+begin_src emacs-lisp
+  (use-package devdocs
+    :defer t)
+#+end_src
+**** Online Pasting
+
+#+BEGIN_SRC emacs-lisp
+  (use-package 0x0
+    :defer t)
+#+END_SRC
+** LSP and Language Modes
+*** LSP Setup
+#+BEGIN_SRC emacs-lisp
+  (use-package eglot
+    :config
+    (evil-define-key 'normal 'eglot-mode-map
+      "K" 'eldoc-box-help-at-point)
+    (add-hook 'python-mode-hook 'eglot-ensure)
+    (add-hook 'php-mode-hook 'eglot-ensure)
+    (add-hook 'go-mode-hook 'eglot-ensure)
+    :custom
+    (eglot-autoshutdown t)
+    (fset #'jsonrpc--log-event #'ignore)
+    (eglot-events-buffer-size 0)
+    (eglot-sync-connect nil)
+    (eglot-extend-to-xref nil))
+#+END_SRC
+*** Programming Langs
+**** Golang
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure go-mode for Go programming.
+  (use-package go-mode
+    :defer t)
+#+END_SRC
+
+**** Lua
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure lua-mode for Lua programming.
+  (use-package lua-mode
+    :defer t)
+#+END_SRC
+
+**** Python
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package lsp-pyright
+  ;;   :hook (python-mode . (lambda ()
+  ;;                          (require 'lsp-pyright)
+  ;;                          (lsp))))  ; or lsp-deferred
+
+  (use-package pyvenv
+    :defer t)
+#+END_SRC
+
+**** Php
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure php-mode for PHP programming.
+  (use-package php-mode
+    :defer t)
+#+END_SRC
+
+**** Web Dev
+#+BEGIN_SRC emacs-lisp
+  (use-package typescript-mode
+    :after tree-sitter
+    :config
+    (define-derived-mode typescriptreact-mode typescript-mode
+      "TypeScript TSX")
+
+    ;; use our derived mode for tsx files
+    (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+    (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)))
+#+END_SRC
+
+*** Markup Langs
+**** Markdown
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure markdown-mode for Markdown editing.
+  (use-package markdown-mode
+    :defer t
+    :hook ((markdown-mode . visual-line-mode)
+           (markdown-mode . flyspell-mode)))
+  ;; :init
+  ;; (setq markdown-command "multimarkdown"))
+
+  (use-package markdown-toc
+    :defer t)
+
+#+END_SRC
+
+#+RESULTS:
+
+**** Yaml
+#+BEGIN_SRC emacs-lisp
+  ;; Install and configure yaml-mode for YAML editing.
+  (use-package yaml-mode
+    :defer t)
+
+#+END_SRC
