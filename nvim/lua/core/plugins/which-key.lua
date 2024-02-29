@@ -118,14 +118,15 @@ local M = {
         },
       },
 
-      b = { name = "Buffers" },
+      b = { name = "+Buffers" },
+      H = { name = "+Help" },
       T = { name = "+Toggles" },
-      d = { name = "+DAP" },
       F = { name = "+Filetype" },
+      l = { "+LSP" },
+      lw = { "+Workspaces" },
 
       z = { "Spelling" },
     }, { prefix = "<leader>", mode = "n", {} })
-
   end,
 }
 

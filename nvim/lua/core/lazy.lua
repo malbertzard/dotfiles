@@ -17,7 +17,7 @@ vim.keymap.set({ "n", "v" }, "<Space>", "<Nop>", { silent = true })
 vim.g.mapleader = " "
 
 require("lazy").setup("core.plugins", {
-  -- defaults = { lazy = true },
+   -- defaults = { lazy = true },
   install = {
     -- install missing plugins on startup. This doesn't increase startup time.
     missing = true,

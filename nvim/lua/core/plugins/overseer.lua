@@ -2,12 +2,12 @@ local M = {
   'stevearc/overseer.nvim',
   opts = {},
   keys = {
-    { "<leader>o", "", desc = "+Overseer" },
-    { "<leader>om", "<cmd>Make<cr>", desc = "Make" },
-    { "<leader>or", "<cmd>OverseerRun<cr>", desc = "Run" },
-    { "<leader>oi", "<cmd>OverseerInfo<cr>", desc = "Info" },
-    { "<leader>ot", "<cmd>OverseerToggle<cr>", desc = "Toggle" },
-    { "<leader>oq", "<cmd>OverseerQuickAction<cr>", desc = "Quick Action" },
+    { "<leader>o",  "",                                desc = "+Overseer" },
+    { "<leader>om", "<cmd>Make<cr>",                   desc = "Make" },
+    { "<leader>or", "<cmd>OverseerRun<cr>",            desc = "Run" },
+    { "<leader>oi", "<cmd>OverseerInfo<cr>",           desc = "Info" },
+    { "<leader>ot", "<cmd>OverseerToggle! bottom<cr>", desc = "Toggle" },
+    { "<leader>oq", "<cmd>OverseerQuickAction<cr>",    desc = "Quick Action" },
   }
 }
 

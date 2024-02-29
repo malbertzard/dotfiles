@@ -2,7 +2,6 @@ local M = {
   "anuvyklack/hydra.nvim",
   lazy = true,
   keys = {
-    "<leader>d",
     "<leader>z",
     "<leader>gM"
   },

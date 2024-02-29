@@ -5,7 +5,6 @@ local M = {}
 M.brightness = "dark"
 M.theme = "gruvbox"
 M.enable_noice = false
-M.enable_dap = false
 
 -- random or see alpha/headers
 M.alpha_header = "octopus"
@@ -35,6 +34,7 @@ M.treesitter_ensure_installed = {
   "regex",
   "query",
   "vim",
+  "http",
 
   "cmake",
   "dockerfile",
@@ -83,10 +83,6 @@ M.tools = {
   -- Formatters
   "flake8",
   "rustywind",
-
-  -- Debugger
-  "delve",
-  "php-debug-adapter",
 }
 
 -- enable greping in hidden files

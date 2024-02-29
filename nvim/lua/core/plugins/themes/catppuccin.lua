@@ -51,20 +51,6 @@ catppuccin.setup({
     gitgutter = true,
     gitsigns = true,
     telescope = true,
-    nvimtree = {
-      enabled = false,
-      show_root = true,
-      transparent_panel = false,
-    },
-    dap = {
-      enabled = true,
-      enable_ui = true, -- enable nvim-dap-ui
-    },
-    neotree = {
-      enabled = true,
-      show_root = true,
-      transparent_panel = false,
-    },
     which_key = true,
     indent_blankline = {
       enabled = true,
