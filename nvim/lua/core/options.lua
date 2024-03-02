@@ -55,5 +55,18 @@ vim.opt.wildignorecase = true          -- When set case is ignored when completi
 vim.opt.wildmode = "longest:full,full" -- Command-line completion mode
 vim.opt.winminwidth = 5                -- minimum window width
 vim.opt.mouse = "a"                    -- allow the mouse to be used in neovim
-
 vim.opt.spelllang = 'de'
+
+
+-- Netrw
+vim.g.netrw_keepdir = 0
+vim.g.netrw_winsize = 30
+vim.g.netrw_banner = 0
+vim.g.netrw_sort_sequence = [[[\/]$,*]]
+vim.g.netrw_sizestyle = "H"
+vim.g.netrw_liststyle = 3
+vim.g.netrw_list_hide = vim.fn["netrw_gitignore#Hide"]()
+vim.g.netrw_localcopydircmd = "cp -r"
+vim.g.netrw_localmkdir = "mkdir -p"
+vim.g.netrw_localrmdir = "rm -r"
+vim.cmd("hi! link netrwMarkFile Search")

@@ -8,6 +8,10 @@ vim.keymap.set("v", "K", ":m '>-2<CR>gv=gv")
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 
+-- File Tree
+vim.keymap.set("n", "<leader>fE", ":Lexplore<cr>")
+vim.keymap.set("n", "<leader>fe", ":Lexplore %:p:h<cr>")
+
 vim.keymap.set("n", "q:", "")
 
 -- Better paste
