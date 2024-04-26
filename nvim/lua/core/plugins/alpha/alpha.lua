@@ -10,10 +10,9 @@ local dashboard = require("alpha.themes.dashboard")
 local buttons = {
   type = "group",
   val = {
-    dashboard.button("b", "  File Browser", ":Telescope file_browser grouped=true <CR>"),
     dashboard.button("r", " " .. " Search Git Repos", ":Telescope repo list theme=ivy<CR>"),
     dashboard.button("p", "  Search Projects", ":Telescope projects theme=ivy<CR>"),
-    -- dashboard.button("R", " " .. " Repo Config", ":e ~/.config/rw/config.yaml <CR>"),
+    dashboard.button("R", " " .. " Repo Config", ":e ~/.config/rw/config.yaml <CR>"),
     dashboard.button("c", " " .. " Config", ":e $MYVIMRC <CR>"),
     dashboard.button("l", "💤 Lazy", ":Lazy<CR>"),
     dashboard.button("q", "  Quit", ":qa<CR>"),
@@ -37,7 +36,7 @@ local header = {
 
 local footer = {
   type = "text",
-  val = "“Simplicity, carried to the extreme, becomes elegance.”",
+  val = "“Simplicity, carried to the extreme, becomes elegance.”\n\n",
   opts = { hl = "SpecialComment", position = "center" },
 }
 

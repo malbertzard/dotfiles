@@ -7,6 +7,7 @@ local M = {
     { "<leader>or", "<cmd>OverseerRun<cr>",            desc = "Run" },
     { "<leader>oi", "<cmd>OverseerInfo<cr>",           desc = "Info" },
     { "<leader>ot", "<cmd>OverseerToggle! bottom<cr>", desc = "Toggle" },
+    { "<leader>oo", "<cmd>OverseerOpen<cr>",           desc = "Open" },
     { "<leader>oq", "<cmd>OverseerQuickAction<cr>",    desc = "Quick Action" },
   }
 }

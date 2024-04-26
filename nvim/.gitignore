@@ -1,5 +1,5 @@
 plugin/
 packer_compiled.lua
 .envrc
-spell/
+spell/*.spl
 .luarc.json

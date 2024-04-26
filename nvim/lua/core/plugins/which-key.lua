@@ -84,7 +84,6 @@ local M = {
     wk.register({
       m = {
         name = "Misc",
-        s = { "<cmd>source ~/.config/nvim/snippets/*<cr>", "Reload snippets" },
         a = { "<cmd>Alpha<cr>", "Alpha" },
         l = { "<cmd>Lazy<cr>", "Lazy" },
       },
@@ -120,7 +119,7 @@ local M = {
 
       b = { name = "+Buffers" },
       H = { name = "+Help" },
-      T = { name = "+Toggles" },
+      T = { name = "+Tests" },
       F = { name = "+Filetype" },
       l = { "+LSP" },
       lw = { "+Workspaces" },

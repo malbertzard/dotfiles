@@ -28,7 +28,7 @@ local M = {
         },
       },
       lualine_x = { "encoding", "fileformat", "filetype" },
-      lualine_y = { "progress" },
+      lualine_y = {},
       lualine_z = { "location" },
     },
     tabline = {

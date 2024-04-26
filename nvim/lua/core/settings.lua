@@ -34,6 +34,7 @@ M.treesitter_ensure_installed = {
   "regex",
   "query",
   "vim",
+  "markdown_inline",
   "http",
 
   "cmake",
@@ -41,11 +42,13 @@ M.treesitter_ensure_installed = {
 
   "css",
   "html",
+  "twig",
+
   "json",
   "toml",
   "yaml",
+
   "markdown",
-  "markdown_inline",
   "latex",
 }
 
