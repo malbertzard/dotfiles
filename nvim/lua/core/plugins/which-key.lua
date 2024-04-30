@@ -87,7 +87,7 @@ local M = {
         a = { "<cmd>Alpha<cr>", "Alpha" },
         l = { "<cmd>Lazy<cr>", "Lazy" },
       },
-      q = {
+      Q = {
         name = "+Quickfix",
         j = { "<cmd>cnext<cr>", "Next Quickfix Item" },
         k = { "<cmd>cprevious<cr>", "Previous Quickfix Item" },
@@ -117,6 +117,7 @@ local M = {
         },
       },
 
+      a = { name = "+Annotation" },
       b = { name = "+Buffers" },
       H = { name = "+Help" },
       T = { name = "+Tests" },
