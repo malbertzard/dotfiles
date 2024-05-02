@@ -11,7 +11,6 @@ local M = {
   },
   opts = {
     options = {
-     theme = settings.theme,
       component_separators = { left = '', right = '' },
       section_separators = { left = '', right = '' },
 

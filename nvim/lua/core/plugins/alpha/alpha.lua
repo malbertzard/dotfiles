@@ -10,12 +10,12 @@ local dashboard = require("alpha.themes.dashboard")
 local buttons = {
   type = "group",
   val = {
-    dashboard.button("r", " " .. " Search Git Repos", ":Telescope repo list theme=ivy<CR>"),
+    dashboard.button("r", " " .. " Search Git Repos", ":Telescope repo list theme=ivy<CR>"),
     dashboard.button("p", "  Search Projects", ":Telescope projects theme=ivy<CR>"),
     dashboard.button("R", " " .. " Repo Config", ":e ~/.config/rw/config.yaml <CR>"),
     dashboard.button("c", " " .. " Config", ":e $MYVIMRC <CR>"),
     dashboard.button("l", "💤 Lazy", ":Lazy<CR>"),
-    dashboard.button("q", "  Quit", ":qa<CR>"),
+    dashboard.button("q", "󰩈  Quit", ":qa<CR>"),
   },
   opts = {
     spacing = 1
