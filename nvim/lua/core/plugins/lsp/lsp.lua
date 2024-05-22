@@ -16,7 +16,6 @@ vim.diagnostic.config({
     focusable = false,
     style = "minimal",
     border = "none",
-    source = "always",
     header = "",
     prefix = "",
   },
@@ -27,9 +26,9 @@ vim.diagnostic.config({
 })
 
 ---- sign column
-local signs = { Error = "", Warn = "", Hint = "", Info = "" }
+local icons = require("core.utils.icons")
 
-for type, icon in pairs(signs) do
+for type, icon in pairs(icons.diagnostics) do
   local hl = "DiagnosticSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = '' })
 end
@@ -42,7 +41,6 @@ for _, lsp in ipairs(settings.lsp_servers) do
     capabilities = capabilities,
     flags = { debounce_text_changes = 150 },
     settings = {
-      lua = lsp_settings.lua,
       json = lsp_settings.json,
       yaml = lsp_settings.yaml,
       python = lsp_settings.python,

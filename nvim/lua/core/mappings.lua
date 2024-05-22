@@ -59,7 +59,7 @@ vim.keymap.set(
 
 
 -- Quickfix List
-vim.keymap.set("n", "<leader>qC",
+vim.keymap.set("n", "<leader>QC",
   function()
     vim.fn.setqflist({})
   end,

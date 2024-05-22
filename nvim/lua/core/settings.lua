@@ -5,6 +5,7 @@ local M = {}
 M.brightness = "dark"
 M.theme = "gruvbox_16"
 M.enable_noice = false
+M.enable_db = false
 
 -- random or see alpha/headers
 M.alpha_header = "octopus"

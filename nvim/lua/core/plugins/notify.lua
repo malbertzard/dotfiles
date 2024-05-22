@@ -1,4 +1,4 @@
-return {
+local M = {
     "rcarriga/nvim-notify",
     enabled = true,
     keys = {
@@ -21,3 +21,5 @@ return {
         end,
     },
 }
+
+return M

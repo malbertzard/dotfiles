@@ -43,8 +43,10 @@ return {
     Error = " ",
     Hint = " ",
     Information = " ",
+    Info = " ",
     Question = " ",
     Warning = " ",
+    Warn = " ",
   },
   git = {
     Add = " ",

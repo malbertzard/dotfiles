@@ -92,7 +92,6 @@ local M = {
         j = { "<cmd>cnext<cr>", "Next Quickfix Item" },
         k = { "<cmd>cprevious<cr>", "Previous Quickfix Item" },
         q = { "<cmd>lua require('core.utils.functions').toggle_qf()<cr>", "Toggle quickfix list" },
-        t = { "<cmd>TodoQuickFix<cr>", "Show TODOs" },
       },
       t = {
         name = "+Term",

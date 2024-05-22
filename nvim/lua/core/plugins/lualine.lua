@@ -1,5 +1,3 @@
-local settings = require("core.settings")
-
 local M = {
   "nvim-lualine/lualine.nvim",
   event = "VeryLazy",

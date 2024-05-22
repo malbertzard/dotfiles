@@ -10,6 +10,15 @@ api.nvim_create_autocmd("BufWritePre", {
 -- Turn off line numbers in terminal
 vim.cmd "autocmd TermOpen * setlocal nonumber norelativenumber"
 
+-- Auto command to start terminal buffers in insert mode
+vim.api.nvim_create_augroup("TerminalInsertMode", { clear = true })
+
+vim.api.nvim_create_autocmd("TermOpen", {
+  pattern = "*",
+  command = "startinsert",
+  group = "TerminalInsertMode",
+})
+
 -- don't auto comment new line
 api.nvim_create_autocmd("BufEnter", { command = [[set formatoptions-=cro]] })
 
@@ -56,6 +65,7 @@ api.nvim_create_autocmd("BufReadPost", {
 api.nvim_create_autocmd("FileType", {
   pattern = {
     "dap-float",
+    "harpoon-menu",
     "fugitive",
     "help",
     "man",
@@ -108,12 +118,12 @@ api.nvim_create_autocmd("User", {
 })
 
 api.nvim_create_autocmd('BufWritePost', {
-	desc = 'build tex file to pdf',
+  desc = 'build tex file to pdf',
 
-	group = vim.api.nvim_create_augroup('user', { clear = true }),
-	callback = function (opts)
-		if vim.bo[opts.buf].filetype == 'tex' then
-			vim.cmd 'TexlabBuild'
-		end
-	end,
+  group = vim.api.nvim_create_augroup('user', { clear = true }),
+  callback = function(opts)
+    if vim.bo[opts.buf].filetype == 'tex' then
+      vim.cmd 'TexlabBuild'
+    end
+  end,
 })
