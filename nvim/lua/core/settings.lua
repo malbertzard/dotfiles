@@ -76,7 +76,7 @@ M.lsp_servers = {
   "texlab",
 
   -- CSS Stuff
-  "tailwindcss",
+  -- "tailwindcss",
   "cssls",
 }
 
@@ -85,7 +85,7 @@ M.tools = {
   "glow",
 
   -- Formatters
-  "flake8",
+  -- "flake8",
   "rustywind",
 }
 
