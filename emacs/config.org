@@ -202,6 +202,12 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
     (use-package general
       :config
       (general-evil-setup)
+      (general-define-key
+       :states 'insert
+       "C-v" 'yank)
+      (general-define-key
+       :keymaps 'minibuffer-mode-map
+       "C-v" 'yank)
       ;; Set up 'SPC' as the leader key
       (general-create-definer start/leader-keys
         :states '(normal insert visual motion emacs)
@@ -232,122 +238,123 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "E r" '(eval-region :wk "Evaluate elisp in region")
         "E R" '(eww-reload :which-key "Reload current page in EWW")
         "E s" '(eshell :which-key "Eshell")
-        "E w" '(eww :which-key "EWW emacs web wowser"))
+        "E W" '(eww-readable :which-key "Wreadble")
+      "E w" '(eww :which-key "EWW emacs web wowser"))
 
-      (start/leader-keys
-        "b" '(:ignore t :wk "Buffers")
-        "b b" '(switch-to-buffer :wk "Switch to buffer")
-        "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
-        "b C" '(clean-buffer-list :wk "Clean buffer list")
-        "b i" '(ibuffer :wk "Ibuffer")
-        "b k" '(kill-current-buffer :wk "Kill current buffer")
-        "b K" '(kill-some-buffers :wk "Kill multiple buffers")
-        "b O" '(crux-kill-other-buffers :wk "Kill all other buffers")
-        "b n" '(next-buffer :wk "Next buffer")
-        "b p" '(previous-buffer :wk "Previous buffer")
-        "b s" '(crux-create-scratch-buffer :wk "Scratch buffer")
-        "b r" '(revert-buffer :wk "Reload buffer")
-        "b R" '(rename-buffer :wk "Rename buffer"))
+    (start/leader-keys
+      "b" '(:ignore t :wk "Buffers")
+      "b b" '(switch-to-buffer :wk "Switch to buffer")
+      "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+      "b C" '(clean-buffer-list :wk "Clean buffer list")
+      "b i" '(ibuffer :wk "Ibuffer")
+      "b k" '(kill-current-buffer :wk "Kill current buffer")
+      "b K" '(kill-some-buffers :wk "Kill multiple buffers")
+      "b O" '(crux-kill-other-buffers :wk "Kill all other buffers")
+      "b n" '(next-buffer :wk "Next buffer")
+      "b p" '(previous-buffer :wk "Previous buffer")
+      "b s" '(crux-create-scratch-buffer :wk "Scratch buffer")
+      "b r" '(revert-buffer :wk "Reload buffer")
+      "b R" '(rename-buffer :wk "Rename buffer"))
 
-      (start/leader-keys
-        "d" '(:ignore t :wk "Dired")
-        "d S" '(crux-sudo-edit :wk "Sudo edit file")
-        "d d" '(dired :wk "Open dired")
-        "d j" '(dired-jump :wk "Dired jump to current")
-        "d w" '(wdired-change-to-wdired-mode :wk "Writable dired")
-        "d f" '(wdired-finish-edit :wk "Writable dired finish edit"))
+    (start/leader-keys
+      "d" '(:ignore t :wk "Dired")
+      "d S" '(crux-sudo-edit :wk "Sudo edit file")
+      "d d" '(dired :wk "Open dired")
+      "d j" '(dired-jump :wk "Dired jump to current")
+      "d w" '(wdired-change-to-wdired-mode :wk "Writable dired")
+      "d f" '(wdired-finish-edit :wk "Writable dired finish edit"))
 
-      (start/leader-keys
-        "H" '(:ignore t :wk "Help")
-        "H d" '(devdocs-lookup :wk "DevDocs")
-        "H c" #'(helpful-command :wk "Command")
-        "H f" #'(helpful-function :wk "Function")
-        "H a" #'(helpful-at-point :wk "At point")
-        "H k" #'(helpful-key :wk "Key")
-        "H C" #'(helpful-callable :wk "Callable")
-        "H m" '(woman :wk "Man pages")
-        "H v" #'(helpful-variable :wk "Variable"))
+    (start/leader-keys
+      "H" '(:ignore t :wk "Help")
+      "H d" '(devdocs-lookup :wk "DevDocs")
+      "H c" #'(helpful-command :wk "Command")
+      "H f" #'(helpful-function :wk "Function")
+      "H a" #'(helpful-at-point :wk "At point")
+      "H k" #'(helpful-key :wk "Key")
+      "H C" #'(helpful-callable :wk "Callable")
+      "H m" '(woman :wk "Man pages")
+      "H v" #'(helpful-variable :wk "Variable"))
 
-      (start/leader-keys
-        :keymaps 'prog-mode-map
-        "e" '(:ignore t :wk "Errors")
-        "e j" '(flycheck-next-error :wk "Next Error")
-        "e k" '(flycheck-previous-error :wk "Next Error")
-        "e l" '(flycheck-list-errors :wk "List Errors in Buffer")
-        "e e" '(flycheck-explain-error-at-point :wk "Explain Error")
-        "e d" '(flycheck-display-error-at-point :wk "Disply Error"))
+    (start/leader-keys
+      :keymaps 'prog-mode-map
+      "e" '(:ignore t :wk "Errors")
+      "e j" '(flycheck-next-error :wk "Next Error")
+      "e k" '(flycheck-previous-error :wk "Next Error")
+      "e l" '(flycheck-list-errors :wk "List Errors in Buffer")
+      "e e" '(flycheck-explain-error-at-point :wk "Explain Error")
+      "e d" '(flycheck-display-error-at-point :wk "Disply Error"))
 
-      (start/leader-keys
-        :keymaps 'eglot-mode-map
-        "l" '(:ignore t :wk "LSP")
-        "l d" '(eglot-find-declaration :wk "Find Declaration")
-        "l i" '(eglot-find-implementation :wk "Find Implementation")
-        "l t" '(eglot-find-type-definition :wk "Find Type definition")
-        "l I" '(eglot-code-action-organize-imports :wk "Organize Imports")
-        "l a" '(eglot-code-actions :wk "Code Actions")
-        "l f" '(eglot-format-buffer :wk "Format Buffer")
-        "l r" '(eglot-rename  :wk "Rename"))
+    (start/leader-keys
+      :keymaps 'eglot-mode-map
+      "l" '(:ignore t :wk "LSP")
+      "l d" '(eglot-find-declaration :wk "Find Declaration")
+      "l i" '(eglot-find-implementation :wk "Find Implementation")
+      "l t" '(eglot-find-type-definition :wk "Find Type definition")
+      "l I" '(eglot-code-action-organize-imports :wk "Organize Imports")
+      "l a" '(eglot-code-actions :wk "Code Actions")
+      "l f" '(eglot-format-buffer :wk "Format Buffer")
+      "l r" '(eglot-rename  :wk "Rename"))
 
-      (start/leader-keys
-        :~keymaps 'prog-mode-map
-        "h" '(:ignore t :wk "Harpoon")
-        "h t" '(harpoon-toggle-file :wk "Toggle file")
-        "h l" '(harpoon-toggle-quick-menu :wk "List")
-        "h c" '(harpoon-clear :wk "Clear")
-        "h d" '(harpoon-delete-item :wk "Delete")
-        "h 1" '(harpoon-go-to-1 :wk "Go to 1")
-        "h 2" '(harpoon-go-to-2 :wk "Go to 2")
-        "h 3" '(harpoon-go-to-3 :wk "Go to 3")
-        "h 4" '(harpoon-go-to-4 :wk "Go to 4")
-        "h 5" '(harpoon-go-to-5 :wk "Go to 5")
-        "h 6" '(harpoon-go-to-6 :wk "Go to 6")
-        "h 7" '(harpoon-go-to-7 :wk "Go to 7")
-        "h 8" '(harpoon-go-to-8 :wk "Go to 8")
-        "h 9" '(harpoon-go-to-9 :wk "Go to 9"))
+    (start/leader-keys
+      :~keymaps 'prog-mode-map
+      "h" '(:ignore t :wk "Harpoon")
+      "h t" '(harpoon-toggle-file :wk "Toggle file")
+      "h l" '(harpoon-toggle-quick-menu :wk "List")
+      "h c" '(harpoon-clear :wk "Clear")
+      "h d" '(harpoon-delete-item :wk "Delete")
+      "h 1" '(harpoon-go-to-1 :wk "Go to 1")
+      "h 2" '(harpoon-go-to-2 :wk "Go to 2")
+      "h 3" '(harpoon-go-to-3 :wk "Go to 3")
+      "h 4" '(harpoon-go-to-4 :wk "Go to 4")
+      "h 5" '(harpoon-go-to-5 :wk "Go to 5")
+      "h 6" '(harpoon-go-to-6 :wk "Go to 6")
+      "h 7" '(harpoon-go-to-7 :wk "Go to 7")
+      "h 8" '(harpoon-go-to-8 :wk "Go to 8")
+      "h 9" '(harpoon-go-to-9 :wk "Go to 9"))
 
-      (start/leader-keys
-        "g" '(:ignore t :wk "Git")
-        "g /" '(magit-displatch :wk "Magit dispatch")
-        "g ." '(magit-file-displatch :wk "Magit file dispatch")
-        "g b" '(magit-branch-checkout :wk "Switch branch")
-        "g c" '(:ignore t :wk "Create")
-        "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
-        "g c c" '(magit-commit-create :wk "Create commit")
-        "g c f" '(magit-commit-fixup :wk "Create fixup commit")
-        "g C" '(magit-clone :wk "Clone repo")
-        "g f" '(:ignore t :wk "Find")
-        "g f c" '(magit-show-commit :wk "Show commit")
-        "g f f" '(magit-find-file :wk "Magit find file")
-        "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
-        "g F" '(magit-fetch :wk "Git fetch")
-        "g g" '(magit-status :wk "Magit status")
-        "g i" '(magit-init :wk "Initialize git repo")
-        "g l" '(magit-log-buffer-file :wk "Magit buffer log")
-        "g r" '(vc-revert :wk "Git revert file")
-        "g s" '(magit-stage-file :wk "Git stage file")
-        "g t" '(git-timemachine :wk "Git time machine")
-        "g u" '(magit-stage-file :wk "Git unstage file"))
+    (start/leader-keys
+      "g" '(:ignore t :wk "Git")
+      "g /" '(magit-displatch :wk "Magit dispatch")
+      "g ." '(magit-file-displatch :wk "Magit file dispatch")
+      "g b" '(magit-branch-checkout :wk "Switch branch")
+      "g c" '(:ignore t :wk "Create")
+      "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+      "g c c" '(magit-commit-create :wk "Create commit")
+      "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+      "g C" '(magit-clone :wk "Clone repo")
+      "g f" '(:ignore t :wk "Find")
+      "g f c" '(magit-show-commit :wk "Show commit")
+      "g f f" '(magit-find-file :wk "Magit find file")
+      "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+      "g F" '(magit-fetch :wk "Git fetch")
+      "g g" '(magit-status :wk "Magit status")
+      "g i" '(magit-init :wk "Initialize git repo")
+      "g l" '(magit-log-buffer-file :wk "Magit buffer log")
+      "g r" '(vc-revert :wk "Git revert file")
+      "g s" '(magit-stage-file :wk "Git stage file")
+      "g t" '(git-timemachine :wk "Git time machine")
+      "g u" '(magit-stage-file :wk "Git unstage file"))
 
-      (start/leader-keys
-        "m" '(:ignore t :wk "Misc")
-        "m d" '(dashboard-open :wk "Dashboard open")
+    (start/leader-keys
+      "m" '(:ignore t :wk "Misc")
+      "m d" '(dashboard-open :wk "Dashboard open")
 
-        "m c" '(:ignore t :wk "Config")
-        "m c C" '(crux-recompile-init :wk "Compile Init")
-        "m c o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
-        "m c R" '(restart-emacs :wk "Restart emacs")
-        "m c q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-        "m c r" '((lambda () (interactive)
-                    (load-file "~/.config/emacs/init.el"))
-                  :wk "Reload Emacs config")
+      "m c" '(:ignore t :wk "Config")
+      "m c C" '(crux-recompile-init :wk "Compile Init")
+      "m c o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
+      "m c R" '(restart-emacs :wk "Restart emacs")
+      "m c q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+      "m c r" '((lambda () (interactive)
+                  (load-file "~/.config/emacs/init.el"))
+                :wk "Reload Emacs config")
 
-        "m T" '(:ignore t :wk "Toggle")
-        "m T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-        "m T l" '(display-line-numbers-mode :wk "Toggle line numbers"))
+      "m T" '(:ignore t :wk "Toggle")
+      "m T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+      "m T l" '(display-line-numbers-mode :wk "Toggle line numbers"))
 
-      (start/leader-keys
-        "t" '(:ignore t :wk "Terminal")
-        "t t" '(eat :wk "Terminal toggle")))
+    (start/leader-keys
+      "t" '(:ignore t :wk "Terminal")
+      "t t" '(eat :wk "Terminal toggle")))
 #+end_src
 
 ** Evil Mode
