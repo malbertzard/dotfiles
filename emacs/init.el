@@ -99,12 +99,11 @@
     "p" '(projectile-command-map :wk "Projectile"))
 
   (start/leader-keys
-    "f" '(:ignore t :wk "File")
+    "f" '(:ignore t :wk "find")
     "f f" '(find-file :wk "Search for files")
     "f g" '(consult-ripgrep :wk "Ripgrep search in files")
     "f l" '(consult-line :wk "Find line")
-    "f S" '(crux-sudo-edit :wk "Sudo edit file")
-    "f o" '(consult-outline :wk "Outline")
+    "f o" '(consult-outline :wk "Find Outline")
     "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
   (start/leader-keys
@@ -138,6 +137,7 @@
 
   (start/leader-keys
     "d" '(:ignore t :wk "Dired")
+    "d S" '(crux-sudo-edit :wk "Sudo edit file")
     "d d" '(dired :wk "Open dired")
     "d j" '(dired-jump :wk "Dired jump to current")
     "d w" '(wdired-change-to-wdired-mode :wk "Writable dired")
@@ -219,6 +219,7 @@
     "m d" '(dashboard-open :wk "Dashboard open")
 
     "m c" '(:ignore t :wk "Config")
+    "m c C" '(crux-recompile-init :wk "Compile Init")
     "m c o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
     "m c R" '(restart-emacs :wk "Restart emacs")
     "m c q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
