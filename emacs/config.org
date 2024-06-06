@@ -1,24 +1,30 @@
 +Title: Emacs Config
 
-#+Author: malbertzard
-#+Description: My Config based on a starter config
+#+Author: Mathis Albertzard
+#+Description: My Config based on a starter config probably don't use this I have no clue
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
-#+Options: toc:3
 
-* Table Of Contents :toc:
+* Table Of Contents :toc_3:
 - [[#introduction][Introduction]]
 - [[#important-to-load-first][Important to load first]]
   - [[#startup-performance][Startup Performance]]
   - [[#auto-tangle-configuration-file][Auto-tangle Configuration file]]
   - [[#use-package][Use Package]]
-  - [[#evil-mode][Evil Mode]]
-  - [[#general-keybindings][General Keybindings]]
   - [[#good-defaults][Good Defaults]]
+  - [[#general-keybindings][General Keybindings]]
+  - [[#evil-mode][Evil Mode]]
+    - [[#evil-collection][Evil Collection]]
+    - [[#evil-surround][Evil Surround]]
+    - [[#evil-visualstar][Evil Visualstar]]
+    - [[#evil-commentary][Evil Commentary]]
+    - [[#evil-textobject][Evil Textobject]]
 - [[#appearance][Appearance]]
   - [[#set-theme][Set Theme]]
   - [[#dashboard][Dashboard]]
   - [[#transparency][Transparency]]
   - [[#fonts][Fonts]]
+    - [[#setting-fonts][Setting fonts]]
+    - [[#zooming-inout][Zooming In/Out]]
   - [[#modeline][Modeline]]
 - [[#development][Development]]
   - [[#editor-conf][Editor Conf]]
@@ -27,17 +33,30 @@
   - [[#eglot][Eglot]]
   - [[#yasnippet][Yasnippet]]
   - [[#language-modes][Language modes]]
+    - [[#lua-mode][Lua mode]]
+    - [[#php-mode][PHP mode]]
+    - [[#golang][Golang]]
+    - [[#org-mode][Org Mode]]
+    - [[#markdown][Markdown]]
   - [[#error][Error]]
   - [[#treesitter][Treesitter]]
+  - [[#debug][Debug]]
   - [[#terminal][Terminal]]
+    - [[#eat][Eat]]
+  - [[#harpoon][Harpoon]]
+  - [[#git][Git]]
+    - [[#magit][Magit]]
+    - [[#git-gutter][Git Gutter]]
+    - [[#diff-hl][Diff-hl]]
+  - [[#dev-docs][Dev Docs]]
+  - [[#rainbow-delimiters][Rainbow Delimiters]]
 - [[#other-packages][Other Packages]]
   - [[#nerd-icons][Nerd Icons]]
   - [[#eww-tweaks][EWW Tweaks]]
-  - [[#harpoon][Harpoon]]
   - [[#dired-tweaks][Dired tweaks]]
   - [[#drag-stuff][Drag Stuff]]
-  - [[#git][Git]]
   - [[#corfu][Corfu]]
+    - [[#kind-icons][Kind Icons]]
   - [[#cape][Cape]]
   - [[#orderless][Orderless]]
   - [[#vertico-and-marginalia][Vertico and Marginalia]]
@@ -46,9 +65,10 @@
   - [[#diminish][Diminish]]
   - [[#eldoc][Eldoc]]
   - [[#helpful][Helpful]]
-  - [[#dev-docs][Dev Docs]]
-  - [[#rainbow-delimiters][Rainbow Delimiters]]
   - [[#which-key][Which-Key]]
+  - [[#system-packages][System Packages]]
+  - [[#crux][CRUX]]
+  - [[#litter][Litter]]
 - [[#runtime-performance][Runtime Performance]]
 
 * Introduction
@@ -113,81 +133,65 @@ With Emacs 29 use-package is now built-in.
                              ("nongnu" . "https://elpa.nongnu.org/nongnu/"))) ;; For Eat Terminal
 #+end_src
 
-** Evil Mode
-
+** Good Defaults
 #+begin_src emacs-lisp
-    (use-package evil
-      :init ;; Execute code Before a package is loaded
-      (evil-mode)
-      :config ;; Execute code After a package is loaded
-      (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
-      :custom ;; Customization of package custom variables
-      (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
-      (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
-      (evil-want-C-i-jump nil)      ;; Disables C-i jump
-      (evil-undo-system 'undo-redo) ;; C-r to redo
-      (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
-      ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
-      :bind (:map evil-motion-state-map
-                  ("SPC" . nil)
-                  ("RET" . nil)))
+    (use-package emacs
+      :custom
+      (menu-bar-mode nil)         ;; Disable the menu bar
+      (scroll-bar-mode nil)       ;; Disable the scroll bar
+      (tool-bar-mode nil)         ;; Disable the tool bar
+      (inhibit-startup-screen t)  ;; Disable welcome screen
 
-    (use-package evil-collection
-      :after evil
+      (delete-selection-mode t)   ;; Select text and delete it by typing.
+      (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
+      (electric-pair-mode t)      ;; Turns on automatic parens pairing
+
+      (ring-bell-function 'ignore)
+      (blink-cursor-mode nil)     ;; Don't blink cursor
+      (global-auto-revert-mode t) ;; Automatically reload file and show changes if the file has changed
+
+      (dired-kill-when-opening-new-dired-buffer t) ;; Dired don't create new buffer
+      ;;(recentf-mode t) ;; Enable recent file mode
+
+      (truncate-lines t)
+      (display-line-numbers-type 'relative) ;; Relative line numbers
+      (global-display-line-numbers-mode t)  ;; Display line numbers
+
+      (dolist (mode '(org-mode-hook
+                      term-mode-hook
+                      shell-mode-hook
+                      treemacs-mode-hook
+                      eshell-mode-hook))
+
+        (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+      (defalias 'yes-or-no-p 'y-or-n-p)
+
+      (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
+      (scroll-conservatively 10) ;; Smooth scrolling
+      (scroll-margin 10)
+
+      (tab-width 4)
+
+      (make-backup-files nil) ;; Stop creating ~ backup files
+      (auto-save-default nil) ;; Stop creating # auto save files
+      :hook
+      (prog-mode . (lambda () (hs-minor-mode t))) ;; Enable folding hide/show globally
       :config
-      ;; Setting where to use evil-collection
-      (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult))
-      (evil-collection-init))
-
-    (use-package evil-surround
-      :config
-      (global-evil-surround-mode 1))
-
-    (use-package evil-visualstar
-      :config
-      (global-evil-visualstar-mode 1))
-
-    (use-package evil-commentary
-      :after evil
-      :diminish
-      :config (evil-commentary-mode +1))
-
-    (use-package evil-textobj-tree-sitter
-      :after tree-sitter evil
-      :config
-      (define-key evil-outer-text-objects-map "m" (evil-textobj-tree-sitter-get-textobj "import"
-                                                    '((python-mode . [(import_statement) @import])
-                                                      (go-mode . [(import_spec) @import])
-                                                      (rust-mode . [(use_declaration) @import]))))
-      (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
-      (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
-      (define-key evil-outer-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "class.outer"))
-      (define-key evil-inner-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "class.inner"))
-      (define-key evil-outer-text-objects-map "C" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
-      (define-key evil-inner-text-objects-map "C" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
-      (define-key evil-outer-text-objects-map "o" (evil-textobj-tree-sitter-get-textobj "loop.outer"))
-      (define-key evil-inner-text-objects-map "o" (evil-textobj-tree-sitter-get-textobj "loop.inner"))
-      (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj "conditional.outer"))
-      (define-key evil-inner-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj "conditional.inner"))
-      (define-key evil-inner-text-objects-map "r" (evil-textobj-tree-sitter-get-textobj "parameter.inner"))
-      (define-key evil-outer-text-objects-map "r" (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
-      (define-key evil-normal-state-map (kbd "]r") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner")))
-      (define-key evil-normal-state-map (kbd "[r") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner" t)))
-      (define-key evil-normal-state-map (kbd "]R") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner" nil t)))
-      (define-key evil-normal-state-map (kbd "[R") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner" t t)))
-      (define-key evil-normal-state-map (kbd "]a") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer")))
-      (define-key evil-normal-state-map (kbd "[a") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer" t)))
-      (define-key evil-normal-state-map (kbd "]A") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer" nil t)))
-      (define-key evil-normal-state-map (kbd "[A") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer" t t)))
-      (define-key evil-normal-state-map (kbd "]c") (lambda () (interactive) (malb/goto-and-recenter "class.outer")))
-      (define-key evil-normal-state-map (kbd "[c") (lambda () (interactive) (malb/goto-and-recenter "class.outer" t)))
-      (define-key evil-normal-state-map (kbd "]C") (lambda () (interactive) (malb/goto-and-recenter "class.outer" nil t)))
-      (define-key evil-normal-state-map (kbd "[C") (lambda () (interactive) (malb/goto-and-recenter "class.outer" t t)))
-      (define-key evil-normal-state-map (kbd "]f") (lambda () (interactive) (malb/goto-and-recenter "function.outer")))
-      (define-key evil-normal-state-map (kbd "[f") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t)))
-      (define-key evil-normal-state-map (kbd "]F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" nil t)))
-      (define-key evil-normal-state-map (kbd "[F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t t))))
-
+      ;; Move customization variables to a separate file and load it, avoid filling up init.el with unnecessary variables
+      (setq custom-file (locate-user-emacs-file "custom-vars.el"))
+      (load custom-file 'noerror 'nomessage)
+      :bind (
+             ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
+             )
+      ;; Fix general.el leader key not working instantly in messages buffer with evil mode
+      ;; :ghook ('after-init-hook
+      ;;         (lambda (&rest _)
+      ;;           (when-let ((messages-buffer (get-buffer "*Messages*")))
+      ;;             (with-current-buffer messages-buffer
+      ;;               (evil-normalize-keymaps))))
+      ;;         nil nil t)
+      )
 #+end_src
 
 ** General Keybindings
@@ -209,11 +213,12 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "p" '(projectile-command-map :wk "Projectile"))
 
       (start/leader-keys
-        "f" '(:ignore t :wk "Find")
-        "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
+        "f" '(:ignore t :wk "File")
         "f f" '(find-file :wk "Search for files")
         "f g" '(consult-ripgrep :wk "Ripgrep search in files")
         "f l" '(consult-line :wk "Find line")
+        "f S" '(crux-sudo-edit :wk "Sudo edit file")
+        "f o" '(consult-outline :wk "Outline")
         "f i" '(consult-imenu :wk "Imenu buffer locations"))
 
       (start/leader-keys
@@ -230,30 +235,20 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "E s" '(eshell :which-key "Eshell")
         "E w" '(eww :which-key "EWW emacs web wowser"))
 
-
       (start/leader-keys
-        "C" '(:ignore t :wk "Config")
-        "C o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
-        "C R" '(restart-emacs :wk "Restart emacs")
-        "C q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-        "C r" '((lambda () (interactive)
-                  (load-file "~/.config/emacs/init.el"))
-                :wk "Reload Emacs config"))
-
-      (start/leader-keys
-       "b" '(:ignore t :wk "All Buffers")
-       "b b" '(switch-to-buffer :wk "Switch to buffer")
-       "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
-       "b C" '(clean-buffer-list :wk "Clean buffer list")
-       "b i" '(ibuffer :wk "Ibuffer")
-       "b k" '(kill-current-buffer :wk "Kill current buffer")
-       "b K" '(kill-some-buffers :wk "Kill multiple buffers")
-       "b n" '(next-buffer :wk "Next buffer")
-       "b p" '(previous-buffer :wk "Previous buffer")
-       "b r" '(revert-buffer :wk "Reload buffer")
-       "b R" '(rename-buffer :wk "Rename buffer")
-       "b s" '(basic-save-buffer :wk "Save buffer")
-       "b S" '(save-some-buffers :wk "Save multiple buffers"))
+        "b" '(:ignore t :wk "Buffers")
+        "b b" '(switch-to-buffer :wk "Switch to buffer")
+        "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+        "b C" '(clean-buffer-list :wk "Clean buffer list")
+        "b i" '(ibuffer :wk "Ibuffer")
+        "b k" '(kill-current-buffer :wk "Kill current buffer")
+        "b K" '(kill-some-buffers :wk "Kill multiple buffers")
+        "b O" '(crux-kill-other-buffers :wk "Kill all other buffers")
+        "b n" '(next-buffer :wk "Next buffer")
+        "b p" '(previous-buffer :wk "Previous buffer")
+        "b s" '(crux-create-scratch-buffer :wk "Scratch buffer")
+        "b r" '(revert-buffer :wk "Reload buffer")
+        "b R" '(rename-buffer :wk "Rename buffer"))
 
       (start/leader-keys
         "d" '(:ignore t :wk "Dired")
@@ -294,6 +289,23 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "l r" '(eglot-rename  :wk "Rename"))
 
       (start/leader-keys
+        :~keymaps 'prog-mode-map
+        "h" '(:ignore t :wk "Harpoon")
+        "h t" '(harpoon-toggle-file :wk "Toggle file")
+        "h l" '(harpoon-toggle-quick-menu :wk "List")
+        "h c" '(harpoon-clear :wk "Clear")
+        "h d" '(harpoon-delete-item :wk "Delete")
+        "h 1" '(harpoon-go-to-1 :wk "Go to 1")
+        "h 2" '(harpoon-go-to-2 :wk "Go to 2")
+        "h 3" '(harpoon-go-to-3 :wk "Go to 3")
+        "h 4" '(harpoon-go-to-4 :wk "Go to 4")
+        "h 5" '(harpoon-go-to-5 :wk "Go to 5")
+        "h 6" '(harpoon-go-to-6 :wk "Go to 6")
+        "h 7" '(harpoon-go-to-7 :wk "Go to 7")
+        "h 8" '(harpoon-go-to-8 :wk "Go to 8")
+        "h 9" '(harpoon-go-to-9 :wk "Go to 9"))
+
+      (start/leader-keys
         "g" '(:ignore t :wk "Git")
         "g /" '(magit-displatch :wk "Magit dispatch")
         "g ." '(magit-file-displatch :wk "Magit file dispatch")
@@ -317,74 +329,117 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "g u" '(magit-stage-file :wk "Git unstage file"))
 
       (start/leader-keys
-        "s" '(:ignore t :wk "Show")
-        "s e" '(eat :wk "Eat terminal"))
+        "m" '(:ignore t :wk "Misc")
+        "m d" '(dashboard-open :wk "Dashboard open")
+
+        "m c" '(:ignore t :wk "Config")
+        "m c o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
+        "m c R" '(restart-emacs :wk "Restart emacs")
+        "m c q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+        "m c r" '((lambda () (interactive)
+                    (load-file "~/.config/emacs/init.el"))
+                  :wk "Reload Emacs config")
+
+        "m T" '(:ignore t :wk "Toggle")
+        "m T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+        "m T l" '(display-line-numbers-mode :wk "Toggle line numbers"))
 
       (start/leader-keys
-        "T" '(:ignore t :wk "Toggle")
-        "T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-        "T l" '(display-line-numbers-mode :wk "Toggle line numbers")))
+        "t" '(:ignore t :wk "Terminal")
+        "t t" '(eat :wk "Terminal toggle")))
 #+end_src
 
-** Good Defaults
+** Evil Mode
+Because im a Vim Goblin
+
 #+begin_src emacs-lisp
-    (use-package emacs
-      :custom
-      (menu-bar-mode nil)         ;; Disable the menu bar
-      (scroll-bar-mode nil)       ;; Disable the scroll bar
-      (tool-bar-mode nil)         ;; Disable the tool bar
-      (inhibit-startup-screen t)  ;; Disable welcome screen
+    (use-package evil
+      :init ;; Execute code Before a package is loaded
+      (evil-mode)
+      :config ;; Execute code After a package is loaded
+      (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
+      :custom ;; Customization of package custom variables
+      (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
+      (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
+      (evil-want-C-i-jump nil)      ;; Disables C-i jump
+      (evil-undo-system 'undo-redo) ;; C-r to redo
+      (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
+      ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
+      :bind (:map evil-motion-state-map
+                  ("SPC" . nil)
+                  ("RET" . nil)))
+#+end_src
 
-      (delete-selection-mode t)   ;; Select text and delete it by typing.
-      (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
-      (electric-pair-mode t)      ;; Turns on automatic parens pairing
+*** Evil Collection
 
-      (ring-bell-function 'ignore)
-      (blink-cursor-mode nil)     ;; Don't blink cursor
-      (global-auto-revert-mode t) ;; Automatically reload file and show changes if the file has changed
-
-      (dired-kill-when-opening-new-dired-buffer t) ;; Dired don't create new buffer
-      ;;(recentf-mode t) ;; Enable recent file mode
-
-      (global-visual-line-mode t)           ;; Enable truncated lines
-      (display-line-numbers-type 'relative) ;; Relative line numbers
-      (global-display-line-numbers-mode t)  ;; Display line numbers
-
-      (dolist (mode '(org-mode-hook
-                      term-mode-hook
-                      shell-mode-hook
-                      treemacs-mode-hook
-                      eshell-mode-hook))
-
-        (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-      (defalias 'yes-or-no-p 'y-or-n-p)
-
-      (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
-      (scroll-conservatively 10) ;; Smooth scrolling
-      (scroll-margin 10)
-
-      (tab-width 4)
-
-      (make-backup-files nil) ;; Stop creating ~ backup files
-      (auto-save-default nil) ;; Stop creating # auto save files
-      :hook
-      (prog-mode . (lambda () (hs-minor-mode t))) ;; Enable folding hide/show globally
+#+begin_src emacs-lisp
+    (use-package evil-collection
+      :after evil
       :config
-      ;; Move customization variables to a separate file and load it, avoid filling up init.el with unnecessary variables
-      (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-      (load custom-file 'noerror 'nomessage)
-      :bind (
-             ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
-             )
-      ;; Fix general.el leader key not working instantly in messages buffer with evil mode
-      :ghook ('after-init-hook
-              (lambda (&rest _)
-                (when-let ((messages-buffer (get-buffer "*Messages*")))
-                  (with-current-buffer messages-buffer
-                    (evil-normalize-keymaps))))
-              nil nil t)
-      )
+      ;; Setting where to use evil-collection
+      (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult))
+      (evil-collection-init))
+#+end_src
+
+*** Evil Surround
+#+begin_src emacs-lisp
+    (use-package evil-surround
+      :config
+      (global-evil-surround-mode 1))
+#+end_src
+
+*** Evil Visualstar
+#+begin_src emacs-lisp
+    (use-package evil-visualstar
+      :config
+      (global-evil-visualstar-mode 1))
+#+end_src
+
+*** Evil Commentary
+#+begin_src emacs-lisp
+    (use-package evil-commentary
+      :after evil
+      :diminish
+      :config (evil-commentary-mode +1))
+#+end_src
+
+*** Evil Textobject
+#+begin_src emacs-lisp
+    (use-package evil-textobj-tree-sitter
+      :after tree-sitter evil
+      :config
+      (define-key evil-outer-text-objects-map "m" (evil-textobj-tree-sitter-get-textobj "import"
+                                                    '((python-mode . [(import_statement) @import])
+                                                      (go-mode . [(import_spec) @import])
+                                                      (rust-mode . [(use_declaration) @import]))))
+      (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
+      (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
+      (define-key evil-outer-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "class.outer"))
+      (define-key evil-inner-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "class.inner"))
+      (define-key evil-outer-text-objects-map "C" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
+      (define-key evil-inner-text-objects-map "C" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
+      (define-key evil-outer-text-objects-map "o" (evil-textobj-tree-sitter-get-textobj "loop.outer"))
+      (define-key evil-inner-text-objects-map "o" (evil-textobj-tree-sitter-get-textobj "loop.inner"))
+      (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj "conditional.outer"))
+      (define-key evil-inner-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj "conditional.inner"))
+      (define-key evil-inner-text-objects-map "r" (evil-textobj-tree-sitter-get-textobj "parameter.inner"))
+      (define-key evil-outer-text-objects-map "r" (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
+      (define-key evil-normal-state-map (kbd "]r") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner")))
+      (define-key evil-normal-state-map (kbd "[r") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner" t)))
+      (define-key evil-normal-state-map (kbd "]R") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner" nil t)))
+      (define-key evil-normal-state-map (kbd "[R") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner" t t)))
+      (define-key evil-normal-state-map (kbd "]a") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer")))
+      (define-key evil-normal-state-map (kbd "[a") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer" t)))
+      (define-key evil-normal-state-map (kbd "]A") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer" nil t)))
+      (define-key evil-normal-state-map (kbd "[A") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer" t t)))
+      (define-key evil-normal-state-map (kbd "]c") (lambda () (interactive) (malb/goto-and-recenter "class.outer")))
+      (define-key evil-normal-state-map (kbd "[c") (lambda () (interactive) (malb/goto-and-recenter "class.outer" t)))
+      (define-key evil-normal-state-map (kbd "]C") (lambda () (interactive) (malb/goto-and-recenter "class.outer" nil t)))
+      (define-key evil-normal-state-map (kbd "[C") (lambda () (interactive) (malb/goto-and-recenter "class.outer" t t)))
+      (define-key evil-normal-state-map (kbd "]f") (lambda () (interactive) (malb/goto-and-recenter "function.outer")))
+      (define-key evil-normal-state-map (kbd "[f") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t)))
+      (define-key evil-normal-state-map (kbd "]F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" nil t)))
+      (define-key evil-normal-state-map (kbd "[F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t t))))
 #+end_src
 
 * Appearance
@@ -403,12 +458,25 @@ Use consult-theme to easily try out themes (*Epilepsy* Warning).
 ** Dashboard
 #+BEGIN_SRC emacs-lisp
     (use-package dashboard
-      :config
-      (dashboard-setup-startup-hook)
-      (setq dashboard-startup-banner 'logo
-            dashboard-banner-logo-title "Villainous Emacs!"
-            dashboard-items nil
-            dashboard-set-footer nil))
+      :custom
+      (dashboard-banner-logo-title "With Great Power Comes Great Responsibility!")
+      (dashboard-center-content t)
+      (dashboard-items '((projects . 5)))
+      (dashboard-set-file-icons t)
+      (dashboard-set-footer nil)
+      (dashboard-projects-backend 'projectile)
+      (dashboard-set-heading-icons t)
+      (dashboard-set-navigator t)
+      (dashboard-show-shortcuts nil)
+      (dashboard-startupify-list '(   dashboard-insert-banner
+                                      dashboard-insert-newline
+                                      dashboard-insert-banner-title
+                                      dashboard-insert-items
+                                      dashboard-insert-newline 
+                                      dashboard-insert-init-info))
+      (dashboard-startup-banner 'logo)
+      :config (dashboard-setup-startup-hook))
+
 #+END_SRC
 
 ** Transparency
@@ -597,14 +665,19 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
       :after org)
 #+end_src
 
-**** Org Bullets
+**** Org Modern
 #+BEGIN_SRC emacs-lisp
-    (use-package org-bullets
-      :hook (org-mode . org-bullets-mode)
-      :custom
-      (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+    (use-package org-modern
+      :hook (org-mode . org-modern-mode))
 #+END_SRC
 
+**** Org Excalidraw
+#+BEGIN_SRC emacs-lisp
+    ;; (use-package org-excalidraw
+    ;;   :straight (:type git :host github :repo "wdavew/org-excalidraw")
+    ;;   :config
+    ;;   (org-excalidraw-directory "~/path_to_store_excalidraw_files"))
+#+END_SRC
 
 **** Center Org Buffer
 #+BEGIN_SRC emacs-lisp
@@ -617,6 +690,14 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
       :hook (org-mode . start/org-mode-visual-fill))
 #+END_SRC
 
+*** Markdown
+#+begin_src emacs-lisp
+    (use-package markdown-mode
+      :mode ("README\\.md\\'" . gfm-mode)
+      :init (setq markdown-command "multimarkdown")
+      :bind (:map markdown-mode-map
+                  ("C-c C-e" . markdown-do)))
+#+end_src
 ** Error
 #+BEGIN_SRC emacs-lisp
     (use-package flycheck)
@@ -675,6 +756,11 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
     (setq treesit-auto-langs '(python rust go php))
 #+END_SRC
 
+** Debug
+#+begin_src emacs-lisp
+    ;; Debug with DAP without LspMode
+    ;; (use-package dape)
+#+end_src
 ** Terminal
 *** Eat
 Eat(Emulate A Terminal) is a terminal emulator within Emacs.
@@ -683,6 +769,49 @@ We setup eat with eshell, if you want to use bash, zsh etc., check out their git
 #+begin_src emacs-lisp
     (use-package eat
       :hook ('eshell-load-hook #'eat-eshell-mode))
+#+end_src
+
+** Harpoon
+#+begin_src emacs-lisp
+(use-package harpoon)
+#+end_src>
+** Git
+*** Magit
+Complete text-based user interface to Git.
+#+begin_src emacs-lisp
+    (use-package magit
+      :commands magit-status)
+
+    (use-package magit-todos
+      :after magit
+      :config (magit-todos-mode 1))
+#+end_src
+
+*** Git Gutter
+#+begin_src emacs-lisp
+    (use-package git-gutter
+      :config(global-git-gutter-mode +1))
+#+end_src
+
+*** Diff-hl
+Highlights uncommitted changes on the left side of the window (area also known as the "gutter"), allows you to jump between and revert them selectively.
+#+begin_src emacs-lisp
+    (use-package diff-hl
+      :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)
+             (magit-pre-refresh  . diff-hl-magit-pre-refresh)
+             (magit-post-refresh . diff-hl-magit-post-refresh))
+      :init (global-diff-hl-mode))
+#+end_src
+
+** Dev Docs
+#+begin_src emacs-lisp
+    (use-package devdocs)
+#+end_src
+** Rainbow Delimiters
+Adds colors to brackets.
+#+begin_src emacs-lisp
+    (use-package rainbow-delimiters
+      :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
 
 * Other Packages
@@ -708,14 +837,10 @@ While nerd-icons supports both GUI and TUI.
 
 ** EWW Tweaks
 #+begin_src emacs-lisp
- ;;(setq eww-retrieve-command
- ;;     '("chromium" "--headless" "--dump-dom"))
+;;(setq eww-retrieve-command
+;;     '("chromium" "--headless" "--dump-dom"))
 #+end_src>
 
-** Harpoon
-#+begin_src emacs-lisp
-  (use-package harpoon)
-#+end_src>
 ** Dired tweaks
 Delete intermediate buffers when navigating through dired.
 
@@ -751,27 +876,6 @@ Delete intermediate buffers when navigating through dired.
       (evil-define-key 'normal 'prog-mode-map (kbd "C-j") 'drag-stuff-down)
       (evil-define-key 'normal 'prog-mode-map (kbd "C-k") 'drag-stuff-up))
 #+END_SRC
-
-** Git
-*** Magit
-Complete text-based user interface to Git.
-#+begin_src emacs-lisp
-    (use-package magit
-      :commands magit-status)
-
-    (use-package git-gutter
-      :config(global-git-gutter-mode +1))
-#+end_src
-
-*** Diff-hl
-Highlights uncommitted changes on the left side of the window (area also known as the "gutter"), allows you to jump between and revert them selectively.
-#+begin_src emacs-lisp
-    (use-package diff-hl
-      :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)
-             (magit-pre-refresh  . diff-hl-magit-pre-refresh)
-             (magit-post-refresh . diff-hl-magit-post-refresh))
-      :init (global-diff-hl-mode))
-#+end_src
 
 ** Corfu
 Enhances in-buffer completion with a small completion popup.
@@ -989,16 +1093,6 @@ With this package installed, you can add ‘:diminish’ to any use-package bloc
 #+BEGIN_SRC emacs-lisp
     (use-package helpful)
 #+END_SRC
-** Dev Docs
-#+begin_src emacs-lisp
-    (use-package devdocs)
-#+end_src
-** Rainbow Delimiters
-Adds colors to brackets.
-#+begin_src emacs-lisp
-    (use-package rainbow-delimiters
-      :hook (prog-mode . rainbow-delimiters-mode))
-#+end_src
 
 ** Which-Key
 Which-key is a helper utility for keychords (which key to press).
@@ -1016,6 +1110,21 @@ Which-key is a helper utility for keychords (which key to press).
       (which-key-idle-delay 0.8)       ;; Set the time delay (in seconds) for the which-key popup to appear
       (which-key-max-description-length 25)
       (which-key-allow-imprecise-window-fit nil)) ;; Fixes which-key window slipping out in Emacs Daemon
+#+end_src
+
+** System Packages
+#+begin_src emacs-lisp
+    (use-package system-packages)
+#+end_src
+
+** CRUX
+#+begin_src emacs-lisp
+    (use-package crux)
+#+end_src
+
+** Litter
+#+begin_src emacs-lisp
+    (use-package no-littering)
 #+end_src
 
 * Runtime Performance

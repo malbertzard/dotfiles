@@ -27,6 +27,213 @@
                          ("elpa" . "https://elpa.gnu.org/packages/")
                          ("nongnu" . "https://elpa.nongnu.org/nongnu/"))) ;; For Eat Terminal
 
+(use-package emacs
+  :custom
+  (menu-bar-mode nil)         ;; Disable the menu bar
+  (scroll-bar-mode nil)       ;; Disable the scroll bar
+  (tool-bar-mode nil)         ;; Disable the tool bar
+  (inhibit-startup-screen t)  ;; Disable welcome screen
+
+  (delete-selection-mode t)   ;; Select text and delete it by typing.
+  (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
+  (electric-pair-mode t)      ;; Turns on automatic parens pairing
+
+  (ring-bell-function 'ignore)
+  (blink-cursor-mode nil)     ;; Don't blink cursor
+  (global-auto-revert-mode t) ;; Automatically reload file and show changes if the file has changed
+
+  (dired-kill-when-opening-new-dired-buffer t) ;; Dired don't create new buffer
+  ;;(recentf-mode t) ;; Enable recent file mode
+
+  (truncate-lines t)
+  (display-line-numbers-type 'relative) ;; Relative line numbers
+  (global-display-line-numbers-mode t)  ;; Display line numbers
+
+  (dolist (mode '(org-mode-hook
+                  term-mode-hook
+                  shell-mode-hook
+                  treemacs-mode-hook
+                  eshell-mode-hook))
+
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+  (defalias 'yes-or-no-p 'y-or-n-p)
+
+  (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
+  (scroll-conservatively 10) ;; Smooth scrolling
+  (scroll-margin 10)
+
+  (tab-width 4)
+
+  (make-backup-files nil) ;; Stop creating ~ backup files
+  (auto-save-default nil) ;; Stop creating # auto save files
+  :hook
+  (prog-mode . (lambda () (hs-minor-mode t))) ;; Enable folding hide/show globally
+  :config
+  ;; Move customization variables to a separate file and load it, avoid filling up init.el with unnecessary variables
+  (setq custom-file (locate-user-emacs-file "custom-vars.el"))
+  (load custom-file 'noerror 'nomessage)
+  :bind (
+         ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
+         )
+  ;; Fix general.el leader key not working instantly in messages buffer with evil mode
+  ;; :ghook ('after-init-hook
+  ;;         (lambda (&rest _)
+  ;;           (when-let ((messages-buffer (get-buffer "*Messages*")))
+  ;;             (with-current-buffer messages-buffer
+  ;;               (evil-normalize-keymaps))))
+  ;;         nil nil t)
+  )
+
+(use-package general
+  :config
+  (general-evil-setup)
+  ;; Set up 'SPC' as the leader key
+  (general-create-definer start/leader-keys
+    :states '(normal insert visual motion emacs)
+    :keymaps 'override
+    :prefix "SPC"           ;; Set leader key
+    :global-prefix "C-SPC") ;; Set global leader key
+
+  (start/leader-keys
+    "p" '(projectile-command-map :wk "Projectile"))
+
+  (start/leader-keys
+    "f" '(:ignore t :wk "File")
+    "f f" '(find-file :wk "Search for files")
+    "f g" '(consult-ripgrep :wk "Ripgrep search in files")
+    "f l" '(consult-line :wk "Find line")
+    "f S" '(crux-sudo-edit :wk "Sudo edit file")
+    "f o" '(consult-outline :wk "Outline")
+    "f i" '(consult-imenu :wk "Imenu buffer locations"))
+
+  (start/leader-keys
+    "E" '(:ignore t :wk "Ediff/Eshell/Eval/EWW")
+    "E b" '(eval-buffer :wk "Evaluate elisp in buffer")
+    "E d" '(eval-defun :wk "Evaluate defun containing or after point")
+    "E e" '(eval-expression :wk "Evaluate and elisp expression")
+    "E f" '(ediff-files :wk "Run ediff on a pair of files")
+    "E F" '(ediff-files3 :wk "Run ediff on three files")
+    "E h" '(counsel-esh-history :which-key "Eshell history")
+    "E l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+    "E r" '(eval-region :wk "Evaluate elisp in region")
+    "E R" '(eww-reload :which-key "Reload current page in EWW")
+    "E s" '(eshell :which-key "Eshell")
+    "E w" '(eww :which-key "EWW emacs web wowser"))
+
+  (start/leader-keys
+    "b" '(:ignore t :wk "Buffers")
+    "b b" '(switch-to-buffer :wk "Switch to buffer")
+    "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+    "b C" '(clean-buffer-list :wk "Clean buffer list")
+    "b i" '(ibuffer :wk "Ibuffer")
+    "b k" '(kill-current-buffer :wk "Kill current buffer")
+    "b K" '(kill-some-buffers :wk "Kill multiple buffers")
+    "b O" '(crux-kill-other-buffers :wk "Kill all other buffers")
+    "b n" '(next-buffer :wk "Next buffer")
+    "b p" '(previous-buffer :wk "Previous buffer")
+    "b s" '(crux-create-scratch-buffer :wk "Scratch buffer")
+    "b r" '(revert-buffer :wk "Reload buffer")
+    "b R" '(rename-buffer :wk "Rename buffer"))
+
+  (start/leader-keys
+    "d" '(:ignore t :wk "Dired")
+    "d d" '(dired :wk "Open dired")
+    "d j" '(dired-jump :wk "Dired jump to current")
+    "d w" '(wdired-change-to-wdired-mode :wk "Writable dired")
+    "d f" '(wdired-finish-edit :wk "Writable dired finish edit"))
+
+  (start/leader-keys
+    "H" '(:ignore t :wk "Help")
+    "H d" '(devdocs-lookup :wk "DevDocs")
+    "H c" #'(helpful-command :wk "Command")
+    "H f" #'(helpful-function :wk "Function")
+    "H a" #'(helpful-at-point :wk "At point")
+    "H k" #'(helpful-key :wk "Key")
+    "H C" #'(helpful-callable :wk "Callable")
+    "H m" '(woman :wk "Man pages")
+    "H v" #'(helpful-variable :wk "Variable"))
+
+  (start/leader-keys
+    :keymaps 'prog-mode-map
+    "e" '(:ignore t :wk "Errors")
+    "e j" '(flycheck-next-error :wk "Next Error")
+    "e k" '(flycheck-previous-error :wk "Next Error")
+    "e l" '(flycheck-list-errors :wk "List Errors in Buffer")
+    "e e" '(flycheck-explain-error-at-point :wk "Explain Error")
+    "e d" '(flycheck-display-error-at-point :wk "Disply Error"))
+
+  (start/leader-keys
+    :keymaps 'eglot-mode-map
+    "l" '(:ignore t :wk "LSP")
+    "l d" '(eglot-find-declaration :wk "Find Declaration")
+    "l i" '(eglot-find-implementation :wk "Find Implementation")
+    "l t" '(eglot-find-type-definition :wk "Find Type definition")
+    "l I" '(eglot-code-action-organize-imports :wk "Organize Imports")
+    "l a" '(eglot-code-actions :wk "Code Actions")
+    "l f" '(eglot-format-buffer :wk "Format Buffer")
+    "l r" '(eglot-rename  :wk "Rename"))
+
+  (start/leader-keys
+    :~keymaps 'prog-mode-map
+    "h" '(:ignore t :wk "Harpoon")
+    "h t" '(harpoon-toggle-file :wk "Toggle file")
+    "h l" '(harpoon-toggle-quick-menu :wk "List")
+    "h c" '(harpoon-clear :wk "Clear")
+    "h d" '(harpoon-delete-item :wk "Delete")
+    "h 1" '(harpoon-go-to-1 :wk "Go to 1")
+    "h 2" '(harpoon-go-to-2 :wk "Go to 2")
+    "h 3" '(harpoon-go-to-3 :wk "Go to 3")
+    "h 4" '(harpoon-go-to-4 :wk "Go to 4")
+    "h 5" '(harpoon-go-to-5 :wk "Go to 5")
+    "h 6" '(harpoon-go-to-6 :wk "Go to 6")
+    "h 7" '(harpoon-go-to-7 :wk "Go to 7")
+    "h 8" '(harpoon-go-to-8 :wk "Go to 8")
+    "h 9" '(harpoon-go-to-9 :wk "Go to 9"))
+
+  (start/leader-keys
+    "g" '(:ignore t :wk "Git")
+    "g /" '(magit-displatch :wk "Magit dispatch")
+    "g ." '(magit-file-displatch :wk "Magit file dispatch")
+    "g b" '(magit-branch-checkout :wk "Switch branch")
+    "g c" '(:ignore t :wk "Create")
+    "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+    "g c c" '(magit-commit-create :wk "Create commit")
+    "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+    "g C" '(magit-clone :wk "Clone repo")
+    "g f" '(:ignore t :wk "Find")
+    "g f c" '(magit-show-commit :wk "Show commit")
+    "g f f" '(magit-find-file :wk "Magit find file")
+    "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+    "g F" '(magit-fetch :wk "Git fetch")
+    "g g" '(magit-status :wk "Magit status")
+    "g i" '(magit-init :wk "Initialize git repo")
+    "g l" '(magit-log-buffer-file :wk "Magit buffer log")
+    "g r" '(vc-revert :wk "Git revert file")
+    "g s" '(magit-stage-file :wk "Git stage file")
+    "g t" '(git-timemachine :wk "Git time machine")
+    "g u" '(magit-stage-file :wk "Git unstage file"))
+
+  (start/leader-keys
+    "m" '(:ignore t :wk "Misc")
+    "m d" '(dashboard-open :wk "Dashboard open")
+
+    "m c" '(:ignore t :wk "Config")
+    "m c o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
+    "m c R" '(restart-emacs :wk "Restart emacs")
+    "m c q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+    "m c r" '((lambda () (interactive)
+                (load-file "~/.config/emacs/init.el"))
+              :wk "Reload Emacs config")
+
+    "m T" '(:ignore t :wk "Toggle")
+    "m T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+    "m T l" '(display-line-numbers-mode :wk "Toggle line numbers"))
+
+  (start/leader-keys
+    "t" '(:ignore t :wk "Terminal")
+    "t t" '(eat :wk "Terminal toggle")))
+
 (use-package evil
   :init ;; Execute code Before a package is loaded
   (evil-mode)
@@ -99,194 +306,6 @@
   (define-key evil-normal-state-map (kbd "]F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" nil t)))
   (define-key evil-normal-state-map (kbd "[F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t t))))
 
-(use-package general
-  :config
-  (general-evil-setup)
-  ;; Set up 'SPC' as the leader key
-  (general-create-definer start/leader-keys
-    :states '(normal insert visual motion emacs)
-    :keymaps 'override
-    :prefix "SPC"           ;; Set leader key
-    :global-prefix "C-SPC") ;; Set global leader key
-
-  (start/leader-keys
-    "p" '(projectile-command-map :wk "Projectile"))
-
-  (start/leader-keys
-    "f" '(:ignore t :wk "Find")
-    "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
-    "f f" '(find-file :wk "Search for files")
-    "f g" '(consult-ripgrep :wk "Ripgrep search in files")
-    "f l" '(consult-line :wk "Find line")
-    "f i" '(consult-imenu :wk "Imenu buffer locations"))
-
-  (start/leader-keys
-    "E" '(:ignore t :wk "Ediff/Eshell/Eval/EWW")
-    "E b" '(eval-buffer :wk "Evaluate elisp in buffer")
-    "E d" '(eval-defun :wk "Evaluate defun containing or after point")
-    "E e" '(eval-expression :wk "Evaluate and elisp expression")
-    "E f" '(ediff-files :wk "Run ediff on a pair of files")
-    "E F" '(ediff-files3 :wk "Run ediff on three files")
-    "E h" '(counsel-esh-history :which-key "Eshell history")
-    "E l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-    "E r" '(eval-region :wk "Evaluate elisp in region")
-    "E R" '(eww-reload :which-key "Reload current page in EWW")
-    "E s" '(eshell :which-key "Eshell")
-    "E w" '(eww :which-key "EWW emacs web wowser"))
-
-
-  (start/leader-keys
-    "C" '(:ignore t :wk "Config")
-    "C o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
-    "C R" '(restart-emacs :wk "Restart emacs")
-    "C q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-    "C r" '((lambda () (interactive)
-              (load-file "~/.config/emacs/init.el"))
-            :wk "Reload Emacs config"))
-
-  (start/leader-keys
-   "b" '(:ignore t :wk "All Buffers")
-   "b b" '(switch-to-buffer :wk "Switch to buffer")
-   "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
-   "b C" '(clean-buffer-list :wk "Clean buffer list")
-   "b i" '(ibuffer :wk "Ibuffer")
-   "b k" '(kill-current-buffer :wk "Kill current buffer")
-   "b K" '(kill-some-buffers :wk "Kill multiple buffers")
-   "b n" '(next-buffer :wk "Next buffer")
-   "b p" '(previous-buffer :wk "Previous buffer")
-   "b r" '(revert-buffer :wk "Reload buffer")
-   "b R" '(rename-buffer :wk "Rename buffer")
-   "b s" '(basic-save-buffer :wk "Save buffer")
-   "b S" '(save-some-buffers :wk "Save multiple buffers"))
-
-  (start/leader-keys
-    "d" '(:ignore t :wk "Dired")
-    "d d" '(dired :wk "Open dired")
-    "d j" '(dired-jump :wk "Dired jump to current")
-    "d w" '(wdired-change-to-wdired-mode :wk "Writable dired")
-    "d f" '(wdired-finish-edit :wk "Writable dired finish edit"))
-
-  (start/leader-keys
-    "H" '(:ignore t :wk "Help")
-    "H d" '(devdocs-lookup :wk "DevDocs")
-    "H c" #'(helpful-command :wk "Command")
-    "H f" #'(helpful-function :wk "Function")
-    "H a" #'(helpful-at-point :wk "At point")
-    "H k" #'(helpful-key :wk "Key")
-    "H C" #'(helpful-callable :wk "Callable")
-    "H m" '(woman :wk "Man pages")
-    "H v" #'(helpful-variable :wk "Variable"))
-
-  (start/leader-keys
-    :keymaps 'prog-mode-map
-    "e" '(:ignore t :wk "Errors")
-    "e j" '(flycheck-next-error :wk "Next Error")
-    "e k" '(flycheck-previous-error :wk "Next Error")
-    "e l" '(flycheck-list-errors :wk "List Errors in Buffer")
-    "e e" '(flycheck-explain-error-at-point :wk "Explain Error")
-    "e d" '(flycheck-display-error-at-point :wk "Disply Error"))
-
-  (start/leader-keys
-    :keymaps 'eglot-mode-map
-    "l" '(:ignore t :wk "LSP")
-    "l d" '(eglot-find-declaration :wk "Find Declaration")
-    "l i" '(eglot-find-implementation :wk "Find Implementation")
-    "l t" '(eglot-find-type-definition :wk "Find Type definition")
-    "l I" '(eglot-code-action-organize-imports :wk "Organize Imports")
-    "l a" '(eglot-code-actions :wk "Code Actions")
-    "l f" '(eglot-format-buffer :wk "Format Buffer")
-    "l r" '(eglot-rename  :wk "Rename"))
-
-  (start/leader-keys
-    "g" '(:ignore t :wk "Git")
-    "g /" '(magit-displatch :wk "Magit dispatch")
-    "g ." '(magit-file-displatch :wk "Magit file dispatch")
-    "g b" '(magit-branch-checkout :wk "Switch branch")
-    "g c" '(:ignore t :wk "Create")
-    "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
-    "g c c" '(magit-commit-create :wk "Create commit")
-    "g c f" '(magit-commit-fixup :wk "Create fixup commit")
-    "g C" '(magit-clone :wk "Clone repo")
-    "g f" '(:ignore t :wk "Find")
-    "g f c" '(magit-show-commit :wk "Show commit")
-    "g f f" '(magit-find-file :wk "Magit find file")
-    "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
-    "g F" '(magit-fetch :wk "Git fetch")
-    "g g" '(magit-status :wk "Magit status")
-    "g i" '(magit-init :wk "Initialize git repo")
-    "g l" '(magit-log-buffer-file :wk "Magit buffer log")
-    "g r" '(vc-revert :wk "Git revert file")
-    "g s" '(magit-stage-file :wk "Git stage file")
-    "g t" '(git-timemachine :wk "Git time machine")
-    "g u" '(magit-stage-file :wk "Git unstage file"))
-
-  (start/leader-keys
-    "s" '(:ignore t :wk "Show")
-    "s e" '(eat :wk "Eat terminal"))
-
-  (start/leader-keys
-    "T" '(:ignore t :wk "Toggle")
-    "T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-    "T l" '(display-line-numbers-mode :wk "Toggle line numbers")))
-
-(use-package emacs
-  :custom
-  (menu-bar-mode nil)         ;; Disable the menu bar
-  (scroll-bar-mode nil)       ;; Disable the scroll bar
-  (tool-bar-mode nil)         ;; Disable the tool bar
-  (inhibit-startup-screen t)  ;; Disable welcome screen
-
-  (delete-selection-mode t)   ;; Select text and delete it by typing.
-  (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
-  (electric-pair-mode t)      ;; Turns on automatic parens pairing
-
-  (ring-bell-function 'ignore)
-  (blink-cursor-mode nil)     ;; Don't blink cursor
-  (global-auto-revert-mode t) ;; Automatically reload file and show changes if the file has changed
-
-  (dired-kill-when-opening-new-dired-buffer t) ;; Dired don't create new buffer
-  ;;(recentf-mode t) ;; Enable recent file mode
-
-  (global-visual-line-mode t)           ;; Enable truncated lines
-  (display-line-numbers-type 'relative) ;; Relative line numbers
-  (global-display-line-numbers-mode t)  ;; Display line numbers
-
-  (dolist (mode '(org-mode-hook
-                  term-mode-hook
-                  shell-mode-hook
-                  treemacs-mode-hook
-                  eshell-mode-hook))
-
-    (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-  (defalias 'yes-or-no-p 'y-or-n-p)
-
-  (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
-  (scroll-conservatively 10) ;; Smooth scrolling
-  (scroll-margin 10)
-
-  (tab-width 4)
-
-  (make-backup-files nil) ;; Stop creating ~ backup files
-  (auto-save-default nil) ;; Stop creating # auto save files
-  :hook
-  (prog-mode . (lambda () (hs-minor-mode t))) ;; Enable folding hide/show globally
-  :config
-  ;; Move customization variables to a separate file and load it, avoid filling up init.el with unnecessary variables
-  (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-  (load custom-file 'noerror 'nomessage)
-  :bind (
-         ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
-         )
-  ;; Fix general.el leader key not working instantly in messages buffer with evil mode
-  :ghook ('after-init-hook
-          (lambda (&rest _)
-            (when-let ((messages-buffer (get-buffer "*Messages*")))
-              (with-current-buffer messages-buffer
-                (evil-normalize-keymaps))))
-          nil nil t)
-  )
-
 (use-package doom-themes
   :config
   (setq doom-themes-enable-bold t
@@ -295,12 +314,24 @@
   (doom-themes-org-config))
 
 (use-package dashboard
-  :config
-  (dashboard-setup-startup-hook)
-  (setq dashboard-startup-banner 'logo
-        dashboard-banner-logo-title "Villainous Emacs!"
-        dashboard-items nil
-        dashboard-set-footer nil))
+  :custom
+  (dashboard-banner-logo-title "With Great Power Comes Great Responsibility!")
+  (dashboard-center-content t)
+  (dashboard-items '((projects . 5)))
+  (dashboard-set-file-icons t)
+  (dashboard-set-footer nil)
+  (dashboard-projects-backend 'projectile)
+  (dashboard-set-heading-icons t)
+  (dashboard-set-navigator t)
+  (dashboard-show-shortcuts nil)
+  (dashboard-startupify-list '(   dashboard-insert-banner
+                                  dashboard-insert-newline
+                                  dashboard-insert-banner-title
+                                  dashboard-insert-items
+                                  dashboard-insert-newline 
+                                  dashboard-insert-init-info))
+  (dashboard-startup-banner 'logo)
+  :config (dashboard-setup-startup-hook))
 
 ;; (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
 
@@ -406,10 +437,13 @@
   :ensure nil
   :after org)
 
-(use-package org-bullets
-  :hook (org-mode . org-bullets-mode)
-  :custom
-  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+(use-package org-modern
+  :hook (org-mode . org-modern-mode))
+
+;; (use-package org-excalidraw
+;;   :straight (:type git :host github :repo "wdavew/org-excalidraw")
+;;   :config
+;;   (org-excalidraw-directory "~/path_to_store_excalidraw_files"))
 
 (defun start/org-mode-visual-fill ()
   (setq visual-fill-column-width 200
@@ -418,6 +452,12 @@
 
 (use-package visual-fill-column
   :hook (org-mode . start/org-mode-visual-fill))
+
+(use-package markdown-mode
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown")
+  :bind (:map markdown-mode-map
+              ("C-c C-e" . markdown-do)))
 
 (use-package flycheck)
 
@@ -471,8 +511,32 @@
 
 (setq treesit-auto-langs '(python rust go php))
 
+;; Debug with DAP without LspMode
+;; (use-package dape)
+
 (use-package eat
   :hook ('eshell-load-hook #'eat-eshell-mode))
+
+(use-package magit
+  :commands magit-status)
+
+(use-package magit-todos
+  :after magit
+  :config (magit-todos-mode 1))
+
+(use-package git-gutter
+  :config(global-git-gutter-mode +1))
+
+(use-package diff-hl
+  :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)
+         (magit-pre-refresh  . diff-hl-magit-pre-refresh)
+         (magit-post-refresh . diff-hl-magit-post-refresh))
+  :init (global-diff-hl-mode))
+
+(use-package devdocs)
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package nerd-icons
   :if (display-graphic-p))
@@ -510,18 +574,6 @@
   :config
   (evil-define-key 'normal 'prog-mode-map (kbd "C-j") 'drag-stuff-down)
   (evil-define-key 'normal 'prog-mode-map (kbd "C-k") 'drag-stuff-up))
-
-(use-package magit
-  :commands magit-status)
-
-(use-package git-gutter
-  :config(global-git-gutter-mode +1))
-
-(use-package diff-hl
-  :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)
-         (magit-pre-refresh  . diff-hl-magit-pre-refresh)
-         (magit-post-refresh . diff-hl-magit-post-refresh))
-  :init (global-diff-hl-mode))
 
 (use-package corfu
   ;; Optional customizations
@@ -686,11 +738,6 @@
 
 (use-package helpful)
 
-(use-package devdocs)
-
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
-
 (use-package which-key
   :init
   (which-key-mode 1)
@@ -704,6 +751,12 @@
   (which-key-idle-delay 0.8)       ;; Set the time delay (in seconds) for the which-key popup to appear
   (which-key-max-description-length 25)
   (which-key-allow-imprecise-window-fit nil)) ;; Fixes which-key window slipping out in Emacs Daemon
+
+(use-package system-packages)
+
+(use-package crux)
+
+(use-package no-littering)
 
 ;; Make gc pauses faster by decreasing the threshold.
 (setq gc-cons-threshold (* 2 1000 1000))
