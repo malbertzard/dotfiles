@@ -1,12 +1,3 @@
-;; Kickstart.emacs is *not* a distribution.
-;; It's a template for your own configuration.
-
-;; It is *recommeded* to configure it from the *config.org* file.
-;; The goal is that you read every line, top-to-bottom, understand
-;; what your configuration is doing, and modify it to suit your needs.
-
-;; You can delete this when you're done. It's your config now. :)
-
 ;; The default is 800 kilobytes. Measured in bytes.
 (setq gc-cons-threshold (* 50 1000 1000))
 
@@ -125,122 +116,122 @@
     "E R" '(eww-reload :which-key "Reload current page in EWW")
     "E s" '(eshell :which-key "Eshell")
     "E W" '(eww-readable :which-key "Wreadble")
-  "E w" '(eww :which-key "EWW emacs web wowser"))
+    "E w" '(eww :which-key "EWW emacs web wowser"))
 
-(start/leader-keys
-  "b" '(:ignore t :wk "Buffers")
-  "b b" '(switch-to-buffer :wk "Switch to buffer")
-  "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
-  "b C" '(clean-buffer-list :wk "Clean buffer list")
-  "b i" '(ibuffer :wk "Ibuffer")
-  "b k" '(kill-current-buffer :wk "Kill current buffer")
-  "b K" '(kill-some-buffers :wk "Kill multiple buffers")
-  "b O" '(crux-kill-other-buffers :wk "Kill all other buffers")
-  "b n" '(next-buffer :wk "Next buffer")
-  "b p" '(previous-buffer :wk "Previous buffer")
-  "b s" '(crux-create-scratch-buffer :wk "Scratch buffer")
-  "b r" '(revert-buffer :wk "Reload buffer")
-  "b R" '(rename-buffer :wk "Rename buffer"))
+  (start/leader-keys
+    "b" '(:ignore t :wk "Buffers")
+    "b b" '(switch-to-buffer :wk "Switch to buffer")
+    "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+    "b C" '(clean-buffer-list :wk "Clean buffer list")
+    "b i" '(ibuffer :wk "Ibuffer")
+    "b k" '(kill-current-buffer :wk "Kill current buffer")
+    "b K" '(kill-some-buffers :wk "Kill multiple buffers")
+    "b O" '(crux-kill-other-buffers :wk "Kill all other buffers")
+    "b n" '(next-buffer :wk "Next buffer")
+    "b p" '(previous-buffer :wk "Previous buffer")
+    "b s" '(crux-create-scratch-buffer :wk "Scratch buffer")
+    "b r" '(revert-buffer :wk "Reload buffer")
+    "b R" '(rename-buffer :wk "Rename buffer"))
 
-(start/leader-keys
-  "d" '(:ignore t :wk "Dired")
-  "d S" '(crux-sudo-edit :wk "Sudo edit file")
-  "d d" '(dired :wk "Open dired")
-  "d j" '(dired-jump :wk "Dired jump to current")
-  "d w" '(wdired-change-to-wdired-mode :wk "Writable dired")
-  "d f" '(wdired-finish-edit :wk "Writable dired finish edit"))
+  (start/leader-keys
+    "d" '(:ignore t :wk "Dired")
+    "d S" '(crux-sudo-edit :wk "Sudo edit file")
+    "d d" '(dired :wk "Open dired")
+    "d j" '(dired-jump :wk "Dired jump to current")
+    "d w" '(wdired-change-to-wdired-mode :wk "Writable dired")
+    "d f" '(wdired-finish-edit :wk "Writable dired finish edit"))
 
-(start/leader-keys
-  "H" '(:ignore t :wk "Help")
-  "H d" '(devdocs-lookup :wk "DevDocs")
-  "H c" #'(helpful-command :wk "Command")
-  "H f" #'(helpful-function :wk "Function")
-  "H a" #'(helpful-at-point :wk "At point")
-  "H k" #'(helpful-key :wk "Key")
-  "H C" #'(helpful-callable :wk "Callable")
-  "H m" '(woman :wk "Man pages")
-  "H v" #'(helpful-variable :wk "Variable"))
+  (start/leader-keys
+    "H" '(:ignore t :wk "Help")
+    "H d" '(devdocs-lookup :wk "DevDocs")
+    "H c" #'(helpful-command :wk "Command")
+    "H f" #'(helpful-function :wk "Function")
+    "H a" #'(helpful-at-point :wk "At point")
+    "H k" #'(helpful-key :wk "Key")
+    "H C" #'(helpful-callable :wk "Callable")
+    "H m" '(woman :wk "Man pages")
+    "H v" #'(helpful-variable :wk "Variable"))
 
-(start/leader-keys
-  :keymaps 'prog-mode-map
-  "e" '(:ignore t :wk "Errors")
-  "e j" '(flycheck-next-error :wk "Next Error")
-  "e k" '(flycheck-previous-error :wk "Next Error")
-  "e l" '(flycheck-list-errors :wk "List Errors in Buffer")
-  "e e" '(flycheck-explain-error-at-point :wk "Explain Error")
-  "e d" '(flycheck-display-error-at-point :wk "Disply Error"))
+  (start/leader-keys
+    :keymaps 'prog-mode-map
+    "e" '(:ignore t :wk "Errors")
+    "e j" '(flycheck-next-error :wk "Next Error")
+    "e k" '(flycheck-previous-error :wk "Next Error")
+    "e l" '(flycheck-list-errors :wk "List Errors in Buffer")
+    "e e" '(flycheck-explain-error-at-point :wk "Explain Error")
+    "e d" '(flycheck-display-error-at-point :wk "Disply Error"))
 
-(start/leader-keys
-  :keymaps 'eglot-mode-map
-  "l" '(:ignore t :wk "LSP")
-  "l d" '(eglot-find-declaration :wk "Find Declaration")
-  "l i" '(eglot-find-implementation :wk "Find Implementation")
-  "l t" '(eglot-find-type-definition :wk "Find Type definition")
-  "l I" '(eglot-code-action-organize-imports :wk "Organize Imports")
-  "l a" '(eglot-code-actions :wk "Code Actions")
-  "l f" '(eglot-format-buffer :wk "Format Buffer")
-  "l r" '(eglot-rename  :wk "Rename"))
+  (start/leader-keys
+    :keymaps 'eglot-mode-map
+    "l" '(:ignore t :wk "LSP")
+    "l d" '(eglot-find-declaration :wk "Find Declaration")
+    "l i" '(eglot-find-implementation :wk "Find Implementation")
+    "l t" '(eglot-find-type-definition :wk "Find Type definition")
+    "l I" '(eglot-code-action-organize-imports :wk "Organize Imports")
+    "l a" '(eglot-code-actions :wk "Code Actions")
+    "l f" '(eglot-format-buffer :wk "Format Buffer")
+    "l r" '(eglot-rename  :wk "Rename"))
 
-(start/leader-keys
-  :~keymaps 'prog-mode-map
-  "h" '(:ignore t :wk "Harpoon")
-  "h t" '(harpoon-toggle-file :wk "Toggle file")
-  "h l" '(harpoon-toggle-quick-menu :wk "List")
-  "h c" '(harpoon-clear :wk "Clear")
-  "h d" '(harpoon-delete-item :wk "Delete")
-  "h 1" '(harpoon-go-to-1 :wk "Go to 1")
-  "h 2" '(harpoon-go-to-2 :wk "Go to 2")
-  "h 3" '(harpoon-go-to-3 :wk "Go to 3")
-  "h 4" '(harpoon-go-to-4 :wk "Go to 4")
-  "h 5" '(harpoon-go-to-5 :wk "Go to 5")
-  "h 6" '(harpoon-go-to-6 :wk "Go to 6")
-  "h 7" '(harpoon-go-to-7 :wk "Go to 7")
-  "h 8" '(harpoon-go-to-8 :wk "Go to 8")
-  "h 9" '(harpoon-go-to-9 :wk "Go to 9"))
+  (start/leader-keys
+    :~keymaps 'prog-mode-map
+    "h" '(:ignore t :wk "Harpoon")
+    "h t" '(harpoon-toggle-file :wk "Toggle file")
+    "h l" '(harpoon-toggle-quick-menu :wk "List")
+    "h c" '(harpoon-clear :wk "Clear")
+    "h d" '(harpoon-delete-item :wk "Delete")
+    "h 1" '(harpoon-go-to-1 :wk "Go to 1")
+    "h 2" '(harpoon-go-to-2 :wk "Go to 2")
+    "h 3" '(harpoon-go-to-3 :wk "Go to 3")
+    "h 4" '(harpoon-go-to-4 :wk "Go to 4")
+    "h 5" '(harpoon-go-to-5 :wk "Go to 5")
+    "h 6" '(harpoon-go-to-6 :wk "Go to 6")
+    "h 7" '(harpoon-go-to-7 :wk "Go to 7")
+    "h 8" '(harpoon-go-to-8 :wk "Go to 8")
+    "h 9" '(harpoon-go-to-9 :wk "Go to 9"))
 
-(start/leader-keys
-  "g" '(:ignore t :wk "Git")
-  "g /" '(magit-displatch :wk "Magit dispatch")
-  "g ." '(magit-file-displatch :wk "Magit file dispatch")
-  "g b" '(magit-branch-checkout :wk "Switch branch")
-  "g c" '(:ignore t :wk "Create")
-  "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
-  "g c c" '(magit-commit-create :wk "Create commit")
-  "g c f" '(magit-commit-fixup :wk "Create fixup commit")
-  "g C" '(magit-clone :wk "Clone repo")
-  "g f" '(:ignore t :wk "Find")
-  "g f c" '(magit-show-commit :wk "Show commit")
-  "g f f" '(magit-find-file :wk "Magit find file")
-  "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
-  "g F" '(magit-fetch :wk "Git fetch")
-  "g g" '(magit-status :wk "Magit status")
-  "g i" '(magit-init :wk "Initialize git repo")
-  "g l" '(magit-log-buffer-file :wk "Magit buffer log")
-  "g r" '(vc-revert :wk "Git revert file")
-  "g s" '(magit-stage-file :wk "Git stage file")
-  "g t" '(git-timemachine :wk "Git time machine")
-  "g u" '(magit-stage-file :wk "Git unstage file"))
+  (start/leader-keys
+    "g" '(:ignore t :wk "Git")
+    "g /" '(magit-displatch :wk "Magit dispatch")
+    "g ." '(magit-file-displatch :wk "Magit file dispatch")
+    "g b" '(magit-branch-checkout :wk "Switch branch")
+    "g c" '(:ignore t :wk "Create")
+    "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+    "g c c" '(magit-commit-create :wk "Create commit")
+    "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+    "g C" '(magit-clone :wk "Clone repo")
+    "g f" '(:ignore t :wk "Find")
+    "g f c" '(magit-show-commit :wk "Show commit")
+    "g f f" '(magit-find-file :wk "Magit find file")
+    "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+    "g F" '(magit-fetch :wk "Git fetch")
+    "g g" '(magit-status :wk "Magit status")
+    "g i" '(magit-init :wk "Initialize git repo")
+    "g l" '(magit-log-buffer-file :wk "Magit buffer log")
+    "g r" '(vc-revert :wk "Git revert file")
+    "g s" '(magit-stage-file :wk "Git stage file")
+    "g t" '(git-timemachine :wk "Git time machine")
+    "g u" '(magit-stage-file :wk "Git unstage file"))
 
-(start/leader-keys
-  "m" '(:ignore t :wk "Misc")
-  "m d" '(dashboard-open :wk "Dashboard open")
+  (start/leader-keys
+    "m" '(:ignore t :wk "Misc")
+    "m d" '(dashboard-open :wk "Dashboard open")
 
-  "m c" '(:ignore t :wk "Config")
-  "m c C" '(crux-recompile-init :wk "Compile Init")
-  "m c o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
-  "m c R" '(restart-emacs :wk "Restart emacs")
-  "m c q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-  "m c r" '((lambda () (interactive)
-              (load-file "~/.config/emacs/init.el"))
-            :wk "Reload Emacs config")
+    "m c" '(:ignore t :wk "Config")
+    "m c C" '(crux-recompile-init :wk "Compile Init")
+    "m c o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
+    "m c R" '(restart-emacs :wk "Restart emacs")
+    "m c q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
+    "m c r" '((lambda () (interactive)
+                (load-file "~/.config/emacs/init.el"))
+              :wk "Reload Emacs config")
 
-  "m T" '(:ignore t :wk "Toggle")
-  "m T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-  "m T l" '(display-line-numbers-mode :wk "Toggle line numbers"))
+    "m T" '(:ignore t :wk "Toggle")
+    "m T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
+    "m T l" '(display-line-numbers-mode :wk "Toggle line numbers"))
 
-(start/leader-keys
-  "t" '(:ignore t :wk "Terminal")
-  "t t" '(eat :wk "Terminal toggle")))
+  (start/leader-keys
+    "t" '(:ignore t :wk "Terminal")
+    "t t" '(eat :wk "Terminal toggle")))
 
 (use-package evil
   :init ;; Execute code Before a package is loaded
@@ -364,7 +355,7 @@
 (use-package doom-modeline
   :init (doom-modeline-mode 1)
   :config
-  (setq doom-modeline-height 64
+  (setq doom-modeline-height 42
         doom-modeline-percent-position nil
         doom-modeline-position-line-format nil
         doom-modeline-buffer-encoding nil
@@ -382,12 +373,13 @@
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 
 (use-package projectile
-  :init
-  (projectile-mode)
-  :custom
-  (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
-  (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
-  (projectile-project-search-path '("~/projects/" "~/work/" ("~/GitHub" . 1)))) ;; . 1 means only search the first subdirectory level for projects
+      :init
+      (projectile-mode)
+      :custom
+      (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
+      (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
+      (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
+    
 ;; Use Bookmarks for smaller, not standard projects
 
 (use-package eglot
@@ -429,13 +421,13 @@
   (org-mode . org-indent-mode))
 
 (custom-set-faces
- '(org-level-1 ((t (:inherit outline-1 :height 1.7))))
- '(org-level-2 ((t (:inherit outline-2 :height 1.6))))
- '(org-level-3 ((t (:inherit outline-3 :height 1.5))))
- '(org-level-4 ((t (:inherit outline-4 :height 1.4))))
- '(org-level-5 ((t (:inherit outline-5 :height 1.3))))
- '(org-level-6 ((t (:inherit outline-5 :height 1.2))))
- '(org-level-7 ((t (:inherit outline-5 :height 1.1)))))
+ '(org-level-1 ((t (:inherit outline-1 :height 1.5))))
+ '(org-level-2 ((t (:inherit outline-2 :height 1.4))))
+ '(org-level-3 ((t (:inherit outline-3 :height 1.3))))
+ '(org-level-4 ((t (:inherit outline-4 :height 1.2))))
+ '(org-level-5 ((t (:inherit outline-5 :height 1.1))))
+ '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
+ '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
 
 (use-package toc-org
   :commands toc-org-enable
@@ -765,6 +757,10 @@
 (use-package crux)
 
 (use-package no-littering)
+
+(use-package pdf-tools)
+
+(use-package theme-magic)
 
 ;; Make gc pauses faster by decreasing the threshold.
 (setq gc-cons-threshold (* 2 1000 1000))
