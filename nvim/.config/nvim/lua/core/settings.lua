@@ -59,25 +59,25 @@ M.lsp_servers = {
   "gopls",
   "pyright",
   "lua_ls",
-  "clangd",
+  -- "clangd",
   "bashls",
 
   -- Work JS Stuff
   "tsserver",
 
   -- Work Php Stuff
-  "phpactor",
-  "antlersls",
+  -- "phpactor",
+  -- "antlersls",
 
   -- Markup Langs
   "jsonls",
   "yamlls",
   "marksman",
-  "texlab",
+  -- "texlab",
 
   -- CSS Stuff
   -- "tailwindcss",
-  "cssls",
+  -- "cssls",
 }
 
 -- Non LSP Tools that should be installed by Mason
@@ -86,7 +86,7 @@ M.tools = {
 
   -- Formatters
   -- "flake8",
-  "rustywind",
+  -- "rustywind",
 }
 
 -- enable greping in hidden files

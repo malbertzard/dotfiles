@@ -89,7 +89,7 @@ fi
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
-alias nv='~/nvim.appimage'
+alias nv='nvim'
 alias c='clear'
 
 # Add an "alert" alias for long running commands.  Use like so:
@@ -125,3 +125,6 @@ bind '"\e[B": history-search-forward'
 bind '"\eOA": history-search-backward'
 bind '"\eOB": history-search-forward'
 . "$HOME/.cargo/env"
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"

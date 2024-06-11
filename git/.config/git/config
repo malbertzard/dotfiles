@@ -1,7 +1,7 @@
 [user]
     email = malbertzard@gmail.com
     name = Mathis Albertzard
-    signingKey = "~/.ssh/gh_ed25519"
+    signingKey = "~/.ssh/githubDeb"
 
 [alias]
     ;
@@ -84,7 +84,6 @@
         cd $1.git; \
         git config --bool core.bare true; \
         }; f"
-
     ;
     ; Etc
     ;
@@ -97,20 +96,11 @@
     # Removes all local branches that doen't have a remote anymore
     pl = !git remote prune origin && git branch -vv | grep ': entfernt]' | awk '{print $1}' | xargs -r git branch -D
 
-
 [init]
     defaultBranch = main
 
 [rebase]
     autosquash = true
-
-[credential "https://github.com"]
-    helper =
-    helper = !/usr/bin/gh auth git-credential
-
-[credential "https://gist.github.com"]
-    helper =
-    helper = !/usr/bin/gh auth git-credential
 
 [branch]
     sort = -committerdate
@@ -119,13 +109,16 @@
     enabled = true
     autoUpdate = true
 
-[maintenance]
-    auto = true
-    strategy = incremental
-    repo = !ls ~/GitHub
-
 [gpg]
     format = ssh
 
 [commit]
     gpgsign = true
+[credential "https://github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential
+[http]
+	postBuffer = 157286400

@@ -28,6 +28,7 @@
   (delete-selection-mode t)   ;; Select text and delete it by typing.
   (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
   (electric-pair-mode t)      ;; Turns on automatic parens pairing
+  (display-battery-mode t)
 
   (ring-bell-function 'ignore)
   (blink-cursor-mode nil)     ;; Don't blink cursor
@@ -173,8 +174,9 @@
     "l r" '(eglot-rename  :wk "Rename"))
 
   (start/leader-keys
-    :~keymaps 'prog-mode-map
+    :keymaps 'prog-mode-map
     "h" '(:ignore t :wk "Harpoon")
+    "h a" '(harpoon-add-file :wk "Add file")
     "h t" '(harpoon-toggle-file :wk "Toggle file")
     "h l" '(harpoon-toggle-quick-menu :wk "List")
     "h c" '(harpoon-clear :wk "Clear")
@@ -272,10 +274,6 @@
 (use-package evil-textobj-tree-sitter
   :after tree-sitter evil
   :config
-  (define-key evil-outer-text-objects-map "m" (evil-textobj-tree-sitter-get-textobj "import"
-                                                '((python-mode . [(import_statement) @import])
-                                                  (go-mode . [(import_spec) @import])
-                                                  (rust-mode . [(use_declaration) @import]))))
   (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
   (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
   (define-key evil-outer-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "class.outer"))
@@ -360,6 +358,7 @@
         doom-modeline-position-line-format nil
         doom-modeline-buffer-encoding nil
         doom-modeline-position-column-format nil
+        doom-modeline-battery t
         doom-modeline-icon t
         doom-modeline-bar-width 5))
 
@@ -373,13 +372,13 @@
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 
 (use-package projectile
-      :init
-      (projectile-mode)
-      :custom
-      (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
-      (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
-      (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
-    
+  :init
+  (projectile-mode)
+  :custom
+  (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
+  (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
+  (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
+
 ;; Use Bookmarks for smaller, not standard projects
 
 (use-package eglot
@@ -390,6 +389,9 @@
   (add-hook 'python-mode-hook 'eglot-ensure)
   (add-hook 'php-mode-hook 'eglot-ensure)
   (add-hook 'go-mode-hook 'eglot-ensure)
+  (add-hook 'rust-ts-mode-hook 'eglot-ensure)
+  (add-hook 'yaml-mode-hook 'eglot-ensure)
+  (add-hook 'bash-mode-hook 'eglot-ensure)
   :custom
   (eglot-autoshutdown t)
   (fset #'jsonrpc--log-event #'ignore)
@@ -403,13 +405,21 @@
   :hook (prog-mode . yas-minor-mode))
 
 (use-package lua-mode
+  :ensure nil
   :mode "\\.lua\\'") ;; Only start in a lua file
 
 (use-package php-mode
+  :ensure nil
   :mode "\\.php\\'") ;; Only start in a php file
+
+;; Install and configure rust-mode for Rust programming.
+(use-package rust-mode
+  :ensure nil
+  :mode "\\.rs\\'")
 
 ;; Install and configure go-mode for Go programming.
 (use-package go-mode
+  :ensure nil
   :mode "\\.go\\'")
 
 (use-package org
@@ -453,11 +463,11 @@
 (use-package visual-fill-column
   :hook (org-mode . start/org-mode-visual-fill))
 
-(use-package markdown-mode
-  :mode ("README\\.md\\'" . gfm-mode)
-  :init (setq markdown-command "multimarkdown")
-  :bind (:map markdown-mode-map
-              ("C-c C-e" . markdown-do)))
+;; (use-package markdown-mode
+;;   :mode ("README\\.md\\'" . gfm-mode)
+;;   :init (setq markdown-command "multimarkdown")
+;;   :bind (:map markdown-mode-map
+;;               ("C-c C-e" . markdown-down)))
 
 (use-package flycheck)
 
@@ -470,37 +480,28 @@
   :config(global-tree-sitter-mode
           (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
-(setq major-mode-remap-alist
-      '((yaml-mode . yaml-ts-mode)
-        (bash-mode . bash-ts-mode)
-        (js2-mode . js-ts-mode)
-        (typescript-mode . typescript-ts-mode)
-        (json-mode . json-ts-mode)
-        ;; (php-mode . php-ts-mode)
-        ;; (go-mode . go-ts-mode)
-        (css-mode . css-ts-mode)
-        (python-mode . python-ts-mode)))
+;; (setq treesit-language-source-alist
+;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+;;         (cmake "https://github.com/uyha/tree-sitter-cmake")
+;;         (css "https://github.com/tree-sitter/tree-sitter-css")
+;;         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+;;         (go "https://github.com/tree-sitter/tree-sitter-go")
+;;         (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+;;         (html "https://github.com/tree-sitter/tree-sitter-html")
+;;         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+;;         (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+;;         (rust "https://github.com/tree-sitter/tree-sitter-rust")
+;;         (json "https://github.com/tree-sitter/tree-sitter-json")
+;;         (make "https://github.com/alemuller/tree-sitter-make")
+;;         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+;;         (python "https://github.com/tree-sitter/tree-sitter-python")
+;;         (toml "https://github.com/tree-sitter/tree-sitter-toml")
+;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+;;         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+;;         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-(use-package tree-sitter-langs
-  :after tree-sitter)
-
-(setq treesit-language-source-alist
-      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-        (cmake "https://github.com/uyha/tree-sitter-cmake")
-        (css "https://github.com/tree-sitter/tree-sitter-css")
-        (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-        (go "https://github.com/tree-sitter/tree-sitter-go")
-        (html "https://github.com/tree-sitter/tree-sitter-html")
-        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-        (json "https://github.com/tree-sitter/tree-sitter-json")
-        (make "https://github.com/alemuller/tree-sitter-make")
-        (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-        (python "https://github.com/tree-sitter/tree-sitter-python")
-        (php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src")
-        (toml "https://github.com/tree-sitter/tree-sitter-toml")
-        (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-        (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-        (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+;; Install all langs
+;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
 
 (use-package treesit-auto
   :custom
@@ -508,8 +509,6 @@
   :config
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
-
-(setq treesit-auto-langs '(python rust go php))
 
 ;; Debug with DAP without LspMode
 ;; (use-package dape)
@@ -552,12 +551,7 @@
   :ensure nil
   :commands (dired dired-jump)
   :custom
-  (setq delete-by-moving-to-trash t)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'dired-up-directory
-    "l" 'dired-find-file
-    dired-listing-switches "-agho --group-directories-first"))
+  (setq delete-by-moving-to-trash t))
 
 (use-package dired-open
   :commands (dired dired-jump)
