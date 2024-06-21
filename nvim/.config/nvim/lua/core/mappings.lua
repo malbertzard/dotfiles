@@ -66,7 +66,7 @@ vim.keymap.set("n", "<leader>QC",
   { desc = "Clear Quickfix List" }
 )
 
-vim.keymap.set("n", "<leader>bD", ":%bd|e#|bd#", { desc = "Close all but the current buffer" })
+vim.keymap.set("n", "<leader>bD", ":%bd|e#|bd#<cr>", { desc = "Close all but the current buffer" })
 
 -- Terminal --
 -- Better terminal navigation

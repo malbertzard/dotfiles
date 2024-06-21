@@ -1,3 +1,9 @@
+local function project_name()
+  local cwd = vim.fn.getcwd()
+  local project_name = vim.fn.fnamemodify(cwd, ":t") -- Extract the last part of the path
+  return project_name
+end
+
 local M = {
   "nvim-lualine/lualine.nvim",
   event = "VeryLazy",
@@ -14,7 +20,7 @@ local M = {
 
     },
     sections = {
-      lualine_a = {},
+      lualine_a = {project_name},
       lualine_b = { "branch", "diff", "diagnostics" },
       lualine_c = {
         {
