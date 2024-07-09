@@ -59,6 +59,7 @@ M.lsp_servers = {
   "gopls",
   "pyright",
   "lua_ls",
+  "ruby_lsp",
   -- "clangd",
   "bashls",
 
@@ -73,7 +74,7 @@ M.lsp_servers = {
   "jsonls",
   "yamlls",
   "marksman",
-  -- "texlab",
+  "texlab",
 
   -- CSS Stuff
   -- "tailwindcss",

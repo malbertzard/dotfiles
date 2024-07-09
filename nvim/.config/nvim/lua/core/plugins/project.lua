@@ -1,6 +1,8 @@
 local M = {
-  "ahmedkhalf/project.nvim",
-  event = "UIEnter",
+  "malbertzard/project.nvim",
+  -- "project.nvim",
+  -- dir = "~/code/project.nvim",
+  enabled = true,
   config = function()
     require("project_nvim").setup({
       patterns = {

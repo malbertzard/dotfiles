@@ -1,14 +1,12 @@
 local M = {
   "nvim-telescope/telescope.nvim",
-  cmd = "Telescope",
-  -- tag = '0.1.1',
   dependencies = {
     -- {
     --   "telescope-ui-select.nvim",
     --   dir = "/mnt/c/Users/Albertzard/Documents/GitHub/telescope-ui-select.nvim",
     -- },
     "nvim-telescope/telescope-symbols.nvim",
-    -- "nvim-telescope/telescope-ui-select.nvim",
+    "nvim-telescope/telescope-ui-select.nvim",
     "lpoto/telescope-docker.nvim",
     "cljoly/telescope-repo.nvim",
     "tsakirist/telescope-lazy.nvim",
@@ -162,7 +160,7 @@ local M = {
     telescope.load_extension("repo")
     telescope.load_extension("projects")
     -- Uncomment until https://github.com/nvim-telescope/telescope-ui-select.nvim/issues/35
-    -- telescope.load_extension("ui-select")
+    telescope.load_extension("ui-select")
     telescope.load_extension("undo")
     if settings.enable_noice then
       telescope.load_extension("noice")
