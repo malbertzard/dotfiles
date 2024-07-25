@@ -6,8 +6,10 @@ M.brightness = "dark"
 M.theme = "gruvbox_16"
 M.enable_noice = false
 M.enable_db = false
+M.enable_notebook = true
 
 -- random or see alpha/headers
+-- Currently does not work
 M.alpha_header = "octopus"
 
 M.showtabline = 1

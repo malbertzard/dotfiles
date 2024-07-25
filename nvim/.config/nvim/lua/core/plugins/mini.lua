@@ -1,5 +1,4 @@
 local M = {
-
   {
     "echasnovski/mini.align",
     event = { "BufReadPre", "BufNewFile" },
@@ -23,6 +22,14 @@ local M = {
     "echasnovski/mini.pairs",
     version = false,
     opts = {}
+  },
+
+  {
+    "echasnovski/mini.icons",
+    version = false,
+    opts = {
+      style = "glyph"
+    }
   },
 }
 

@@ -3,6 +3,9 @@ local opts = {
     autoSearchPaths = true,
     useLibraryCodeForTypes = true,
     diagnosticMode = 'openFilesOnly',
+    diagnosticSeverityOverrides = {
+      reportUnusedExpression = "none",
+    },
   }
 }
 

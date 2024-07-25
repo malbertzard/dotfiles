@@ -56,3 +56,5 @@ vim.opt.wildmode = "longest:full,full" -- Command-line completion mode
 vim.opt.winminwidth = 5                -- minimum window width
 vim.opt.mouse = "a"                    -- allow the mouse to be used in neovim
 vim.opt.spelllang = 'en'
+
+vim.g.python3_host_prog = vim.fn.expand("~/.virtualenvs/neovim/bin/python3")
