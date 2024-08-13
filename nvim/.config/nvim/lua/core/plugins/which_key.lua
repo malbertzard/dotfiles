@@ -81,7 +81,7 @@ local M = {
     })
 
     -- Register leader based mappings
-    wk.add({
+    wk.register({
       m = {
         name = "Misc",
         a = { "<cmd>Alpha<cr>", "Alpha" },

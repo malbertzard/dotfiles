@@ -48,6 +48,7 @@ M.treesitter_ensure_installed = {
   "twig",
 
   "json",
+  "jsonc",
   "toml",
   "yaml",
 

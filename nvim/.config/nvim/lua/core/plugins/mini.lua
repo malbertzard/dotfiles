@@ -23,14 +23,6 @@ local M = {
     version = false,
     opts = {}
   },
-
-  {
-    "echasnovski/mini.icons",
-    version = false,
-    opts = {
-      style = "glyph"
-    }
-  },
 }
 
 return M
