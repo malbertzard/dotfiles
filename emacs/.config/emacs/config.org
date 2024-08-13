@@ -9,6 +9,7 @@
 - [[#important-to-load-first][Important to load first]]
   - [[#startup-performance][Startup Performance]]
   - [[#auto-tangle-configuration-file][Auto-tangle Configuration file]]
+  - [[#straight][Straight]]
   - [[#use-package][Use Package]]
   - [[#good-defaults][Good Defaults]]
   - [[#general-keybindings][General Keybindings]]
@@ -31,6 +32,7 @@
   - [[#tramp][Tramp]]
   - [[#projectile][Projectile]]
   - [[#eglot][Eglot]]
+  - [[#dape][Dape]]
   - [[#yasnippet][Yasnippet]]
   - [[#language-modes][Language modes]]
     - [[#lua-mode][Lua mode]]
@@ -61,6 +63,7 @@
     - [[#kind-icons][Kind Icons]]
   - [[#cape][Cape]]
   - [[#orderless][Orderless]]
+  - [[#embark][Embark]]
   - [[#vertico-and-marginalia][Vertico and Marginalia]]
   - [[#templates][Templates]]
   - [[#consult][Consult]]
@@ -71,7 +74,6 @@
   - [[#system-packages][System Packages]]
   - [[#crux][CRUX]]
   - [[#litter][Litter]]
-  - [[#pdf-tools][PDF Tools]]
   - [[#theme-magic][Theme Magic]]
 - [[#runtime-performance][Runtime Performance]]
 
@@ -115,20 +117,31 @@ automatically exports the configuration here to the associated output files.
     (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'start/org-babel-tangle-config)))
 #+end_src
 
-** Use Package
-We use the default package manager package.el with use-package. Alternative package managers (straight.el, elpaca, etc.) are useful if you want to
-install packages from git repositories, if you want a specific, not very popular package that is not available on elpa or melpa,
-or you want UI (elpaca) and other things.
-
-If you are interested in these other package managers, check out their git repositories or search for more package managers.
-In my experience Package.el is not slow and gets the job done.
-
-To update/upgrade packages, use the package-upgrade-all command.
-Check out the use-package [[https://www.gnu.org/software/emacs/manual/use-package.html][documentation]] to see how to use it.
-With Emacs 29 use-package is now built-in.
+** Straight
 #+begin_src emacs-lisp
-    (require 'use-package-ensure) ;; Load use-package-always-ensure
-    (setq use-package-always-ensure t) ;; Always ensures that a package is installed
+    (defvar bootstrap-version)
+    (let ((bootstrap-file
+           (expand-file-name
+            "straight/repos/straight.el/bootstrap.el"
+            (or (bound-and-true-p straight-base-dir)
+                user-emacs-directory)))
+          (bootstrap-version 7))
+      (unless (file-exists-p bootstrap-file)
+        (with-current-buffer
+            (url-retrieve-synchronously
+             "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+             'silent 'inhibit-cookies)
+          (goto-char (point-max))
+          (eval-print-last-sexp)))
+      (load bootstrap-file nil 'nomessage))
+
+    (setq straight-use-package-by-default t)
+#+end_src
+
+** Use Package
+#+begin_src emacs-lisp
+    (straight-use-package 'use-package)
+
     (setq package-archives '(("melpa" . "https://melpa.org/packages/") ;; Sets default package repositories
                              ("org" . "https://orgmode.org/elpa/")
                              ("elpa" . "https://elpa.gnu.org/packages/")
@@ -228,21 +241,6 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "f l" '(consult-line :wk "Find line")
         "f o" '(consult-outline :wk "Find Outline")
         "f i" '(consult-imenu :wk "Imenu buffer locations"))
-
-      (start/leader-keys
-        "E" '(:ignore t :wk "Ediff/Eshell/Eval/EWW")
-        "E b" '(eval-buffer :wk "Evaluate elisp in buffer")
-        "E d" '(eval-defun :wk "Evaluate defun containing or after point")
-        "E e" '(eval-expression :wk "Evaluate and elisp expression")
-        "E f" '(ediff-files :wk "Run ediff on a pair of files")
-        "E F" '(ediff-files3 :wk "Run ediff on three files")
-        "E h" '(counsel-esh-history :which-key "Eshell history")
-        "E l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-        "E r" '(eval-region :wk "Evaluate elisp in region")
-        "E R" '(eww-reload :which-key "Reload current page in EWW")
-        "E s" '(eshell :which-key "Eshell")
-        "E W" '(eww-readable :which-key "Wreadble")
-        "E w" '(eww :which-key "EWW emacs web wowser"))
 
       (start/leader-keys
         "b" '(:ignore t :wk "Buffers")
@@ -354,7 +352,20 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
 
         "m T" '(:ignore t :wk "Toggle")
         "m T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-        "m T l" '(display-line-numbers-mode :wk "Toggle line numbers"))
+        "m T l" '(display-line-numbers-mode :wk "Toggle line numbers")
+        "m E" '(:ignore t :wk "Ediff/Eshell/Eval/EWW")
+        "m E b" '(eval-buffer :wk "Evaluate elisp in buffer")
+        "m E d" '(eval-defun :wk "Evaluate defun containing or after point")
+        "m E e" '(eval-expression :wk "Evaluate and elisp expression")
+        "m E f" '(ediff-files :wk "Run ediff on a pair of files")
+        "m E F" '(ediff-files3 :wk "Run ediff on three files")
+        "m E h" '(counsel-esh-history :which-key "Eshell history")
+        "m E l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+        "m E r" '(eval-region :wk "Evaluate elisp in region")
+        "m E R" '(eww-reload :which-key "Reload current page in EWW")
+        "m E s" '(eshell :which-key "Eshell")
+        "m E W" '(eww-readable :which-key "Wreadble")
+        "m E w" '(eww :which-key "EWW emacs web wowser"))
 
       (start/leader-keys
         "t" '(:ignore t :wk "Terminal")
@@ -480,7 +491,7 @@ Use consult-theme to easily try out themes (*Epilepsy* Warning).
                                       dashboard-insert-newline
                                       dashboard-insert-banner-title
                                       dashboard-insert-items
-                                      dashboard-insert-newline 
+                                      dashboard-insert-newline
                                       dashboard-insert-init-info))
       (dashboard-startup-banner 'logo)
       :config (dashboard-setup-startup-hook))
@@ -491,7 +502,6 @@ With Emacs version 29, true transparency has been added.
 #+begin_src emacs-lisp
     ;; (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
 #+end_src
-
 
 ** Fonts
 *** Setting fonts
@@ -574,17 +584,9 @@ For more [[https://www.gnu.org/software/emacs/manual/html_mono/eglot.html][infor
 Eglot is easy to set up, but the only difficult part is downloading and setting up the lsp servers.
 After that just add a hook with eglot-ensure to automatically start eglot for a given file type. And you are done.
 
-A harder example is Lua. Download the lua-language-server from their git repository, make the lua-language-server file executable at lua-language-server/bin.
-Uncomment the following lines and change the path to the language server executable. Now the language server will work.
-Or add the lua-language-server executable to your path.
-
-If you can use a package manager just install the lsp server and add a hook.
-Use visual block to uncomment easily in Org documents (C-v).
-
-TODO: This does not seem to work right
 #+begin_src emacs-lisp
     (use-package eglot
-      :ensure nil ;; Don't install eglot because it's now built-in
+      :straight nil ;; Don't install eglot because it's now built-in
       :config
       (evil-define-key 'normal 'eglot-mode-map
         "K" 'eldoc-box-help-at-point)
@@ -603,7 +605,24 @@ TODO: This does not seem to work right
       (eglot-events-buffer-size 0)
       (eglot-sync-connect nil)
       (eglot-extend-to-xref nil))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(go-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 #+end_src
+
+** Dape
+Dape is a DAP adapter without use of lsp-mode alternative to dap-mode
+[[https://github.com/svaante/dape][Dape link to Github]]
+
+#+begin_src emacs-lisp
+    ;; (use-package dape
+    ;;   :hook (prog-mode . eglot))
+#+END_src
 
 ** Yasnippet
 A template system for Emacs. And yasnippet-snippets is a snippet collection package.
@@ -614,23 +633,19 @@ To use it write out the full keyword (or use autocompletion) and press Tab.
 #+end_src
 
 ** Language modes
-It's not required for every language like C,C++,C#,Java,Javascript etc. to install language mode packages,
-but for more specific languages it is necessary for syntax highlighting.
-If you want to use TreeSitter, check out this [[https://www.masteringemacs.org/article/how-to-get-started-tree-sitter][website]] or try out [[https://github.com/renzmann/treesit-auto][Treesit-auto]].
-Currently it's tedious to use Treesitter, because emacs has not yet fully migrated to it.
 *** Lua mode
 Example, how to setup a language mode (if you don't want it, feel free to delete it).
 Use SPC-tab to uncomment the lines.
 #+begin_src emacs-lisp
     (use-package lua-mode
-      :ensure nil
+      :straight nil
       :mode "\\.lua\\'") ;; Only start in a lua file
 #+end_src
 
 *** PHP mode
 #+begin_src emacs-lisp
     (use-package php-mode
-      :ensure nil
+      :straight nil
       :mode "\\.php\\'") ;; Only start in a php file
 #+end_src
 
@@ -638,26 +653,24 @@ Use SPC-tab to uncomment the lines.
 #+BEGIN_SRC emacs-lisp
     ;; Install and configure rust-mode for Rust programming.
     (use-package rust-mode
-      :ensure nil
-      :mode "\\.rs\\'") 
+      :straight nil
+      :mode "\\.rs\\'")
 #+END_SRC
+
 
 *** Golang
 #+BEGIN_SRC emacs-lisp
     ;; Install and configure go-mode for Go programming.
-    ;; (use-package go-mode
-    ;;   :ensure nil
-    ;;   :mode "\\.go\\'")
+    (use-package go-mode
+      :straight nil
+      :mode "\\.go\\'")
 #+END_SRC
 
 *** Org Mode
-Org mode is one of the things that emacs is loved for.
-Once you've used it for a bit, you'll understand why people love it. Even reading about it can be inspiring!
-For example, this document is effectively the source code and descriptions bound into the one document,
-much like the literate programming ideas that Donald Knuth made famous.
+
 #+begin_src emacs-lisp
     (use-package org
-      :ensure nil
+      :straight nil
       :custom
       (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
 
@@ -681,15 +694,6 @@ much like the literate programming ideas that Donald Knuth made famous.
       :hook (org-mode . toc-org-mode))
 #+end_src
 
-**** Source Code Block Tag Expansion
-Org-tempo is not a separate package but a module within org that can be enabled.
-Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
-#+begin_src emacs-lisp
-    (use-package org-tempo
-      :ensure nil
-      :after org)
-#+end_src
-
 **** Org Modern
 #+BEGIN_SRC emacs-lisp
     (use-package org-modern
@@ -698,10 +702,10 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
 
 **** Org Excalidraw
 #+BEGIN_SRC emacs-lisp
-    ;; (use-package org-excalidraw
-    ;;   :straight (:type git :host github :repo "wdavew/org-excalidraw")
-    ;;   :config
-    ;;   (org-excalidraw-directory "~/path_to_store_excalidraw_files"))
+    (use-package org-excalidraw
+      :straight (:type git :host github :repo "wdavew/org-excalidraw")
+      :config
+      (setq org-excalidraw-directory "~/code/Cadmus/__Assets/Excalidraw/"))
 #+END_SRC
 
 **** Center Org Buffer
@@ -733,32 +737,38 @@ Org-tempo allows for '<s' followed by TAB to expand to a begin_src tag.
       (global-flycheck-eglot-mode 1))
 #+END_SRC
 ** Treesitter
-TODO: This does not seem to work right
 
 #+BEGIN_SRC emacs-lisp
+    ;; TODO: This does not seem to work right
+
     (use-package tree-sitter
       :config(global-tree-sitter-mode
               (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
-    ;; (setq treesit-language-source-alist
-    ;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-    ;;         (cmake "https://github.com/uyha/tree-sitter-cmake")
-    ;;         (css "https://github.com/tree-sitter/tree-sitter-css")
-    ;;         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-    ;;         (go "https://github.com/tree-sitter/tree-sitter-go")
-    ;;         (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-    ;;         (html "https://github.com/tree-sitter/tree-sitter-html")
-    ;;         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-    ;;         (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
-    ;;         (rust "https://github.com/tree-sitter/tree-sitter-rust")
-    ;;         (json "https://github.com/tree-sitter/tree-sitter-json")
-    ;;         (make "https://github.com/alemuller/tree-sitter-make")
-    ;;         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-    ;;         (python "https://github.com/tree-sitter/tree-sitter-python")
-    ;;         (toml "https://github.com/tree-sitter/tree-sitter-toml")
-    ;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-    ;;         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-    ;;         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+    (setq treesit-language-source-alist
+          '(
+                (bash "https://github.com/tree-sitter/tree-sitter-bash")
+        	(cmake "https://github.com/uyha/tree-sitter-cmake")
+        	(css "https://github.com/tree-sitter/tree-sitter-css")
+        	(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        	(html "https://github.com/tree-sitter/tree-sitter-html")
+    		    (go "https://github.com/tree-sitter/tree-sitter-go")
+                (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+        	(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        	(json "https://github.com/tree-sitter/tree-sitter-json")
+        	(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+        	(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+        	(make "https://github.com/alemuller/tree-sitter-make")
+        	(rust "https://github.com/tree-sitter/tree-sitter-rust")
+        	(python "https://github.com/tree-sitter/tree-sitter-python")
+        	(toml "https://github.com/tree-sitter/tree-sitter-toml")
+        	(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+        	(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+        	(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+    (setq treesit-font-lock-level 4)
+
+    (use-package tree-sitter-langs)
 
     ;; Install all langs
     ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
@@ -769,7 +779,6 @@ TODO: This does not seem to work right
       :config
       (treesit-auto-add-to-auto-mode-alist 'all)
       (global-treesit-auto-mode))
-
 #+END_SRC
 
 ** Debug
@@ -794,7 +803,7 @@ We setup eat with eshell, if you want to use bash, zsh etc., check out their git
 ** Docker
 #+begin_src emacs-lisp
 (use-package docker
-:bind ("C-c d" . docker)) 
+:bind ("C-c d" . docker))
 #+end_src>
 ** Git
 *** Magit
@@ -868,7 +877,7 @@ Delete intermediate buffers when navigating through dired.
 #+BEGIN_SRC emacs-lisp
     (use-package dired
       :after evil-collection
-      :ensure nil
+      :straight nil
       :commands (dired dired-jump)
       :custom
       (setq delete-by-moving-to-trash t))
@@ -972,6 +981,11 @@ Recomended for packages like vertico, corfu.
       :custom
       (completion-styles '(orderless basic))
       (completion-category-overrides '((file (styles basic partial-completion)))))
+#+end_src
+
+** Embark
+#+begin_src emacs-lisp
+    (use-package embark)
 #+end_src
 
 ** Vertico and Marginalia
@@ -1141,11 +1155,6 @@ Which-key is a helper utility for keychords (which key to press).
 ** Litter
 #+begin_src emacs-lisp
     (use-package no-littering)
-#+end_src
-
-** PDF Tools
-#+begin_src emacs-lisp
-    (use-package pdf-tools)
 #+end_src
 
 ** Theme Magic

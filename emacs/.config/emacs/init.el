@@ -11,8 +11,26 @@
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'start/org-babel-tangle-config)))
 
-(require 'use-package-ensure) ;; Load use-package-always-ensure
-(setq use-package-always-ensure t) ;; Always ensures that a package is installed
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(setq straight-use-package-by-default t)
+
+(straight-use-package 'use-package)
+
 (setq package-archives '(("melpa" . "https://melpa.org/packages/") ;; Sets default package repositories
                          ("org" . "https://orgmode.org/elpa/")
                          ("elpa" . "https://elpa.gnu.org/packages/")
@@ -103,21 +121,6 @@
     "f l" '(consult-line :wk "Find line")
     "f o" '(consult-outline :wk "Find Outline")
     "f i" '(consult-imenu :wk "Imenu buffer locations"))
-
-  (start/leader-keys
-    "E" '(:ignore t :wk "Ediff/Eshell/Eval/EWW")
-    "E b" '(eval-buffer :wk "Evaluate elisp in buffer")
-    "E d" '(eval-defun :wk "Evaluate defun containing or after point")
-    "E e" '(eval-expression :wk "Evaluate and elisp expression")
-    "E f" '(ediff-files :wk "Run ediff on a pair of files")
-    "E F" '(ediff-files3 :wk "Run ediff on three files")
-    "E h" '(counsel-esh-history :which-key "Eshell history")
-    "E l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-    "E r" '(eval-region :wk "Evaluate elisp in region")
-    "E R" '(eww-reload :which-key "Reload current page in EWW")
-    "E s" '(eshell :which-key "Eshell")
-    "E W" '(eww-readable :which-key "Wreadble")
-    "E w" '(eww :which-key "EWW emacs web wowser"))
 
   (start/leader-keys
     "b" '(:ignore t :wk "Buffers")
@@ -229,7 +232,20 @@
 
     "m T" '(:ignore t :wk "Toggle")
     "m T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-    "m T l" '(display-line-numbers-mode :wk "Toggle line numbers"))
+    "m T l" '(display-line-numbers-mode :wk "Toggle line numbers")
+    "m E" '(:ignore t :wk "Ediff/Eshell/Eval/EWW")
+    "m E b" '(eval-buffer :wk "Evaluate elisp in buffer")
+    "m E d" '(eval-defun :wk "Evaluate defun containing or after point")
+    "m E e" '(eval-expression :wk "Evaluate and elisp expression")
+    "m E f" '(ediff-files :wk "Run ediff on a pair of files")
+    "m E F" '(ediff-files3 :wk "Run ediff on three files")
+    "m E h" '(counsel-esh-history :which-key "Eshell history")
+    "m E l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+    "m E r" '(eval-region :wk "Evaluate elisp in region")
+    "m E R" '(eww-reload :which-key "Reload current page in EWW")
+    "m E s" '(eshell :which-key "Eshell")
+    "m E W" '(eww-readable :which-key "Wreadble")
+    "m E w" '(eww :which-key "EWW emacs web wowser"))
 
   (start/leader-keys
     "t" '(:ignore t :wk "Terminal")
@@ -325,7 +341,7 @@
                                   dashboard-insert-newline
                                   dashboard-insert-banner-title
                                   dashboard-insert-items
-                                  dashboard-insert-newline 
+                                  dashboard-insert-newline
                                   dashboard-insert-init-info))
   (dashboard-startup-banner 'logo)
   :config (dashboard-setup-startup-hook))
@@ -382,14 +398,15 @@
 ;; Use Bookmarks for smaller, not standard projects
 
 (use-package eglot
-  :ensure nil ;; Don't install eglot because it's now built-in
+  :straight nil ;; Don't install eglot because it's now built-in
   :config
   (evil-define-key 'normal 'eglot-mode-map
     "K" 'eldoc-box-help-at-point)
   (add-hook 'python-mode-hook 'eglot-ensure)
   (add-hook 'php-mode-hook 'eglot-ensure)
   (add-hook 'go-mode-hook 'eglot-ensure)
-  (add-hook 'rust-ts-mode-hook 'eglot-ensure)
+  (add-hook 'rust-mode-hook 'eglot-ensure)
+  (add-hook 'ruby-mode-hook 'eglot-ensure)
   (add-hook 'yaml-mode-hook 'eglot-ensure)
   (add-hook 'bash-mode-hook 'eglot-ensure)
   :custom
@@ -401,29 +418,40 @@
   (eglot-sync-connect nil)
   (eglot-extend-to-xref nil))
 
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(go-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
+
+;; (use-package dape
+;;   :hook (prog-mode . eglot))
+
 (use-package yasnippet-snippets
   :hook (prog-mode . yas-minor-mode))
 
 (use-package lua-mode
-  :ensure nil
+  :straight nil
   :mode "\\.lua\\'") ;; Only start in a lua file
 
 (use-package php-mode
-  :ensure nil
+  :straight nil
   :mode "\\.php\\'") ;; Only start in a php file
 
 ;; Install and configure rust-mode for Rust programming.
 (use-package rust-mode
-  :ensure nil
+  :straight nil
   :mode "\\.rs\\'")
 
 ;; Install and configure go-mode for Go programming.
 (use-package go-mode
-  :ensure nil
+  :straight nil
   :mode "\\.go\\'")
 
 (use-package org
-  :ensure nil
+  :straight nil
   :custom
   (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
 
@@ -443,17 +471,13 @@
   :commands toc-org-enable
   :hook (org-mode . toc-org-mode))
 
-(use-package org-tempo
-  :ensure nil
-  :after org)
-
 (use-package org-modern
   :hook (org-mode . org-modern-mode))
 
-;; (use-package org-excalidraw
-;;   :straight (:type git :host github :repo "wdavew/org-excalidraw")
-;;   :config
-;;   (org-excalidraw-directory "~/path_to_store_excalidraw_files"))
+(use-package org-excalidraw
+  :straight (:type git :host github :repo "wdavew/org-excalidraw")
+  :config
+  (setq org-excalidraw-directory "~/code/Cadmus/__Assets/Excalidraw/"))
 
 (defun start/org-mode-visual-fill ()
   (setq visual-fill-column-width 200
@@ -463,11 +487,11 @@
 (use-package visual-fill-column
   :hook (org-mode . start/org-mode-visual-fill))
 
-;; (use-package markdown-mode
-;;   :mode ("README\\.md\\'" . gfm-mode)
-;;   :init (setq markdown-command "multimarkdown")
-;;   :bind (:map markdown-mode-map
-;;               ("C-c C-e" . markdown-down)))
+(use-package markdown-mode
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown")
+  :bind (:map markdown-mode-map
+              ("C-c C-e" . markdown-down)))
 
 (use-package flycheck)
 
@@ -476,29 +500,36 @@
   :config
   (global-flycheck-eglot-mode 1))
 
+;; TODO: This does not seem to work right
+
 (use-package tree-sitter
   :config(global-tree-sitter-mode
           (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
-;; (setq treesit-language-source-alist
-;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-;;         (cmake "https://github.com/uyha/tree-sitter-cmake")
-;;         (css "https://github.com/tree-sitter/tree-sitter-css")
-;;         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-;;         (go "https://github.com/tree-sitter/tree-sitter-go")
-;;         (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-;;         (html "https://github.com/tree-sitter/tree-sitter-html")
-;;         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-;;         (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
-;;         (rust "https://github.com/tree-sitter/tree-sitter-rust")
-;;         (json "https://github.com/tree-sitter/tree-sitter-json")
-;;         (make "https://github.com/alemuller/tree-sitter-make")
-;;         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-;;         (python "https://github.com/tree-sitter/tree-sitter-python")
-;;         (toml "https://github.com/tree-sitter/tree-sitter-toml")
-;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-;;         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-;;         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+(setq treesit-language-source-alist
+      '(
+            (bash "https://github.com/tree-sitter/tree-sitter-bash")
+    	(cmake "https://github.com/uyha/tree-sitter-cmake")
+    	(css "https://github.com/tree-sitter/tree-sitter-css")
+    	(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+    	(html "https://github.com/tree-sitter/tree-sitter-html")
+		    (go "https://github.com/tree-sitter/tree-sitter-go")
+            (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+    	(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+    	(json "https://github.com/tree-sitter/tree-sitter-json")
+    	(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+    	(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+    	(make "https://github.com/alemuller/tree-sitter-make")
+    	(rust "https://github.com/tree-sitter/tree-sitter-rust")
+    	(python "https://github.com/tree-sitter/tree-sitter-python")
+    	(toml "https://github.com/tree-sitter/tree-sitter-toml")
+    	(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+    	(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+    	(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+(setq treesit-font-lock-level 4)
+
+(use-package tree-sitter-langs)
 
 ;; Install all langs
 ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
@@ -548,7 +579,7 @@
 
 (use-package dired
   :after evil-collection
-  :ensure nil
+  :straight nil
   :commands (dired dired-jump)
   :custom
   (setq delete-by-moving-to-trash t))
@@ -624,6 +655,8 @@
   :custom
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
+
+(use-package embark)
 
 (use-package vertico
   :bind (:map vertico-map
@@ -751,8 +784,6 @@
 (use-package crux)
 
 (use-package no-littering)
-
-(use-package pdf-tools)
 
 (use-package theme-magic)
 
