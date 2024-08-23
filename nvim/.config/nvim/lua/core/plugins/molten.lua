@@ -14,12 +14,14 @@ local M = {
       vim.g.molten_image_provider = "wezterm"
       vim.g.molten_auto_open_html_in_browser = true
       vim.g.molten_auto_open_output = false,
-          vim.keymap.set("n", "<localleader>mi", ":MoltenInit<CR>", { silent = true, desc = "Initialize the plugin" })
+      vim.keymap.set("n", "<localleader>m", "", { silent = true, desc = "Molten" })
+      vim.keymap.set("n", "<localleader>mi", ":MoltenInit<CR>", { silent = true, desc = "Initialize the plugin" })
       vim.keymap.set("n", "<localleader>e", ":MoltenEvaluateOperator<CR>",
         { silent = true, desc = "run operator selection" })
+      vim.keymap.set("n", "<localleader>r", "", { silent = true, desc = "Run" })
       vim.keymap.set("n", "<localleader>rl", ":MoltenEvaluateLine<CR>", { silent = true, desc = "evaluate line" })
       vim.keymap.set("n", "<localleader>rr", ":MoltenReevaluateCell<CR>", { silent = true, desc = "re-evaluate cell" })
-      vim.keymap.set("v", "<localleader>r", ":<C-u>MoltenEvaluateVisual<CR>gv",
+      vim.keymap.set("v", "<localleader>rv", ":<C-u>MoltenEvaluateVisual<CR>gv",
         { silent = true, desc = "evaluate visual selection" })
     end,
   },
@@ -79,9 +81,6 @@ local M = {
       vim.keymap.set("n", "<localleader>rA", runner.run_all, { desc = "run all cells", silent = true })
       vim.keymap.set("n", "<localleader>rl", runner.run_line, { desc = "run line", silent = true })
       vim.keymap.set("v", "<localleader>r", runner.run_range, { desc = "run visual range", silent = true })
-      vim.keymap.set("n", "<localleader>RA", function()
-        runner.run_all(true)
-      end, { desc = "run all cells of all languages", silent = true })
     end,
   },
 

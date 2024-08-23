@@ -63,7 +63,7 @@ M.lsp_servers = {
   "pyright",
   "lua_ls",
   "ruby_lsp",
-  -- "clangd",
+  "clangd",
   "bashls",
 
   -- Work JS Stuff

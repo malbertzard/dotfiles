@@ -8,7 +8,7 @@ local M = {
     }
   },
   keys = {
-    { "<leader>Fg", "", desc = "Glow" },
+    { "<localleader>g", "", desc = "Glow" },
   }
 }
 

@@ -26,12 +26,12 @@ vim.diagnostic.config({
 })
 
 ---- sign column
-local icons = require("core.utils.icons")
-
-for type, icon in pairs(icons.diagnostics) do
-  local hl = "DiagnosticSign" .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = '' })
-end
+-- local icons = require("core.utils.icons")
+--
+-- for type, icon in pairs(icons.diagnostics) do
+--   local hl = "DiagnosticSign" .. type
+--   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = '' })
+-- end
 
 for _, lsp in ipairs(settings.lsp_servers) do
   if lsp == "rust_analyzer" then
