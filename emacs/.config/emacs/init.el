@@ -1,16 +1,6 @@
 ;; The default is 800 kilobytes. Measured in bytes.
 (setq gc-cons-threshold (* 50 1000 1000))
 
-(defun start/org-babel-tangle-config ()
-  "Automatically tangle our Emacs.org config file when we save it. Credit to Emacs From Scratch for this one!"
-  (when (string-equal (file-name-directory (buffer-file-name))
-                      (expand-file-name user-emacs-directory))
-    ;; Dynamic scoping to the rescue
-    (let ((org-confirm-babel-evaluate nil))
-      (org-babel-tangle))))
-
-(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'start/org-babel-tangle-config)))
-
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -27,9 +17,21 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(setq straight-use-package-by-default t)
+;; (use-package emacs
+;;   :straight nil
+;;   :after org-mode
+;;   :custom)
+;; (defun start/org-babel-tangle-config ()
+;;   "Automatically tangle our Emacs.org config file when we save it. Credit to Emacs From Scratch for this one!"
+;;   (when (string-equal (file-name-directory (buffer-file-name))
+;;                       (expand-file-name user-emacs-directory))
+;;     ;; Dynamic scoping to the rescue
+;;     (let ((org-confirm-babel-evaluate nil))
+;;       (org-babel-tangle))))
 
-(straight-use-package 'use-package)
+;; (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'start/org-babel-tangle-config)))
+
+(setq straight-use-package 'use-package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/") ;; Sets default package repositories
                          ("org" . "https://orgmode.org/elpa/")
@@ -72,6 +74,9 @@
   (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
   (scroll-conservatively 10) ;; Smooth scrolling
   (scroll-margin 10)
+  
+  (split-height-threshold nil) ;;Default split vertical
+  (split-width-threshold 0)
 
   (tab-width 4)
 
@@ -81,21 +86,17 @@
   (prog-mode . (lambda () (hs-minor-mode t))) ;; Enable folding hide/show globally
   :config
   ;; Move customization variables to a separate file and load it, avoid filling up init.el with unnecessary variables
-  (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-  (load custom-file 'noerror 'nomessage)
+  ;; (custom-file (locate-user-emacs-file "custom-vars.el"))
+  ;; (load custom-file 'noerror 'nomessage)
   :bind (
          ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
          )
   ;; Fix general.el leader key not working instantly in messages buffer with evil mode
-  ;; :ghook ('after-init-hook
-  ;;         (lambda (&rest _)
-  ;;           (when-let ((messages-buffer (get-buffer "*Messages*")))
-  ;;             (with-current-buffer messages-buffer
-  ;;               (evil-normalize-keymaps))))
-  ;;         nil nil t)
   )
 
 (use-package general
+  :straight t
+  :after evil
   :config
   (general-evil-setup)
   (general-define-key
@@ -252,9 +253,9 @@
     "t t" '(eat :wk "Terminal toggle")))
 
 (use-package evil
-  :init ;; Execute code Before a package is loaded
-  (evil-mode)
+  :straight t
   :config ;; Execute code After a package is loaded
+  (evil-mode)
   (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
   :custom ;; Customization of package custom variables
   (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
@@ -268,6 +269,7 @@
               ("RET" . nil)))
 
 (use-package evil-collection
+  :straight t
   :after evil
   :config
   ;; Setting where to use evil-collection
@@ -275,19 +277,23 @@
   (evil-collection-init))
 
 (use-package evil-surround
+  :straight t
   :config
   (global-evil-surround-mode 1))
 
 (use-package evil-visualstar
+  :straight t
   :config
   (global-evil-visualstar-mode 1))
 
 (use-package evil-commentary
+  :straight t
   :after evil
   :diminish
   :config (evil-commentary-mode +1))
 
 (use-package evil-textobj-tree-sitter
+  :straight t
   :after tree-sitter evil
   :config
   (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
@@ -320,6 +326,7 @@
   (define-key evil-normal-state-map (kbd "[F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t t))))
 
 (use-package doom-themes
+  :straight t
   :config
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
@@ -327,6 +334,7 @@
   (doom-themes-org-config))
 
 (use-package dashboard
+  :straight t
   :custom
   (dashboard-banner-logo-title "With Great Power Comes Great Responsibility!")
   (dashboard-center-content t)
@@ -360,6 +368,7 @@
 (setq-default line-spacing 0.15)
 
 (use-package emacs
+  :straight nil
   :bind
   ("C-+" . text-scale-increase)
   ("C--" . text-scale-decrease)
@@ -367,6 +376,7 @@
   ("<C-wheel-down>" . text-scale-decrease))
 
 (use-package doom-modeline
+  :straight t
   :init (doom-modeline-mode 1)
   :config
   (setq doom-modeline-height 42
@@ -379,6 +389,7 @@
         doom-modeline-bar-width 5))
 
 (use-package editorconfig
+  :straight t
   :diminish editorconfig-mode
   :config
   (editorconfig-mode 1))
@@ -388,6 +399,7 @@
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 
 (use-package projectile
+  :straight t
   :init
   (projectile-mode)
   :custom
@@ -420,7 +432,11 @@
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
-               '(go-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
+               '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
@@ -430,25 +446,40 @@
 ;;   :hook (prog-mode . eglot))
 
 (use-package yasnippet-snippets
+  :straight t
   :hook (prog-mode . yas-minor-mode))
 
-(use-package lua-mode
-  :straight nil
-  :mode "\\.lua\\'") ;; Only start in a lua file
+(defun pyrightconfig-write (virtualenv)
+  (interactive "DEnv: ")
 
-(use-package php-mode
-  :straight nil
-  :mode "\\.php\\'") ;; Only start in a php file
+  (let* (;; file-truename and tramp-file-local-name ensure that neither `~' nor
+		 ;; the Tramp prefix (e.g. "/ssh:my-host:") wind up in the final
+		 ;; absolute directory path.
+		 (venv-dir (tramp-file-local-name (file-truename virtualenv)))
 
-;; Install and configure rust-mode for Rust programming.
-(use-package rust-mode
-  :straight nil
-  :mode "\\.rs\\'")
+		 ;; Given something like /path/to/.venv/, this strips off the trailing `/'.
+		 (venv-file-name (directory-file-name venv-dir))
 
-;; Install and configure go-mode for Go programming.
-(use-package go-mode
-  :straight nil
-  :mode "\\.go\\'")
+		 ;; Naming convention for venvPath matches the field for
+		 ;; pyrightconfig.json.  `file-name-directory' gets us the parent path
+		 ;; (one above .venv).
+		 (venvPath (file-name-directory venv-file-name))
+
+		 ;; Grabs just the `.venv' off the end of the venv-file-name.
+		 (venv (file-name-base venv-file-name))
+
+		 ;; Eglot demands that `pyrightconfig.json' is in the project root
+		 ;; folder.
+		 (base-dir (vc-git-root default-directory))
+		 (out-file (expand-file-name "pyrightconfig.json" base-dir))
+
+		 ;; Finally, get a string with the JSON payload.
+		 (out-contents (json-encode (list :venvPath venvPath :venv venv))))
+
+	;; Emacs uses buffers for everything.  This creates a temp buffer, inserts
+	;; the JSON payload, then flushes that content to final `pyrightconfig.json'
+	;; location
+	(with-temp-file out-file (insert out-contents))))
 
 (use-package org
   :straight nil
@@ -468,10 +499,12 @@
  '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
 
 (use-package toc-org
+  :straight t
   :commands toc-org-enable
   :hook (org-mode . toc-org-mode))
 
 (use-package org-modern
+  :straight t
   :hook (org-mode . org-modern-mode))
 
 (use-package org-excalidraw
@@ -485,102 +518,128 @@
   (visual-fill-column-mode 1))
 
 (use-package visual-fill-column
+  :straight t
   :hook (org-mode . start/org-mode-visual-fill))
 
 (use-package markdown-mode
+  :straight t
   :mode ("README\\.md\\'" . gfm-mode)
   :init (setq markdown-command "multimarkdown")
   :bind (:map markdown-mode-map
               ("C-c C-e" . markdown-down)))
 
-(use-package flycheck)
+(use-package flycheck
+  :straight t)
 
 (use-package flycheck-eglot
+  :straight t
   :after (flycheck eglot)
   :config
   (global-flycheck-eglot-mode 1))
 
 ;; TODO: This does not seem to work right
-
 (use-package tree-sitter
+  :straight t
   :config(global-tree-sitter-mode
           (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
 (setq treesit-language-source-alist
       '(
-            (bash "https://github.com/tree-sitter/tree-sitter-bash")
-    	(cmake "https://github.com/uyha/tree-sitter-cmake")
-    	(css "https://github.com/tree-sitter/tree-sitter-css")
-    	(elisp "https://github.com/Wilfred/tree-sitter-elisp")
-    	(html "https://github.com/tree-sitter/tree-sitter-html")
-		    (go "https://github.com/tree-sitter/tree-sitter-go")
-            (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-    	(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-    	(json "https://github.com/tree-sitter/tree-sitter-json")
-    	(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-    	(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-    	(make "https://github.com/alemuller/tree-sitter-make")
-    	(rust "https://github.com/tree-sitter/tree-sitter-rust")
-    	(python "https://github.com/tree-sitter/tree-sitter-python")
-    	(toml "https://github.com/tree-sitter/tree-sitter-toml")
-    	(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-    	(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-    	(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+        (bash "https://github.com/tree-sitter/tree-sitter-bash")
+		(cmake "https://github.com/uyha/tree-sitter-cmake")
+		(css "https://github.com/tree-sitter/tree-sitter-css")
+		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+		(html "https://github.com/tree-sitter/tree-sitter-html")
+		(go "https://github.com/tree-sitter/tree-sitter-go")
+        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+		(json "https://github.com/tree-sitter/tree-sitter-json")
+		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+		(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+		(make "https://github.com/alemuller/tree-sitter-make")
+		(rust "https://github.com/tree-sitter/tree-sitter-rust")
+		(python "https://github.com/tree-sitter/tree-sitter-python")
+		(toml "https://github.com/tree-sitter/tree-sitter-toml")
+		(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+		(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+		(yaml "https://github.com/ikatyang/tree-sitter-yaml"))
+	  )
 
 (setq treesit-font-lock-level 4)
 
-(use-package tree-sitter-langs)
+(use-package tree-sitter-langs
+  :straight t)
 
 ;; Install all langs
 ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
 
 (use-package treesit-auto
+  :straight t
   :custom
   (treesit-auto-install 'prompt)
   :config
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
-;; Debug with DAP without LspMode
-;; (use-package dape)
-
 (use-package eat
+  :straight t
   :hook ('eshell-load-hook #'eat-eshell-mode))
 
+(use-package harpoon
+  :straight t)
+
+(use-package docker
+  :straight t
+  :bind ("C-c d" . docker))
+
 (use-package magit
+  :straight t
   :commands magit-status)
 
 (use-package magit-todos
+  :straight t
   :after magit
   :config (magit-todos-mode 1))
 
 (use-package git-gutter
+  :straight t
   :config(global-git-gutter-mode +1))
 
 (use-package diff-hl
+  :straight t
   :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)
          (magit-pre-refresh  . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh))
   :init (global-diff-hl-mode))
 
-(use-package devdocs)
+(use-package devdocs
+  :straight t)
 
 (use-package rainbow-delimiters
+  :straight t
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package nerd-icons
+  :straight t
   :if (display-graphic-p))
 
 (use-package nerd-icons-dired
+  :straight t
   :hook (dired-mode . (lambda () (nerd-icons-dired-mode t))))
 
 (use-package nerd-icons-ibuffer
+  :straight t
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+
+;;(setq eww-retrieve-command
+;;     '("chromium" "--headless" "--dump-dom"))
 
 (use-package dired
   :after evil-collection
   :straight nil
   :commands (dired dired-jump)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map "c" 'dired-create-empty-file)
   :custom
   (setq delete-by-moving-to-trash t))
 
@@ -591,16 +650,20 @@
                                 ("mkv" . "mpv"))))
 
 (use-package dired-hide-dotfiles
+  :straight t
   :hook (dired-mode . dired-hide-dotfiles-mode)
   :config
   (evil-collection-define-key 'normal 'dired-mode-map "H" 'dired-hide-dotfiles-mode))
 
 (use-package drag-stuff
+  :straight t
   :config
   (evil-define-key 'normal 'prog-mode-map (kbd "C-j") 'drag-stuff-down)
   (evil-define-key 'normal 'prog-mode-map (kbd "C-k") 'drag-stuff-up))
 
 (use-package corfu
+  :straight t
+  :after orderless
   ;; Optional customizations
   :custom
   (corfu-cycle nil)
@@ -620,10 +683,12 @@
   (global-corfu-mode))
 
 (use-package nerd-icons-corfu
+  :straight t
   :after corfu
   :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package kind-icon
+  :straight t
   :after corfu
   :custom
   (kind-icon-use-icons t)
@@ -634,6 +699,7 @@
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package cape
+  :straight t
   :after corfu
   :init
   (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
@@ -652,35 +718,48 @@
   )
 
 (use-package orderless
+  :straight t
   :custom
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-(use-package embark)
+(use-package embark
+  :straight t
+  :bind (("C-." . embark-act)
+         :map minibuffer-local-map
+         ("C-c C-c" . embark-collect)
+         ("C-c C-e" . embark-export)))
+
+(use-package embark-consult
+  :straight t)
 
 (use-package vertico
+  :straight t
   :bind (:map vertico-map
               ("<tab>" . vertico-insert)
               ("C-j" . vertico-next)
+              ("C-f" . vertico-exit)
               ("C-K" . vertico-previous))
   :custom
   (vertico-cycle t)
   (vertico-count 13)                    ; Number of candidates to display
   (vertico-resize t)
-  (read-buffer-completion-ignore-case t)
-  (read-file-name-completion-ignore-case t)
-  (completion-styles '(basic substring partial-completion flex))
   :init
   (vertico-mode))
 
 (savehist-mode) ;; Enables save history mode
 
 (use-package marginalia
+  :straight t
   :after vertico
+  :ensure t
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
   :init
   (marginalia-mode))
 
 (use-package nerd-icons-completion
+  :straight t
   :after marginalia
   :config
   (nerd-icons-completion-mode)
@@ -689,6 +768,7 @@
 
 ;; Configure tempel for templating support.
 (use-package tempel
+  :straight t
   :bind (("M-." . tempel-complete))
   :init
   ;; Set up tempel for different modes.
@@ -702,9 +782,11 @@
 
 ;; Install tempel-collection for additional templates.
 (use-package tempel-collection
+  :straight t
   :after tempel)
 
 (use-package consult
+  :straight t
   ;; Enable automatic preview at point in the *Completions* buffer. This is
   ;; relevant when you use the default completion UI.
   :hook (completion-list-mode . consult-preview-at-point-mode)
@@ -755,17 +837,22 @@
   ;; (setq consult-project-function nil)
   )
 
-(use-package diminish)
+(use-package diminish
+  :straight t)
 
 (setq eldoc-echo-area-use-multiline-p nil)
 
 (use-package eldoc-box
+  :straight t
   :config
+  (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
   (setq eldoc-box-cleanup-interval 3))
 
-(use-package helpful)
+(use-package helpful
+  :straight t)
 
 (use-package which-key
+  :straight t
   :init
   (which-key-mode 1)
   :diminish
@@ -779,13 +866,27 @@
   (which-key-max-description-length 25)
   (which-key-allow-imprecise-window-fit nil)) ;; Fixes which-key window slipping out in Emacs Daemon
 
-(use-package system-packages)
+(use-package system-packages
+  :straight t)
 
-(use-package crux)
+(use-package crux
+  :straight t)
 
-(use-package no-littering)
+(use-package wgrep
+  :straight t
+  :bind ( :map grep-mode-map
+          ("e" . wgrep-change-to-wgrep-mode)
+          ("C-x C-q" . wgrep-change-to-wgrep-mode)
+          ("C-c C-c" . wgrep-finish-edit)))
 
-(use-package theme-magic)
+(use-package no-littering
+  :straight t)
+
+(use-package pdf-tools
+  :straight t)
+
+(use-package theme-magic
+  :straight t)
 
 ;; Make gc pauses faster by decreasing the threshold.
 (setq gc-cons-threshold (* 2 1000 1000))
