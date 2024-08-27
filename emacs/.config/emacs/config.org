@@ -6,12 +6,14 @@
 
 * Table Of Contents :toc_3:
 - [[#introduction][Introduction]]
+- [[#stuff-i-need-to-do][Stuff I need to do]]
 - [[#important-to-load-first][Important to load first]]
   - [[#startup-performance][Startup Performance]]
   - [[#straight][Straight]]
   - [[#auto-tangle-configuration-file][Auto-tangle Configuration file]]
   - [[#use-package][Use Package]]
   - [[#good-defaults][Good Defaults]]
+  - [[#compilation-can-be-better][Compilation can be better]]
   - [[#general-keybindings][General Keybindings]]
   - [[#evil-mode][Evil Mode]]
     - [[#evil-collection][Evil Collection]]
@@ -38,12 +40,14 @@
     - [[#python-mode][Python mode]]
     - [[#org-mode][Org Mode]]
     - [[#markdown][Markdown]]
+    - [[#quarto][Quarto]]
   - [[#error][Error]]
   - [[#treesitter][Treesitter]]
   - [[#terminal][Terminal]]
     - [[#eat][Eat]]
   - [[#harpoon][Harpoon]]
   - [[#docker][Docker]]
+  - [[#rest-client][Rest Client]]
   - [[#git][Git]]
     - [[#magit][Magit]]
     - [[#git-gutter][Git Gutter]]
@@ -76,14 +80,18 @@
 - [[#runtime-performance][Runtime Performance]]
 
 * Introduction
-Kickstart.emacs is *not* a distribution.
-It's a template for your own configuration.
+This is my home which I build. You should use this this is for me and me only. 
+But try emacs its pretty nice.
 
-It is *recommeded* to configure it from the *config.org* file.
-The goal is that you read every line, top-to-bottom, understand
-what your configuration is doing, and modify it to suit your needs.
-
-You can delete this when you're done. It's your config now. :)
+* Stuff I need to do
+- [ ] Auto compile the init.el to init.elc with straight
+- [ ] Some Dired tweaks
+- [ ] Debugging without dap-mode use Dape
+- [ ] Add polymode 
+    - [ ] Nested treesitter
+    - [ ] Quarto
+    - [ ] TailwindCSS inside of HTML
+    - [ ] General how to weave langs
 
 * Important to load first
 ** Startup Performance
@@ -187,8 +195,8 @@ automatically exports the configuration here to the associated output files.
       (scroll-conservatively 10) ;; Smooth scrolling
       (scroll-margin 10)
       
-      (split-height-threshold nil) ;;Default split vertical
-      (split-width-threshold 0)
+      ;; (split-height-threshold nil) ;;Default split vertical
+      ;; (split-width-threshold 0)
 
       (tab-width 4)
 
@@ -205,6 +213,31 @@ automatically exports the configuration here to the associated output files.
              )
       ;; Fix general.el leader key not working instantly in messages buffer with evil mode
       )
+#+end_src
+** Compilation can be better
+#+begin_src emacs-lisp
+    (require 'ansi-color)
+    (defun endless/colorize-compilation ()
+      "Colorize from `compilation-filter-start' to `point'."
+      (let ((inhibit-read-only t))
+        (ansi-color-apply-on-region
+         compilation-filter-start (point))))
+
+    (add-hook 'compilation-filter-hook
+              #'endless/colorize-compilation)
+
+    (defun compile-or-open ()
+      "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
+      (interactive)
+      (let ((compilation-buffer (get-buffer "*compilation*")))
+        (if compilation-buffer
+            (progn
+              (unless (get-buffer-window compilation-buffer)
+                (save-selected-window
+                  (select-window (split-window-below -15))
+                  (switch-to-buffer compilation-buffer)
+                  (shrink-window-if-larger-than-buffer))))
+          (call-interactively 'compile))))
 #+end_src
 
 ** General Keybindings
@@ -240,6 +273,20 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "f l" '(consult-line :wk "Find line")
         "f o" '(consult-outline :wk "Find Outline")
         "f i" '(consult-imenu :wk "Imenu buffer locations"))
+
+      (start/leader-keys
+        "C" '(:ignore t :wk "Compile")
+        "C o" '(compile-or-open :wk "Compile or open")
+        "C c" '(projectile-compile-project :wk "Compile Project")
+        "C r" '(recompile :wk "Recompile")
+        "C k" '(kill-compilation :wk "Kill compilation")
+        "C s" '(:ignore t :wk "Switch")
+        "C s i" '(comint-mode :wk "Make interactive mode")
+        "C s c" '(compilation-mode :wk "Make compilation mode")
+        "C e" '(:ignore t :wk "Errors")
+        "C e l" '(consult-compile-error :wk "List compile errors")
+        "C e j" '(compilation-next-error :wk "Next compile error")
+        "C e k" '(compilation-previous-error :wk "Previous compile error"))
 
       (start/leader-keys
         "b" '(:ignore t :wk "Buffers")
@@ -296,7 +343,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "l r" '(eglot-rename  :wk "Rename"))
 
       (start/leader-keys
-        :keymaps 'prog-mode-map
+        ;; :keymaps 'prog-mode-map
         "h" '(:ignore t :wk "Harpoon")
         "h a" '(harpoon-add-file :wk "Add file")
         "h t" '(harpoon-toggle-file :wk "Toggle file")
@@ -748,6 +795,15 @@ Manage python virtual enviroment
       :bind (:map markdown-mode-map
                   ("C-c C-e" . markdown-down)))
 #+end_src
+
+*** Quarto
+#+begin_src emacs-lisp
+    ;; (use-package quarto-mode
+    ;;   :straight t
+    ;;   :mode (("\\.Rmd" . poly-quarto-mode)))
+
+    ;; (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
+#+end_src
 ** Error
 #+BEGIN_SRC emacs-lisp
     (use-package flycheck
@@ -762,7 +818,6 @@ Manage python virtual enviroment
 ** Treesitter
 
 #+BEGIN_SRC emacs-lisp
-    ;; TODO: This does not seem to work right
     (use-package tree-sitter
       :straight t
       :config(global-tree-sitter-mode
@@ -830,6 +885,14 @@ Harpoon is a quick and easy way to find your way around your files
       :straight t
       :bind ("C-c d" . docker))
 #+end_src
+
+** Rest Client
+#+begin_src emacs-lisp
+    (use-package restclient
+      :straight t
+      :mode (("\\.http\\'" . restclient-mode)))
+#+end_src
+
 ** Git
 *** Magit
 Complete text-based user interface to Git.
@@ -1177,7 +1240,8 @@ With this package installed, you can add ‘:diminish’ to any use-package bloc
     (use-package eldoc-box
       :straight t
       :config
-      (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
+      ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
+      (setq eldoc-box-hover-mode nil)
       (setq eldoc-box-cleanup-interval 3))
 
 #+END_SRC

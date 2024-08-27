@@ -75,8 +75,8 @@
   (scroll-conservatively 10) ;; Smooth scrolling
   (scroll-margin 10)
   
-  (split-height-threshold nil) ;;Default split vertical
-  (split-width-threshold 0)
+  ;; (split-height-threshold nil) ;;Default split vertical
+  ;; (split-width-threshold 0)
 
   (tab-width 4)
 
@@ -93,6 +93,29 @@
          )
   ;; Fix general.el leader key not working instantly in messages buffer with evil mode
   )
+
+(require 'ansi-color)
+(defun endless/colorize-compilation ()
+  "Colorize from `compilation-filter-start' to `point'."
+  (let ((inhibit-read-only t))
+    (ansi-color-apply-on-region
+     compilation-filter-start (point))))
+
+(add-hook 'compilation-filter-hook
+          #'endless/colorize-compilation)
+
+(defun compile-or-open ()
+  "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
+  (interactive)
+  (let ((compilation-buffer (get-buffer "*compilation*")))
+    (if compilation-buffer
+        (progn
+          (unless (get-buffer-window compilation-buffer)
+            (save-selected-window
+              (select-window (split-window-below -15))
+              (switch-to-buffer compilation-buffer)
+              (shrink-window-if-larger-than-buffer))))
+      (call-interactively 'compile))))
 
 (use-package general
   :straight t
@@ -122,6 +145,20 @@
     "f l" '(consult-line :wk "Find line")
     "f o" '(consult-outline :wk "Find Outline")
     "f i" '(consult-imenu :wk "Imenu buffer locations"))
+
+  (start/leader-keys
+    "C" '(:ignore t :wk "Compile")
+    "C o" '(compile-or-open :wk "Compile or open")
+    "C c" '(projectile-compile-project :wk "Compile Project")
+    "C r" '(recompile :wk "Recompile")
+    "C k" '(kill-compilation :wk "Kill compilation")
+    "C s" '(:ignore t :wk "Switch")
+    "C s i" '(comint-mode :wk "Make interactive mode")
+    "C s c" '(compilation-mode :wk "Make compilation mode")
+    "C e" '(:ignore t :wk "Errors")
+    "C e l" '(consult-compile-error :wk "List compile errors")
+    "C e j" '(compilation-next-error :wk "Next compile error")
+    "C e k" '(compilation-previous-error :wk "Previous compile error"))
 
   (start/leader-keys
     "b" '(:ignore t :wk "Buffers")
@@ -178,7 +215,7 @@
     "l r" '(eglot-rename  :wk "Rename"))
 
   (start/leader-keys
-    :keymaps 'prog-mode-map
+    ;; :keymaps 'prog-mode-map
     "h" '(:ignore t :wk "Harpoon")
     "h a" '(harpoon-add-file :wk "Add file")
     "h t" '(harpoon-toggle-file :wk "Toggle file")
@@ -528,6 +565,12 @@
   :bind (:map markdown-mode-map
               ("C-c C-e" . markdown-down)))
 
+;; (use-package quarto-mode
+;;   :straight t
+;;   :mode (("\\.Rmd" . poly-quarto-mode)))
+
+;; (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
+
 (use-package flycheck
   :straight t)
 
@@ -537,7 +580,6 @@
   :config
   (global-flycheck-eglot-mode 1))
 
-;; TODO: This does not seem to work right
 (use-package tree-sitter
   :straight t
   :config(global-tree-sitter-mode
@@ -591,6 +633,10 @@
 (use-package docker
   :straight t
   :bind ("C-c d" . docker))
+
+(use-package restclient
+  :straight t
+  :mode (("\\.http\\'" . restclient-mode)))
 
 (use-package magit
   :straight t
@@ -845,7 +891,8 @@
 (use-package eldoc-box
   :straight t
   :config
-  (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
+  ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
+  (setq eldoc-box-hover-mode nil)
   (setq eldoc-box-cleanup-interval 3))
 
 (use-package helpful
