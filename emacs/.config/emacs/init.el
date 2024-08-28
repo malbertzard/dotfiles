@@ -38,6 +38,15 @@
                          ("elpa" . "https://elpa.gnu.org/packages/")
                          ("nongnu" . "https://elpa.nongnu.org/nongnu/"))) ;; For Eat Terminal
 
+(use-package no-littering
+  :straight t)
+
+(use-package system-packages
+  :straight t)
+
+(use-package diminish
+  :straight t)
+
 (use-package emacs
   :custom
   (menu-bar-mode nil)         ;; Disable the menu bar
@@ -93,29 +102,6 @@
          )
   ;; Fix general.el leader key not working instantly in messages buffer with evil mode
   )
-
-(require 'ansi-color)
-(defun endless/colorize-compilation ()
-  "Colorize from `compilation-filter-start' to `point'."
-  (let ((inhibit-read-only t))
-    (ansi-color-apply-on-region
-     compilation-filter-start (point))))
-
-(add-hook 'compilation-filter-hook
-          #'endless/colorize-compilation)
-
-(defun compile-or-open ()
-  "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
-  (interactive)
-  (let ((compilation-buffer (get-buffer "*compilation*")))
-    (if compilation-buffer
-        (progn
-          (unless (get-buffer-window compilation-buffer)
-            (save-selected-window
-              (select-window (split-window-below -15))
-              (switch-to-buffer compilation-buffer)
-              (shrink-window-if-larger-than-buffer))))
-      (call-interactively 'compile))))
 
 (use-package general
   :straight t
@@ -293,6 +279,128 @@
     "t" '(:ignore t :wk "Terminal")
     "t t" '(eat :wk "Terminal toggle")))
 
+(require 'tramp)
+(add-to-list 'tramp-remote-path 'tramp-default-remote-path)
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+
+;;(setq eww-retrieve-command
+;;     '("chromium" "--headless" "--dump-dom"))
+
+(use-package dired
+  :after evil-collection
+  :straight nil
+  :commands (dired dired-jump)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map "c" 'dired-create-empty-file)
+  :custom
+  (setq delete-by-moving-to-trash t))
+
+(use-package dired-open
+  :commands (dired dired-jump)
+  :config
+  (setq dired-open-extensions '(("png" . "feh")
+                                ("mkv" . "mpv"))))
+
+(use-package dired-hide-dotfiles
+  :straight t
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map "H" 'dired-hide-dotfiles-mode))
+
+(use-package doom-themes
+  :straight t
+  :config
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
+  (load-theme 'doom-gruvbox t)
+  (doom-themes-org-config))
+
+(use-package dashboard
+  :straight t
+  :custom
+  (dashboard-banner-logo-title "With Great Power Comes Great Responsibility!")
+  (dashboard-center-content t)
+  (dashboard-items '((projects . 5)))
+  (dashboard-set-file-icons t)
+  (dashboard-set-footer nil)
+  (dashboard-projects-backend 'projectile)
+  (dashboard-set-heading-icons t)
+  (dashboard-set-navigator t)
+  (dashboard-show-shortcuts nil)
+  (dashboard-startupify-list '(   dashboard-insert-banner
+                                  dashboard-insert-newline
+                                  dashboard-insert-banner-title
+                                  dashboard-insert-items
+                                  dashboard-insert-newline
+                                  dashboard-insert-init-info))
+  (dashboard-startup-banner 'logo)
+  :config (dashboard-setup-startup-hook))
+
+;; (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
+
+(set-face-attribute 'default nil
+                    ;; :font "JetBrains Mono" ;; Set your favorite type of font or download JetBrains Mono
+                    :height 120
+                    :weight 'medium)
+;; This sets the default font on all graphical frames created after restarting Emacs.
+;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+;; are not right unless I also add this method of setting the default font.
+
+;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
+(setq-default line-spacing 0.15)
+
+(use-package emacs
+  :straight nil
+  :bind
+  ("C-+" . text-scale-increase)
+  ("C--" . text-scale-decrease)
+  ("<C-wheel-up>" . text-scale-increase)
+  ("<C-wheel-down>" . text-scale-decrease))
+
+(use-package nerd-icons
+  :straight t
+  :if (display-graphic-p))
+
+(use-package nerd-icons-dired
+  :straight t
+  :hook (dired-mode . (lambda () (nerd-icons-dired-mode t))))
+
+(use-package nerd-icons-ibuffer
+  :straight t
+  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+
+(use-package doom-modeline
+  :straight t
+  :init (doom-modeline-mode 1)
+  :config
+  (setq doom-modeline-height 42
+        doom-modeline-percent-position nil
+        doom-modeline-position-line-format nil
+        doom-modeline-buffer-encoding nil
+        doom-modeline-position-column-format nil
+        doom-modeline-battery t
+        doom-modeline-icon t
+        doom-modeline-bar-width 5))
+
+(use-package which-key
+  :straight t
+  :init
+  (which-key-mode 1)
+  :diminish
+  :custom
+  (which-key-side-window-location 'bottom)
+  (which-key-sort-order #'which-key-key-order-alpha) ;; Same as default, except single characters are sorted alphabetically
+  (which-key-sort-uppercase-first nil)
+  (which-key-add-column-padding 1) ;; Number of spaces to add to the left of each column
+  (which-key-min-display-lines 6)  ;; Increase the minimum lines to display, because the default is only 1
+  (which-key-idle-delay 0.8)       ;; Set the time delay (in seconds) for the which-key popup to appear
+  (which-key-max-description-length 25)
+  (which-key-allow-imprecise-window-fit nil)) ;; Fixes which-key window slipping out in Emacs Daemon
+
+(use-package rainbow-delimiters
+  :straight t
+  :hook (prog-mode . rainbow-delimiters-mode))
+
 (use-package evil
   :straight t
   :config ;; Execute code After a package is loaded
@@ -366,357 +474,44 @@
   (define-key evil-normal-state-map (kbd "]F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" nil t)))
   (define-key evil-normal-state-map (kbd "[F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t t))))
 
-(use-package doom-themes
+(use-package undo-tree
   :straight t
-  :config
-  (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t)
-  (load-theme 'doom-gruvbox t)
-  (doom-themes-org-config))
-
-(use-package dashboard
-  :straight t
-  :custom
-  (dashboard-banner-logo-title "With Great Power Comes Great Responsibility!")
-  (dashboard-center-content t)
-  (dashboard-items '((projects . 5)))
-  (dashboard-set-file-icons t)
-  (dashboard-set-footer nil)
-  (dashboard-projects-backend 'projectile)
-  (dashboard-set-heading-icons t)
-  (dashboard-set-navigator t)
-  (dashboard-show-shortcuts nil)
-  (dashboard-startupify-list '(   dashboard-insert-banner
-                                  dashboard-insert-newline
-                                  dashboard-insert-banner-title
-                                  dashboard-insert-items
-                                  dashboard-insert-newline
-                                  dashboard-insert-init-info))
-  (dashboard-startup-banner 'logo)
-  :config (dashboard-setup-startup-hook))
-
-;; (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
-
-(set-face-attribute 'default nil
-                    ;; :font "JetBrains Mono" ;; Set your favorite type of font or download JetBrains Mono
-                    :height 120
-                    :weight 'medium)
-;; This sets the default font on all graphical frames created after restarting Emacs.
-;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-;; are not right unless I also add this method of setting the default font.
-
-;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
-(setq-default line-spacing 0.15)
-
-(use-package emacs
-  :straight nil
-  :bind
-  ("C-+" . text-scale-increase)
-  ("C--" . text-scale-decrease)
-  ("<C-wheel-up>" . text-scale-increase)
-  ("<C-wheel-down>" . text-scale-decrease))
-
-(use-package doom-modeline
-  :straight t
-  :init (doom-modeline-mode 1)
-  :config
-  (setq doom-modeline-height 42
-        doom-modeline-percent-position nil
-        doom-modeline-position-line-format nil
-        doom-modeline-buffer-encoding nil
-        doom-modeline-position-column-format nil
-        doom-modeline-battery t
-        doom-modeline-icon t
-        doom-modeline-bar-width 5))
-
-(use-package editorconfig
-  :straight t
-  :diminish editorconfig-mode
-  :config
-  (editorconfig-mode 1))
-
-(require 'tramp)
-(add-to-list 'tramp-remote-path 'tramp-default-remote-path)
-(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
-
-(use-package projectile
-  :straight t
-  :init
-  (projectile-mode)
-  :custom
-  (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
-  (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
-  (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
-
-;; Use Bookmarks for smaller, not standard projects
-
-(use-package eglot
-  :straight nil ;; Don't install eglot because it's now built-in
-  :config
-  (evil-define-key 'normal 'eglot-mode-map
-    "K" 'eldoc-box-help-at-point)
-  (add-hook 'python-mode-hook 'eglot-ensure)
-  (add-hook 'php-mode-hook 'eglot-ensure)
-  (add-hook 'go-mode-hook 'eglot-ensure)
-  (add-hook 'rust-mode-hook 'eglot-ensure)
-  (add-hook 'ruby-mode-hook 'eglot-ensure)
-  (add-hook 'yaml-mode-hook 'eglot-ensure)
-  (add-hook 'bash-mode-hook 'eglot-ensure)
-  :custom
-  (eglot-autoshutdown t)
-  (fset #'jsonrpc--log-event #'ignore)
-  (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
-  (eglot-report-progress nil)
-  (eglot-events-buffer-size 0)
-  (eglot-sync-connect nil)
-  (eglot-extend-to-xref nil))
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
-
-;; (use-package dape
-;;   :hook (prog-mode . eglot))
-
-(use-package yasnippet-snippets
-  :straight t
-  :hook (prog-mode . yas-minor-mode))
-
-(defun pyrightconfig-write (virtualenv)
-  (interactive "DEnv: ")
-
-  (let* (;; file-truename and tramp-file-local-name ensure that neither `~' nor
-		 ;; the Tramp prefix (e.g. "/ssh:my-host:") wind up in the final
-		 ;; absolute directory path.
-		 (venv-dir (tramp-file-local-name (file-truename virtualenv)))
-
-		 ;; Given something like /path/to/.venv/, this strips off the trailing `/'.
-		 (venv-file-name (directory-file-name venv-dir))
-
-		 ;; Naming convention for venvPath matches the field for
-		 ;; pyrightconfig.json.  `file-name-directory' gets us the parent path
-		 ;; (one above .venv).
-		 (venvPath (file-name-directory venv-file-name))
-
-		 ;; Grabs just the `.venv' off the end of the venv-file-name.
-		 (venv (file-name-base venv-file-name))
-
-		 ;; Eglot demands that `pyrightconfig.json' is in the project root
-		 ;; folder.
-		 (base-dir (vc-git-root default-directory))
-		 (out-file (expand-file-name "pyrightconfig.json" base-dir))
-
-		 ;; Finally, get a string with the JSON payload.
-		 (out-contents (json-encode (list :venvPath venvPath :venv venv))))
-
-	;; Emacs uses buffers for everything.  This creates a temp buffer, inserts
-	;; the JSON payload, then flushes that content to final `pyrightconfig.json'
-	;; location
-	(with-temp-file out-file (insert out-contents))))
-
-(use-package org
-  :straight nil
-  :custom
-  (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
-
-  :hook
-  (org-mode . org-indent-mode))
-
-(custom-set-faces
- '(org-level-1 ((t (:inherit outline-1 :height 1.5))))
- '(org-level-2 ((t (:inherit outline-2 :height 1.4))))
- '(org-level-3 ((t (:inherit outline-3 :height 1.3))))
- '(org-level-4 ((t (:inherit outline-4 :height 1.2))))
- '(org-level-5 ((t (:inherit outline-5 :height 1.1))))
- '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
- '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
-
-(use-package toc-org
-  :straight t
-  :commands toc-org-enable
-  :hook (org-mode . toc-org-mode))
-
-(use-package org-modern
-  :straight t
-  :hook (org-mode . org-modern-mode))
-
-(use-package org-excalidraw
-  :straight (:type git :host github :repo "wdavew/org-excalidraw")
-  :config
-  (setq org-excalidraw-directory "~/code/Cadmus/__Assets/Excalidraw/"))
-
-(defun start/org-mode-visual-fill ()
-  (setq visual-fill-column-width 200
-        visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
-
-(use-package visual-fill-column
-  :straight t
-  :hook (org-mode . start/org-mode-visual-fill))
-
-(use-package markdown-mode
-  :straight t
-  :mode ("README\\.md\\'" . gfm-mode)
-  :init (setq markdown-command "multimarkdown")
-  :bind (:map markdown-mode-map
-              ("C-c C-e" . markdown-down)))
-
-(use-package poly-markdown
-  :straight t)
-
-(use-package quarto-mode
-  :straight t
-  :mode (("\\.Rmd" . poly-quarto-mode)))
-
-(add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
-
-(use-package zig-mode
-  :straight t)
-
-(use-package flycheck
-  :straight t)
-
-(use-package flycheck-eglot
-  :straight t
-  :after (flycheck eglot)
-  :config
-  (global-flycheck-eglot-mode 1))
-
-(use-package tree-sitter
-  :straight t
-  :config(global-tree-sitter-mode
-          (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
-
-(setq treesit-language-source-alist
-      '(
-        (bash "https://github.com/tree-sitter/tree-sitter-bash")
-		(cmake "https://github.com/uyha/tree-sitter-cmake")
-		(css "https://github.com/tree-sitter/tree-sitter-css")
-		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
-		(html "https://github.com/tree-sitter/tree-sitter-html")
-		(zig "https://github.com/GrayJack/tree-sitter-zig")
-		(go "https://github.com/tree-sitter/tree-sitter-go")
-        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-		(json "https://github.com/tree-sitter/tree-sitter-json")
-		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-		(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-		(make "https://github.com/alemuller/tree-sitter-make")
-		(rust "https://github.com/tree-sitter/tree-sitter-rust")
-		(python "https://github.com/tree-sitter/tree-sitter-python")
-		(toml "https://github.com/tree-sitter/tree-sitter-toml")
-		(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-		(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-		(yaml "https://github.com/ikatyang/tree-sitter-yaml"))
-	  )
-
-(setq treesit-font-lock-level 4)
-
-(use-package tree-sitter-langs
-  :straight t)
-
-;; Install all langs
-;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
-
-(use-package treesit-auto
-  :straight t
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
-
-(use-package eat
-  :straight t
-  :hook ('eshell-load-hook #'eat-eshell-mode))
-
-(use-package harpoon
-  :straight t)
-
-(use-package docker
-  :straight t
-  :bind ("C-c d" . docker))
-
-(use-package restclient
-  :straight t
-  :mode (("\\.http\\'" . restclient-mode)))
-
-(use-package magit
-  :straight t
-  :commands magit-status)
-
-(use-package magit-todos
-  :straight t
-  :after magit
-  :config (magit-todos-mode 1))
-
-(use-package git-gutter
-  :straight t
-  :config(global-git-gutter-mode +1))
-
-(use-package diff-hl
-  :straight t
-  :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)
-         (magit-pre-refresh  . diff-hl-magit-pre-refresh)
-         (magit-post-refresh . diff-hl-magit-post-refresh))
-  :init (global-diff-hl-mode))
-
-(use-package devdocs
-  :straight t)
-
-(use-package rainbow-delimiters
-  :straight t
-  :hook (prog-mode . rainbow-delimiters-mode))
-
-(use-package nerd-icons
-  :straight t
-  :if (display-graphic-p))
-
-(use-package nerd-icons-dired
-  :straight t
-  :hook (dired-mode . (lambda () (nerd-icons-dired-mode t))))
-
-(use-package nerd-icons-ibuffer
-  :straight t
-  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
-
-;;(setq eww-retrieve-command
-;;     '("chromium" "--headless" "--dump-dom"))
-
-(use-package dired
-  :after evil-collection
-  :straight nil
-  :commands (dired dired-jump)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map "c" 'dired-create-empty-file)
-  :custom
-  (setq delete-by-moving-to-trash t))
-
-(use-package dired-open
-  :commands (dired dired-jump)
-  :config
-  (setq dired-open-extensions '(("png" . "feh")
-                                ("mkv" . "mpv"))))
-
-(use-package dired-hide-dotfiles
-  :straight t
-  :hook (dired-mode . dired-hide-dotfiles-mode)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map "H" 'dired-hide-dotfiles-mode))
+  :config (global-undo-tree-mode))
 
 (use-package drag-stuff
   :straight t
   :config
   (evil-define-key 'normal 'prog-mode-map (kbd "C-j") 'drag-stuff-down)
   (evil-define-key 'normal 'prog-mode-map (kbd "C-k") 'drag-stuff-up))
+
+;; Configure tempel for templating support.
+(use-package tempel
+  :straight t
+  :bind (("M-." . tempel-complete))
+  :init
+  ;; Set up tempel for different modes.
+  (defun tempel-setup-capf ()
+    (setq-local completion-at-point-functions
+                (cons #'tempel-expand
+                      completion-at-point-functions)))
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf))
+
+;; Install tempel-collection for additional templates.
+(use-package tempel-collection
+  :straight t
+  :after tempel)
+
+(use-package harpoon
+  :straight t)
+
+(use-package wgrep
+  :straight t
+  :bind ( :map grep-mode-map
+          ("e" . wgrep-change-to-wgrep-mode)
+          ("C-x C-q" . wgrep-change-to-wgrep-mode)
+          ("C-c C-c" . wgrep-finish-edit)))
 
 (use-package corfu
   :straight t
@@ -780,16 +575,6 @@
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-(use-package embark
-  :straight t
-  :bind (("C-." . embark-act)
-         :map minibuffer-local-map
-         ("C-c C-c" . embark-collect)
-         ("C-c C-e" . embark-export)))
-
-(use-package embark-consult
-  :straight t)
-
 (use-package vertico
   :straight t
   :bind (:map vertico-map
@@ -822,25 +607,6 @@
   (nerd-icons-completion-mode)
   :hook
   ('marginalia-mode-hook . 'nerd-icons-completion-marginalia-setup))
-
-;; Configure tempel for templating support.
-(use-package tempel
-  :straight t
-  :bind (("M-." . tempel-complete))
-  :init
-  ;; Set up tempel for different modes.
-  (defun tempel-setup-capf ()
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf))
-
-;; Install tempel-collection for additional templates.
-(use-package tempel-collection
-  :straight t
-  :after tempel)
 
 (use-package consult
   :straight t
@@ -894,9 +660,6 @@
   ;; (setq consult-project-function nil)
   )
 
-(use-package diminish
-  :straight t)
-
 (setq eldoc-echo-area-use-multiline-p nil)
 
 (use-package eldoc-box
@@ -906,46 +669,279 @@
   (setq eldoc-box-hover-mode nil)
   (setq eldoc-box-cleanup-interval 3))
 
-(use-package helpful
+(require 'ansi-color)
+(defun endless/colorize-compilation ()
+  "Colorize from `compilation-filter-start' to `point'."
+  (let ((inhibit-read-only t))
+    (ansi-color-apply-on-region
+     compilation-filter-start (point))))
+
+(add-hook 'compilation-filter-hook
+          #'endless/colorize-compilation)
+
+(defun compile-or-open ()
+  "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
+  (interactive)
+  (let ((compilation-buffer (get-buffer "*compilation*")))
+    (if compilation-buffer
+        (progn
+          (unless (get-buffer-window compilation-buffer)
+            (save-selected-window
+              (select-window (split-window-below -15))
+              (switch-to-buffer compilation-buffer)
+              (shrink-window-if-larger-than-buffer))))
+      (call-interactively 'compile))))
+
+(use-package flycheck
   :straight t)
 
-(use-package which-key
+(use-package flycheck-eglot
+  :straight t
+  :after (flycheck eglot)
+  :config
+  (global-flycheck-eglot-mode 1))
+
+(use-package tree-sitter
+  :straight t
+  :config(global-tree-sitter-mode
+          (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
+
+(setq treesit-language-source-alist
+      '(
+        (bash "https://github.com/tree-sitter/tree-sitter-bash")
+		(cmake "https://github.com/uyha/tree-sitter-cmake")
+		(css "https://github.com/tree-sitter/tree-sitter-css")
+		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+		(html "https://github.com/tree-sitter/tree-sitter-html")
+		(zig "https://github.com/GrayJack/tree-sitter-zig")
+		(go "https://github.com/tree-sitter/tree-sitter-go")
+        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+		(json "https://github.com/tree-sitter/tree-sitter-json")
+		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+		(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+		(make "https://github.com/alemuller/tree-sitter-make")
+		(rust "https://github.com/tree-sitter/tree-sitter-rust")
+		(python "https://github.com/tree-sitter/tree-sitter-python")
+		(toml "https://github.com/tree-sitter/tree-sitter-toml")
+		(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+		(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+		(yaml "https://github.com/ikatyang/tree-sitter-yaml"))
+	  )
+
+(setq treesit-font-lock-level 4)
+
+(use-package tree-sitter-langs
+  :straight t)
+
+;; Install all langs
+;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+
+(use-package treesit-auto
+  :straight t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
+(use-package eglot
+  :straight nil ;; Don't install eglot because it's now built-in
+  :config
+  (evil-define-key 'normal 'eglot-mode-map
+    "K" 'eldoc-box-help-at-point)
+  (add-hook 'python-mode-hook 'eglot-ensure)
+  (add-hook 'php-mode-hook 'eglot-ensure)
+  (add-hook 'go-mode-hook 'eglot-ensure)
+  (add-hook 'rust-mode-hook 'eglot-ensure)
+  (add-hook 'ruby-mode-hook 'eglot-ensure)
+  (add-hook 'yaml-mode-hook 'eglot-ensure)
+  (add-hook 'bash-mode-hook 'eglot-ensure)
+  :custom
+  (eglot-autoshutdown t)
+  (fset #'jsonrpc--log-event #'ignore)
+  (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
+  (eglot-report-progress nil)
+  (eglot-events-buffer-size 0)
+  (eglot-sync-connect nil)
+  (eglot-extend-to-xref nil))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
+
+;; (use-package dape
+;;   :hook (prog-mode . eglot))
+
+(defun pyrightconfig-write (virtualenv)
+  (interactive "DEnv: ")
+
+  (let* (;; file-truename and tramp-file-local-name ensure that neither `~' nor
+		 ;; the Tramp prefix (e.g. "/ssh:my-host:") wind up in the final
+		 ;; absolute directory path.
+		 (venv-dir (tramp-file-local-name (file-truename virtualenv)))
+
+		 ;; Given something like /path/to/.venv/, this strips off the trailing `/'.
+		 (venv-file-name (directory-file-name venv-dir))
+
+		 ;; Naming convention for venvPath matches the field for
+		 ;; pyrightconfig.json.  `file-name-directory' gets us the parent path
+		 ;; (one above .venv).
+		 (venvPath (file-name-directory venv-file-name))
+
+		 ;; Grabs just the `.venv' off the end of the venv-file-name.
+		 (venv (file-name-base venv-file-name))
+
+		 ;; Eglot demands that `pyrightconfig.json' is in the project root
+		 ;; folder.
+		 (base-dir (vc-git-root default-directory))
+		 (out-file (expand-file-name "pyrightconfig.json" base-dir))
+
+		 ;; Finally, get a string with the JSON payload.
+		 (out-contents (json-encode (list :venvPath venvPath :venv venv))))
+
+	;; Emacs uses buffers for everything.  This creates a temp buffer, inserts
+	;; the JSON payload, then flushes that content to final `pyrightconfig.json'
+	;; location
+	(with-temp-file out-file (insert out-contents))))
+
+(use-package zig-mode
+  :straight t)
+
+(use-package editorconfig
+  :straight t
+  :diminish editorconfig-mode
+  :config
+  (editorconfig-mode 1))
+
+(use-package eat
+  :straight t
+  :hook ('eshell-load-hook #'eat-eshell-mode))
+
+(use-package magit
+  :straight t
+  :commands magit-status)
+
+(use-package magit-todos
+  :straight t
+  :after magit
+  :config (magit-todos-mode 1))
+
+(use-package git-gutter
+  :straight t
+  :config(global-git-gutter-mode +1))
+
+(use-package diff-hl
+  :straight t
+  :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)
+         (magit-pre-refresh  . diff-hl-magit-pre-refresh)
+         (magit-post-refresh . diff-hl-magit-post-refresh))
+  :init (global-diff-hl-mode))
+
+(use-package projectile
   :straight t
   :init
-  (which-key-mode 1)
-  :diminish
+  (projectile-mode)
   :custom
-  (which-key-side-window-location 'bottom)
-  (which-key-sort-order #'which-key-key-order-alpha) ;; Same as default, except single characters are sorted alphabetically
-  (which-key-sort-uppercase-first nil)
-  (which-key-add-column-padding 1) ;; Number of spaces to add to the left of each column
-  (which-key-min-display-lines 6)  ;; Increase the minimum lines to display, because the default is only 1
-  (which-key-idle-delay 0.8)       ;; Set the time delay (in seconds) for the which-key popup to appear
-  (which-key-max-description-length 25)
-  (which-key-allow-imprecise-window-fit nil)) ;; Fixes which-key window slipping out in Emacs Daemon
+  (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
+  (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
+  (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
 
-(use-package system-packages
-  :straight t)
+;; Use Bookmarks for smaller, not standard projects
+
+(use-package docker
+  :straight t
+  :bind ("C-c d" . docker))
 
 (use-package crux
   :straight t)
 
-(use-package undo-tree
+(use-package embark
   :straight t
-  :config (global-undo-tree-mode))
+  :bind (("C-." . embark-act)
+         :map minibuffer-local-map
+         ("C-c C-c" . embark-collect)
+         ("C-c C-e" . embark-export)))
 
-(use-package wgrep
-  :straight t
-  :bind ( :map grep-mode-map
-          ("e" . wgrep-change-to-wgrep-mode)
-          ("C-x C-q" . wgrep-change-to-wgrep-mode)
-          ("C-c C-c" . wgrep-finish-edit)))
+(use-package embark-consult
+  :straight t)
 
-(use-package no-littering
+(use-package helpful
+  :straight t)
+
+(use-package devdocs
   :straight t)
 
 (use-package pdf-tools
   :straight t)
+
+(use-package markdown-mode
+  :straight t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown")
+  :bind (:map markdown-mode-map
+              ("C-c C-e" . markdown-down)))
+
+(use-package poly-markdown
+  :straight t)
+
+(use-package quarto-mode
+  :straight t
+  :mode (("\\.Rmd" . poly-quarto-mode)))
+
+(add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
+
+(use-package org
+  :straight nil
+  :custom
+  (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
+
+  :hook
+  (org-mode . org-indent-mode))
+
+(custom-set-faces
+ '(org-level-1 ((t (:inherit outline-1 :height 1.5))))
+ '(org-level-2 ((t (:inherit outline-2 :height 1.4))))
+ '(org-level-3 ((t (:inherit outline-3 :height 1.3))))
+ '(org-level-4 ((t (:inherit outline-4 :height 1.2))))
+ '(org-level-5 ((t (:inherit outline-5 :height 1.1))))
+ '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
+ '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
+
+(use-package toc-org
+  :straight t
+  :commands toc-org-enable
+  :hook (org-mode . toc-org-mode))
+
+(use-package org-modern
+  :straight t
+  :hook (org-mode . org-modern-mode))
+
+(use-package org-excalidraw
+  :straight (:type git :host github :repo "wdavew/org-excalidraw")
+  :config
+  (setq org-excalidraw-directory "~/code/Cadmus/__Assets/Excalidraw/"))
+
+(defun start/org-mode-visual-fill ()
+  (setq visual-fill-column-width 200
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
+
+(use-package visual-fill-column
+  :straight t
+  :hook (org-mode . start/org-mode-visual-fill))
+
+(use-package restclient
+  :straight t
+  :mode (("\\.http\\'" . restclient-mode)))
 
 (use-package theme-magic
   :straight t)

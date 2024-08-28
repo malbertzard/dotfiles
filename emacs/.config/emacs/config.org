@@ -12,15 +12,16 @@
   - [[#straight][Straight]]
   - [[#auto-tangle-configuration-file][Auto-tangle Configuration file]]
   - [[#use-package][Use Package]]
+- [[#utility-packages][Utility packages]]
+  - [[#litter][Litter]]
+  - [[#system-packages][System Packages]]
+  - [[#diminish][Diminish]]
+- [[#base-stuff][Base Stuff]]
   - [[#good-defaults][Good Defaults]]
-  - [[#compilation-can-be-better][Compilation can be better]]
   - [[#general-keybindings][General Keybindings]]
-  - [[#evil-mode][Evil Mode]]
-    - [[#evil-collection][Evil Collection]]
-    - [[#evil-surround][Evil Surround]]
-    - [[#evil-visualstar][Evil Visualstar]]
-    - [[#evil-commentary][Evil Commentary]]
-    - [[#evil-textobject][Evil Textobject]]
+  - [[#tramp][Tramp]]
+  - [[#eww-tweaks][EWW Tweaks]]
+  - [[#dired-tweaks][Dired tweaks]]
 - [[#appearance][Appearance]]
   - [[#set-theme][Set Theme]]
   - [[#dashboard][Dashboard]]
@@ -28,56 +29,58 @@
   - [[#fonts][Fonts]]
     - [[#setting-fonts][Setting fonts]]
     - [[#zooming-inout][Zooming In/Out]]
+  - [[#nerd-icons][Nerd Icons]]
   - [[#modeline][Modeline]]
+  - [[#which-key][Which-Key]]
+- [[#file-editing][File Editing]]
+  - [[#rainbow-delimiters][Rainbow Delimiters]]
+  - [[#evil-mode][Evil Mode]]
+    - [[#evil-collection][Evil Collection]]
+    - [[#evil-surround][Evil Surround]]
+    - [[#evil-visualstar][Evil Visualstar]]
+    - [[#evil-commentary][Evil Commentary]]
+    - [[#evil-textobject][Evil Textobject]]
+  - [[#undo-tree][Undo Tree]]
+  - [[#drag-stuff][Drag Stuff]]
+  - [[#templates][Templates]]
+  - [[#harpoon][Harpoon]]
+  - [[#wgrep][Wgrep]]
+  - [[#completions][Completions]]
+    - [[#corfu][Corfu]]
+    - [[#cape][Cape]]
+    - [[#orderless][Orderless]]
+    - [[#vertico-and-marginalia][Vertico and Marginalia]]
+    - [[#consult][Consult]]
+    - [[#eldoc][Eldoc]]
 - [[#development][Development]]
-  - [[#editor-conf][Editor Conf]]
-  - [[#tramp][Tramp]]
-  - [[#projectile][Projectile]]
-  - [[#eglot][Eglot]]
-  - [[#dape][Dape]]
-  - [[#yasnippet][Yasnippet]]
-  - [[#language-modes][Language modes]]
-    - [[#python-mode][Python mode]]
-    - [[#org-mode][Org Mode]]
-    - [[#markdown][Markdown]]
-    - [[#quarto][Quarto]]
-    - [[#zig][Zig]]
+  - [[#compilation-can-be-better][Compilation can be better]]
   - [[#error][Error]]
   - [[#treesitter][Treesitter]]
+  - [[#eglot][Eglot]]
+  - [[#dape][Dape]]
+  - [[#language-modes][Language modes]]
+    - [[#python-mode][Python mode]]
+    - [[#zig][Zig]]
+  - [[#editor-conf][Editor Conf]]
+- [[#other-packages][Other Packages]]
   - [[#terminal][Terminal]]
     - [[#eat][Eat]]
-  - [[#harpoon][Harpoon]]
-  - [[#docker][Docker]]
-  - [[#rest-client][Rest Client]]
   - [[#git][Git]]
     - [[#magit][Magit]]
     - [[#git-gutter][Git Gutter]]
     - [[#diff-hl][Diff-hl]]
-  - [[#dev-docs][Dev Docs]]
-  - [[#rainbow-delimiters][Rainbow Delimiters]]
-- [[#other-packages][Other Packages]]
-  - [[#nerd-icons][Nerd Icons]]
-  - [[#eww-tweaks][EWW Tweaks]]
-  - [[#dired-tweaks][Dired tweaks]]
-  - [[#drag-stuff][Drag Stuff]]
-  - [[#corfu][Corfu]]
-    - [[#kind-icons][Kind Icons]]
-  - [[#cape][Cape]]
-  - [[#orderless][Orderless]]
-  - [[#embark][Embark]]
-  - [[#vertico-and-marginalia][Vertico and Marginalia]]
-  - [[#templates][Templates]]
-  - [[#consult][Consult]]
-  - [[#diminish][Diminish]]
-  - [[#eldoc][Eldoc]]
-  - [[#helpful][Helpful]]
-  - [[#which-key][Which-Key]]
-  - [[#system-packages][System Packages]]
+  - [[#projectile][Projectile]]
+  - [[#docker][Docker]]
   - [[#crux][CRUX]]
-  - [[#undo-tree][Undo Tree]]
-  - [[#wgrep][Wgrep]]
-  - [[#litter][Litter]]
-  - [[#pdf-tools][Pdf Tools]]
+  - [[#embark][Embark]]
+  - [[#helpful][Helpful]]
+  - [[#dev-docs][Dev Docs]]
+  - [[#file-modes][File Modes]]
+    - [[#pdf-tools][Pdf Tools]]
+    - [[#markdown][Markdown]]
+    - [[#quarto][Quarto]]
+    - [[#org-mode][Org Mode]]
+    - [[#http-file-mode--rest-client][Http File Mode / Rest Client]]
   - [[#theme-magic][Theme Magic]]
 - [[#runtime-performance][Runtime Performance]]
 
@@ -158,6 +161,28 @@ automatically exports the configuration here to the associated output files.
                              ("nongnu" . "https://elpa.nongnu.org/nongnu/"))) ;; For Eat Terminal
 #+end_src
 
+* Utility packages
+** Litter
+#+begin_src emacs-lisp
+    (use-package no-littering
+      :straight t)
+#+end_src
+
+** System Packages
+#+begin_src emacs-lisp
+    (use-package system-packages
+      :straight t)
+#+end_src
+
+** Diminish
+This package implements hiding or abbreviation of the modeline displays (lighters) of minor-modes.
+With this package installed, you can add ‘:diminish’ to any use-package block to hide that particular mode in the modeline.
+#+begin_src emacs-lisp
+    (use-package diminish
+      :straight t)
+#+end_src
+
+* Base Stuff
 ** Good Defaults
 #+begin_src emacs-lisp
     (use-package emacs
@@ -216,32 +241,6 @@ automatically exports the configuration here to the associated output files.
       ;; Fix general.el leader key not working instantly in messages buffer with evil mode
       )
 #+end_src
-** Compilation can be better
-#+begin_src emacs-lisp
-    (require 'ansi-color)
-    (defun endless/colorize-compilation ()
-      "Colorize from `compilation-filter-start' to `point'."
-      (let ((inhibit-read-only t))
-        (ansi-color-apply-on-region
-         compilation-filter-start (point))))
-
-    (add-hook 'compilation-filter-hook
-              #'endless/colorize-compilation)
-
-    (defun compile-or-open ()
-      "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
-      (interactive)
-      (let ((compilation-buffer (get-buffer "*compilation*")))
-        (if compilation-buffer
-            (progn
-              (unless (get-buffer-window compilation-buffer)
-                (save-selected-window
-                  (select-window (split-window-below -15))
-                  (switch-to-buffer compilation-buffer)
-                  (shrink-window-if-larger-than-buffer))))
-          (call-interactively 'compile))))
-#+end_src
-
 ** General Keybindings
 A keybinding framework to set keybindings easily.
 The Leader key is what you will press when you want to access your keybindings (SPC + . Find file).
@@ -424,6 +423,182 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "t t" '(eat :wk "Terminal toggle")))
 #+end_src
 
+** Tramp
+#+BEGIN_SRC emacs-lisp
+    (require 'tramp)
+    (add-to-list 'tramp-remote-path 'tramp-default-remote-path)
+    (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+#+END_SRC
+
+** EWW Tweaks
+#+begin_src emacs-lisp
+    ;;(setq eww-retrieve-command
+    ;;     '("chromium" "--headless" "--dump-dom"))
+#+end_src
+
+** Dired tweaks
+Delete intermediate buffers when navigating through dired.
+
+#+BEGIN_SRC emacs-lisp
+    (use-package dired
+      :after evil-collection
+      :straight nil
+      :commands (dired dired-jump)
+      :config
+      (evil-collection-define-key 'normal 'dired-mode-map "c" 'dired-create-empty-file)
+      :custom
+      (setq delete-by-moving-to-trash t))
+
+    (use-package dired-open
+      :commands (dired dired-jump)
+      :config
+      (setq dired-open-extensions '(("png" . "feh")
+                                    ("mkv" . "mpv"))))
+
+    (use-package dired-hide-dotfiles
+      :straight t
+      :hook (dired-mode . dired-hide-dotfiles-mode)
+      :config
+      (evil-collection-define-key 'normal 'dired-mode-map "H" 'dired-hide-dotfiles-mode))
+#+END_SRC
+
+* Appearance
+** Set Theme
+Set gruvbox theme, if you want some themes try out doom-themes.
+Use consult-theme to easily try out themes (*Epilepsy* Warning).
+#+begin_src emacs-lisp
+    (use-package doom-themes
+      :straight t
+      :config
+      (setq doom-themes-enable-bold t
+            doom-themes-enable-italic t)
+      (load-theme 'doom-gruvbox t)
+      (doom-themes-org-config))
+#+end_src
+
+** Dashboard
+#+BEGIN_SRC emacs-lisp
+    (use-package dashboard
+      :straight t
+      :custom
+      (dashboard-banner-logo-title "With Great Power Comes Great Responsibility!")
+      (dashboard-center-content t)
+      (dashboard-items '((projects . 5)))
+      (dashboard-set-file-icons t)
+      (dashboard-set-footer nil)
+      (dashboard-projects-backend 'projectile)
+      (dashboard-set-heading-icons t)
+      (dashboard-set-navigator t)
+      (dashboard-show-shortcuts nil)
+      (dashboard-startupify-list '(   dashboard-insert-banner
+                                      dashboard-insert-newline
+                                      dashboard-insert-banner-title
+                                      dashboard-insert-items
+                                      dashboard-insert-newline
+                                      dashboard-insert-init-info))
+      (dashboard-startup-banner 'logo)
+      :config (dashboard-setup-startup-hook))
+#+END_SRC
+
+** Transparency
+With Emacs version 29, true transparency has been added.
+#+begin_src emacs-lisp
+    ;; (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
+#+end_src
+
+** Fonts
+*** Setting fonts
+#+begin_src emacs-lisp
+    (set-face-attribute 'default nil
+                        ;; :font "JetBrains Mono" ;; Set your favorite type of font or download JetBrains Mono
+                        :height 120
+                        :weight 'medium)
+    ;; This sets the default font on all graphical frames created after restarting Emacs.
+    ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+    ;; are not right unless I also add this method of setting the default font.
+
+    ;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
+    (setq-default line-spacing 0.15)
+#+end_src
+
+*** Zooming In/Out
+You can use the bindings C-+ C-- for zooming in/out. You can also use CTRL plus the mouse wheel for zooming in/out.
+#+begin_src emacs-lisp
+    (use-package emacs
+      :straight nil
+      :bind
+      ("C-+" . text-scale-increase)
+      ("C--" . text-scale-decrease)
+      ("<C-wheel-up>" . text-scale-increase)
+      ("<C-wheel-down>" . text-scale-decrease))
+#+end_src
+
+** Nerd Icons
+For icons and more helpful UI.
+This is an icon set that can be used with dired, ibuffer and other Emacs programs.
+
+Don't forget to use nerd-icons-install-fonts.
+
+We use Nerd icons because it has more, better icons and all-the-icons only supports GUI.
+While nerd-icons supports both GUI and TUI.
+#+begin_src emacs-lisp
+    (use-package nerd-icons
+      :straight t
+      :if (display-graphic-p))
+
+    (use-package nerd-icons-dired
+      :straight t
+      :hook (dired-mode . (lambda () (nerd-icons-dired-mode t))))
+
+    (use-package nerd-icons-ibuffer
+      :straight t
+      :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
+#+end_src
+
+** Modeline
+Replace the default modeline with a prettier more useful.
+#+begin_src emacs-lisp
+    (use-package doom-modeline
+      :straight t
+      :init (doom-modeline-mode 1)
+      :config
+      (setq doom-modeline-height 42
+            doom-modeline-percent-position nil
+            doom-modeline-position-line-format nil
+            doom-modeline-buffer-encoding nil
+            doom-modeline-position-column-format nil
+            doom-modeline-battery t
+            doom-modeline-icon t
+            doom-modeline-bar-width 5))
+#+end_src
+** Which-Key
+Which-key is a helper utility for keychords (which key to press).
+#+begin_src emacs-lisp
+    (use-package which-key
+      :straight t
+      :init
+      (which-key-mode 1)
+      :diminish
+      :custom
+      (which-key-side-window-location 'bottom)
+      (which-key-sort-order #'which-key-key-order-alpha) ;; Same as default, except single characters are sorted alphabetically
+      (which-key-sort-uppercase-first nil)
+      (which-key-add-column-padding 1) ;; Number of spaces to add to the left of each column
+      (which-key-min-display-lines 6)  ;; Increase the minimum lines to display, because the default is only 1
+      (which-key-idle-delay 0.8)       ;; Set the time delay (in seconds) for the which-key popup to appear
+      (which-key-max-description-length 25)
+      (which-key-allow-imprecise-window-fit nil)) ;; Fixes which-key window slipping out in Emacs Daemon
+#+end_src
+
+* File Editing
+** Rainbow Delimiters
+Adds colors to brackets.
+#+begin_src emacs-lisp
+    (use-package rainbow-delimiters
+      :straight t
+      :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
 ** Evil Mode
 Because im a Vim Goblin
 
@@ -518,306 +693,288 @@ Because im a Vim Goblin
       (define-key evil-normal-state-map (kbd "[F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t t))))
 #+end_src
 
-* Appearance
-** Set Theme
-Set gruvbox theme, if you want some themes try out doom-themes.
-Use consult-theme to easily try out themes (*Epilepsy* Warning).
+** Undo Tree 
 #+begin_src emacs-lisp
-    (use-package doom-themes
+    (use-package undo-tree
+      :straight t
+      :config (global-undo-tree-mode))
+#+end_src
+** Drag Stuff
+#+BEGIN_SRC emacs-lisp
+    (use-package drag-stuff
       :straight t
       :config
-      (setq doom-themes-enable-bold t
-            doom-themes-enable-italic t)
-      (load-theme 'doom-gruvbox t)
-      (doom-themes-org-config))
-#+end_src
-
-** Dashboard
-#+BEGIN_SRC emacs-lisp
-    (use-package dashboard
-      :straight t
-      :custom
-      (dashboard-banner-logo-title "With Great Power Comes Great Responsibility!")
-      (dashboard-center-content t)
-      (dashboard-items '((projects . 5)))
-      (dashboard-set-file-icons t)
-      (dashboard-set-footer nil)
-      (dashboard-projects-backend 'projectile)
-      (dashboard-set-heading-icons t)
-      (dashboard-set-navigator t)
-      (dashboard-show-shortcuts nil)
-      (dashboard-startupify-list '(   dashboard-insert-banner
-                                      dashboard-insert-newline
-                                      dashboard-insert-banner-title
-                                      dashboard-insert-items
-                                      dashboard-insert-newline
-                                      dashboard-insert-init-info))
-      (dashboard-startup-banner 'logo)
-      :config (dashboard-setup-startup-hook))
+      (evil-define-key 'normal 'prog-mode-map (kbd "C-j") 'drag-stuff-down)
+      (evil-define-key 'normal 'prog-mode-map (kbd "C-k") 'drag-stuff-up))
 #+END_SRC
 
-** Transparency
-With Emacs version 29, true transparency has been added.
-#+begin_src emacs-lisp
-    ;; (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
-#+end_src
-
-** Fonts
-*** Setting fonts
-#+begin_src emacs-lisp
-    (set-face-attribute 'default nil
-                        ;; :font "JetBrains Mono" ;; Set your favorite type of font or download JetBrains Mono
-                        :height 120
-                        :weight 'medium)
-    ;; This sets the default font on all graphical frames created after restarting Emacs.
-    ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-    ;; are not right unless I also add this method of setting the default font.
-
-    ;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
-    (setq-default line-spacing 0.15)
-#+end_src
-
-*** Zooming In/Out
-You can use the bindings C-+ C-- for zooming in/out. You can also use CTRL plus the mouse wheel for zooming in/out.
-#+begin_src emacs-lisp
-    (use-package emacs
-      :straight nil
-      :bind
-      ("C-+" . text-scale-increase)
-      ("C--" . text-scale-decrease)
-      ("<C-wheel-up>" . text-scale-increase)
-      ("<C-wheel-down>" . text-scale-decrease))
-#+end_src
-
-** Modeline
-Replace the default modeline with a prettier more useful.
-#+begin_src emacs-lisp
-    (use-package doom-modeline
+** Templates
+#+BEGIN_SRC emacs-lisp
+    ;; Configure tempel for templating support.
+    (use-package tempel
       :straight t
-      :init (doom-modeline-mode 1)
-      :config
-      (setq doom-modeline-height 42
-            doom-modeline-percent-position nil
-            doom-modeline-position-line-format nil
-            doom-modeline-buffer-encoding nil
-            doom-modeline-position-column-format nil
-            doom-modeline-battery t
-            doom-modeline-icon t
-            doom-modeline-bar-width 5))
+      :bind (("M-." . tempel-complete))
+      :init
+      ;; Set up tempel for different modes.
+      (defun tempel-setup-capf ()
+        (setq-local completion-at-point-functions
+                    (cons #'tempel-expand
+                          completion-at-point-functions)))
+      (add-hook 'conf-mode-hook 'tempel-setup-capf)
+      (add-hook 'prog-mode-hook 'tempel-setup-capf)
+      (add-hook 'text-mode-hook 'tempel-setup-capf))
+
+    ;; Install tempel-collection for additional templates.
+    (use-package tempel-collection
+      :straight t
+      :after tempel)
+#+END_SRC
+
+** Harpoon
+Harpoon is a quick and easy way to find your way around your files 
+#+begin_src emacs-lisp
+    (use-package harpoon
+      :straight t)
 #+end_src
+** Wgrep 
+- [ ] No idea how to use this but seems usefull please get used to it
+#+begin_src emacs-lisp
+    (use-package wgrep
+      :straight t
+      :bind ( :map grep-mode-map
+              ("e" . wgrep-change-to-wgrep-mode)
+              ("C-x C-q" . wgrep-change-to-wgrep-mode)
+              ("C-c C-c" . wgrep-finish-edit)))
+#+end_src
+** Completions
+Getting and using completions and other infos
+*** Corfu
+Enhances in-buffer completion with a small completion popup.
+Corfu is a small package, which relies on the Emacs completion facilities and concentrates on providing a polished completion.
+For more configuration options check out their [[https://github.com/minad/corfu][git repository]].
+Notes:
+- To enter Orderless field separator, use M-SPC.
+#+begin_src emacs-lisp
+    (use-package corfu
+      :straight t
+      :after orderless
+      ;; Optional customizations
+      :custom
+      (corfu-cycle nil)
+      (corfu-auto t)                 ;; Enable auto completion
+      (corfu-auto-prefix 2)          ;; Minimum length of prefix for auto completion.
+      (corfu-popupinfo-mode t)       ;; Enable popup information
+      (corfu-popupinfo-delay 0.15)   ;; Lower popupinfo delay to 0.15 seconds from 2 seconds
+      (corfu-separator ?\s)          ;; Orderless field separator, Use M-SPC to enter separator
+
+      (corfu-count 14)
+      (corfu-scroll-margin 4)        ;; Use scroll margin
+      (completion-ignore-case t)
+      (tab-always-indent 'complete)
+      (corfu-preview-current nil) ;; Don't insert completion without confirmation
+      (completion-styles '(orderless basic))
+      :init
+      (global-corfu-mode))
+
+    (use-package nerd-icons-corfu
+      :straight t
+      :after corfu
+      :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+#+end_src
+
+**** Kind Icons
+
+#+BEGIN_SRC emacs-lisp
+    (use-package kind-icon
+      :straight t
+      :after corfu
+      :custom
+      (kind-icon-use-icons t)
+      (kind-icon-default-face 'corfu-default) ; Have background color be the same as `corfu' face background
+      (kind-icon-blend-background nil)  ; Use midpoint color between foreground and background colors ("blended")?
+      (kind-icon-blend-frac 0.08)
+      :config
+      (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+#+END_SRC
+
+*** Cape
+Provides Completion At Point Extensions which can be used in combination with Corfu, Company or the default completion UI.
+Notes:
+- The functions that are added later will be the first in the completion list.
+- Take care when adding Capfs (Completion-at-point-functions) to the list since each of the Capfs adds a small runtime cost.
+Read the [[https://github.com/minad/cape#configuration][configuration section]] in Cape's readme for more information.
+#+begin_src emacs-lisp
+    (use-package cape
+      :straight t
+      :after corfu
+      :init
+      (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
+      (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
+      (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
+      (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
+      (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
+
+      ;;(add-to-list 'completion-at-point-functions #'cape-abbrev) ;; Complete abbreviation
+      (add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
+      ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
+      (add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
+      ;;(add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
+      ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
+      ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
+      )
+#+end_src
+
+*** Orderless
+Completion style that divides the pattern into space-separated components, and matches candidates that match all of the components in any order.
+Recomended for packages like vertico, corfu.
+#+begin_src emacs-lisp
+    (use-package orderless
+      :straight t
+      :custom
+      (completion-styles '(orderless basic))
+      (completion-category-overrides '((file (styles basic partial-completion)))))
+#+end_src
+
+*** Vertico and Marginalia
+- Vertico: Provides a performant and minimalistic vertical completion UI based on the default completion system.
+- Savehist: Saves completion history.
+- Marginalia: Adds extra metadata for completions in the margins (like descriptions).
+- Nerd-icons-completion: Adds icons to completion candidates using the built in completion metadata functions.
+
+We use this packages, because they use emacs native functions. Unlike Ivy or Helm.
+One alternative is ivy and counsel, check out the [[https://github.com/MiniApollo/kickstart.emacs/wiki][project wiki]] for more inforomation.
+#+begin_src emacs-lisp
+    (use-package vertico
+      :straight t
+      :bind (:map vertico-map
+                  ("<tab>" . vertico-insert)
+                  ("C-j" . vertico-next)
+                  ("C-f" . vertico-exit)
+                  ("C-K" . vertico-previous))
+      :custom
+      (vertico-cycle t)
+      (vertico-count 13)                    ; Number of candidates to display
+      (vertico-resize t)
+      :init
+      (vertico-mode))
+
+    (savehist-mode) ;; Enables save history mode
+
+    (use-package marginalia
+      :straight t
+      :after vertico
+      :ensure t
+      :custom
+      (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+      :init
+      (marginalia-mode))
+
+    (use-package nerd-icons-completion
+      :straight t
+      :after marginalia
+      :config
+      (nerd-icons-completion-mode)
+      :hook
+      ('marginalia-mode-hook . 'nerd-icons-completion-marginalia-setup))
+#+end_src
+
+*** Consult
+Provides search and navigation commands based on the Emacs completion function.
+Check out their [[https://github.com/minad/consult][git repository]] for more awesome functions.
+#+begin_src emacs-lisp
+    (use-package consult
+      :straight t
+      ;; Enable automatic preview at point in the *Completions* buffer. This is
+      ;; relevant when you use the default completion UI.
+      :hook (completion-list-mode . consult-preview-at-point-mode)
+      :init
+      ;; Optionally configure the register formatting. This improves the register
+      ;; preview for `consult-register', `consult-register-load',
+      ;; `consult-register-store' and the Emacs built-ins.
+      (setq register-preview-delay 0.5
+            register-preview-function #'consult-register-format)
+
+      ;; Optionally tweak the register preview window.
+      ;; This adds thin lines, sorting and hides the mode line of the window.
+      (advice-add #'register-preview :override #'consult-register-window)
+
+      ;; Use Consult to select xref locations with preview
+      (setq xref-show-xrefs-function #'consult-xref
+            xref-show-definitions-function #'consult-xref)
+      :config
+      ;; Optionally configure preview. The default value
+      ;; is 'any, such that any key triggers the preview.
+      ;; (setq consult-preview-key 'any)
+      ;; (setq consult-preview-key "M-.")
+      ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+
+      ;; For some commands and buffer sources it is useful to configure the
+      ;; :preview-key on a per-command basis using the `consult-customize' macro.
+      ;; (consult-customize
+      ;; consult-theme :preview-key '(:debounce 0.2 any)
+      ;; consult-ripgrep consult-git-grep consult-grep
+      ;; consult-bookmark consult-recent-file consult-xref
+      ;; consult--source-bookmark consult--source-file-register
+      ;; consult--source-recent-file consult--source-project-recent-file
+      ;; :preview-key "M-."
+      ;; :preview-key '(:debounce 0.4 any))
+
+      ;; By default `consult-project-function' uses `project-root' from project.el.
+      ;; Optionally configure a different project root function.
+       ;;;; 1. project.el (the default)
+      ;; (setq consult-project-function #'consult--default-project--function)
+       ;;;; 2. vc.el (vc-root-dir)
+      ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
+       ;;;; 3. locate-dominating-file
+      ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
+       ;;;; 4. projectile.el (projectile-project-root)
+      (autoload 'projectile-project-root "projectile")
+      (setq consult-project-function (lambda (_) (projectile-project-root)))
+       ;;;; 5. No project support
+      ;; (setq consult-project-function nil)
+      )
+#+end_src
+
+*** Eldoc
+#+BEGIN_SRC emacs-lisp
+    (setq eldoc-echo-area-use-multiline-p nil)
+
+    (use-package eldoc-box
+      :straight t
+      :config
+      ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
+      (setq eldoc-box-hover-mode nil)
+      (setq eldoc-box-cleanup-interval 3))
+
+#+END_SRC
 
 * Development
-** Editor Conf
-#+BEGIN_SRC emacs-lisp
-    (use-package editorconfig
-      :straight t
-      :diminish editorconfig-mode
-      :config
-      (editorconfig-mode 1))
-#+END_SRC
-
-** Tramp
-#+BEGIN_SRC emacs-lisp
-    (require 'tramp)
-    (add-to-list 'tramp-remote-path 'tramp-default-remote-path)
-    (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
-#+END_SRC
-
-** Projectile
-Project interaction library for Emacs.
+** Compilation can be better
 #+begin_src emacs-lisp
-    (use-package projectile
-      :straight t
-      :init
-      (projectile-mode)
-      :custom
-      (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
-      (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
-      (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
+    (require 'ansi-color)
+    (defun endless/colorize-compilation ()
+      "Colorize from `compilation-filter-start' to `point'."
+      (let ((inhibit-read-only t))
+        (ansi-color-apply-on-region
+         compilation-filter-start (point))))
 
-    ;; Use Bookmarks for smaller, not standard projects
+    (add-hook 'compilation-filter-hook
+              #'endless/colorize-compilation)
+
+    (defun compile-or-open ()
+      "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
+      (interactive)
+      (let ((compilation-buffer (get-buffer "*compilation*")))
+        (if compilation-buffer
+            (progn
+              (unless (get-buffer-window compilation-buffer)
+                (save-selected-window
+                  (select-window (split-window-below -15))
+                  (switch-to-buffer compilation-buffer)
+                  (shrink-window-if-larger-than-buffer))))
+          (call-interactively 'compile))))
 #+end_src
 
-** Eglot
-Language Server Protocol Support for Emacs. The built-in is now Eglot (with emacs 29).
-
-Eglot is fast and minimal, but requires manual setup for LSP servers (downloading).
-For more [[https://www.gnu.org/software/emacs/manual/html_mono/eglot.html][information how to use.]] One alternative to Eglot is Lsp-mode, check out the [[https://github.com/MiniApollo/kickstart.emacs/wiki][project wiki]] page for more information.
-
-Eglot is easy to set up, but the only difficult part is downloading and setting up the lsp servers.
-After that just add a hook with eglot-ensure to automatically start eglot for a given file type. And you are done.
-
-#+begin_src emacs-lisp
-    (use-package eglot
-      :straight nil ;; Don't install eglot because it's now built-in
-      :config
-      (evil-define-key 'normal 'eglot-mode-map
-        "K" 'eldoc-box-help-at-point)
-      (add-hook 'python-mode-hook 'eglot-ensure)
-      (add-hook 'php-mode-hook 'eglot-ensure)
-      (add-hook 'go-mode-hook 'eglot-ensure)
-      (add-hook 'rust-mode-hook 'eglot-ensure)
-      (add-hook 'ruby-mode-hook 'eglot-ensure)
-      (add-hook 'yaml-mode-hook 'eglot-ensure)
-      (add-hook 'bash-mode-hook 'eglot-ensure)
-      :custom
-      (eglot-autoshutdown t)
-      (fset #'jsonrpc--log-event #'ignore)
-      (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
-      (eglot-report-progress nil)
-      (eglot-events-buffer-size 0)
-      (eglot-sync-connect nil)
-      (eglot-extend-to-xref nil))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
-#+end_src
-
-** Dape
-Dape is a DAP adapter without use of lsp-mode alternative to dap-mode
-[[https://github.com/svaante/dape][Dape link to Github]]
-
-#+begin_src emacs-lisp
-    ;; (use-package dape
-    ;;   :hook (prog-mode . eglot))
-#+END_src
-
-** Yasnippet
-A template system for Emacs. And yasnippet-snippets is a snippet collection package.
-To use it write out the full keyword (or use autocompletion) and press Tab.
-#+begin_src emacs-lisp
-    (use-package yasnippet-snippets
-      :straight t
-      :hook (prog-mode . yas-minor-mode))
-#+end_src
-
-** Language modes
-*** Python mode
-Manage python virtual enviroment
-#+begin_src emacs-lisp
-    (defun pyrightconfig-write (virtualenv)
-      (interactive "DEnv: ")
-
-      (let* (;; file-truename and tramp-file-local-name ensure that neither `~' nor
-    		 ;; the Tramp prefix (e.g. "/ssh:my-host:") wind up in the final
-    		 ;; absolute directory path.
-    		 (venv-dir (tramp-file-local-name (file-truename virtualenv)))
-
-    		 ;; Given something like /path/to/.venv/, this strips off the trailing `/'.
-    		 (venv-file-name (directory-file-name venv-dir))
-
-    		 ;; Naming convention for venvPath matches the field for
-    		 ;; pyrightconfig.json.  `file-name-directory' gets us the parent path
-    		 ;; (one above .venv).
-    		 (venvPath (file-name-directory venv-file-name))
-
-    		 ;; Grabs just the `.venv' off the end of the venv-file-name.
-    		 (venv (file-name-base venv-file-name))
-
-    		 ;; Eglot demands that `pyrightconfig.json' is in the project root
-    		 ;; folder.
-    		 (base-dir (vc-git-root default-directory))
-    		 (out-file (expand-file-name "pyrightconfig.json" base-dir))
-
-    		 ;; Finally, get a string with the JSON payload.
-    		 (out-contents (json-encode (list :venvPath venvPath :venv venv))))
-
-    	;; Emacs uses buffers for everything.  This creates a temp buffer, inserts
-    	;; the JSON payload, then flushes that content to final `pyrightconfig.json'
-    	;; location
-    	(with-temp-file out-file (insert out-contents))))
-#+end_src
-*** Org Mode
-
-#+begin_src emacs-lisp
-    (use-package org
-      :straight nil
-      :custom
-      (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
-
-      :hook
-      (org-mode . org-indent-mode))
-
-    (custom-set-faces
-     '(org-level-1 ((t (:inherit outline-1 :height 1.5))))
-     '(org-level-2 ((t (:inherit outline-2 :height 1.4))))
-     '(org-level-3 ((t (:inherit outline-3 :height 1.3))))
-     '(org-level-4 ((t (:inherit outline-4 :height 1.2))))
-     '(org-level-5 ((t (:inherit outline-5 :height 1.1))))
-     '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
-     '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
-#+end_src
-
-**** Table of Contents
-#+begin_src emacs-lisp
-    (use-package toc-org
-      :straight t
-      :commands toc-org-enable
-      :hook (org-mode . toc-org-mode))
-#+end_src
-
-**** Org Modern
-#+BEGIN_SRC emacs-lisp
-    (use-package org-modern
-      :straight t
-      :hook (org-mode . org-modern-mode))
-#+END_SRC
-
-**** Org Excalidraw
-#+BEGIN_SRC emacs-lisp
-    (use-package org-excalidraw
-      :straight (:type git :host github :repo "wdavew/org-excalidraw")
-      :config
-      (setq org-excalidraw-directory "~/code/Cadmus/__Assets/Excalidraw/"))
-#+END_SRC
-
-**** Center Org Buffer
-#+BEGIN_SRC emacs-lisp
-    (defun start/org-mode-visual-fill ()
-      (setq visual-fill-column-width 200
-            visual-fill-column-center-text t)
-      (visual-fill-column-mode 1))
-
-    (use-package visual-fill-column
-      :straight t
-      :hook (org-mode . start/org-mode-visual-fill))
-#+END_SRC
-
-*** Markdown
-#+begin_src emacs-lisp
-    (use-package markdown-mode
-      :straight t
-      :mode ("README\\.md\\'" . gfm-mode)
-      :init (setq markdown-command "multimarkdown")
-      :bind (:map markdown-mode-map
-                  ("C-c C-e" . markdown-down)))
-#+end_src
-
-*** Quarto
-#+begin_src emacs-lisp
-    (use-package poly-markdown
-      :straight t)
-
-    (use-package quarto-mode
-      :straight t
-      :mode (("\\.Rmd" . poly-quarto-mode)))
-
-    (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
-#+end_src
-*** Zig
-#+begin_src emacs-lisp
-    (use-package zig-mode
-      :straight t)
-#+end_src
 ** Error
 #+BEGIN_SRC emacs-lisp
     (use-package flycheck
@@ -877,6 +1034,112 @@ Manage python virtual enviroment
       (global-treesit-auto-mode))
 #+END_SRC
 
+** Eglot
+Language Server Protocol Support for Emacs. The built-in is now Eglot (with emacs 29).
+
+Eglot is fast and minimal, but requires manual setup for LSP servers (downloading).
+For more [[https://www.gnu.org/software/emacs/manual/html_mono/eglot.html][information how to use.]] One alternative to Eglot is Lsp-mode, check out the [[https://github.com/MiniApollo/kickstart.emacs/wiki][project wiki]] page for more information.
+
+Eglot is easy to set up, but the only difficult part is downloading and setting up the lsp servers.
+After that just add a hook with eglot-ensure to automatically start eglot for a given file type. And you are done.
+
+#+begin_src emacs-lisp
+    (use-package eglot
+      :straight nil ;; Don't install eglot because it's now built-in
+      :config
+      (evil-define-key 'normal 'eglot-mode-map
+        "K" 'eldoc-box-help-at-point)
+      (add-hook 'python-mode-hook 'eglot-ensure)
+      (add-hook 'php-mode-hook 'eglot-ensure)
+      (add-hook 'go-mode-hook 'eglot-ensure)
+      (add-hook 'rust-mode-hook 'eglot-ensure)
+      (add-hook 'ruby-mode-hook 'eglot-ensure)
+      (add-hook 'yaml-mode-hook 'eglot-ensure)
+      (add-hook 'bash-mode-hook 'eglot-ensure)
+      :custom
+      (eglot-autoshutdown t)
+      (fset #'jsonrpc--log-event #'ignore)
+      (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
+      (eglot-report-progress nil)
+      (eglot-events-buffer-size 0)
+      (eglot-sync-connect nil)
+      (eglot-extend-to-xref nil))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
+#+end_src
+
+** Dape
+Dape is a DAP adapter without use of lsp-mode alternative to dap-mode
+[[https://github.com/svaante/dape][Dape link to Github]]
+
+#+begin_src emacs-lisp
+    ;; (use-package dape
+    ;;   :hook (prog-mode . eglot))
+#+END_src
+
+** Language modes
+Just for programing languages
+*** Python mode
+Manage python virtual enviroment
+#+begin_src emacs-lisp
+    (defun pyrightconfig-write (virtualenv)
+      (interactive "DEnv: ")
+
+      (let* (;; file-truename and tramp-file-local-name ensure that neither `~' nor
+    		 ;; the Tramp prefix (e.g. "/ssh:my-host:") wind up in the final
+    		 ;; absolute directory path.
+    		 (venv-dir (tramp-file-local-name (file-truename virtualenv)))
+
+    		 ;; Given something like /path/to/.venv/, this strips off the trailing `/'.
+    		 (venv-file-name (directory-file-name venv-dir))
+
+    		 ;; Naming convention for venvPath matches the field for
+    		 ;; pyrightconfig.json.  `file-name-directory' gets us the parent path
+    		 ;; (one above .venv).
+    		 (venvPath (file-name-directory venv-file-name))
+
+    		 ;; Grabs just the `.venv' off the end of the venv-file-name.
+    		 (venv (file-name-base venv-file-name))
+
+    		 ;; Eglot demands that `pyrightconfig.json' is in the project root
+    		 ;; folder.
+    		 (base-dir (vc-git-root default-directory))
+    		 (out-file (expand-file-name "pyrightconfig.json" base-dir))
+
+    		 ;; Finally, get a string with the JSON payload.
+    		 (out-contents (json-encode (list :venvPath venvPath :venv venv))))
+
+    	;; Emacs uses buffers for everything.  This creates a temp buffer, inserts
+    	;; the JSON payload, then flushes that content to final `pyrightconfig.json'
+    	;; location
+    	(with-temp-file out-file (insert out-contents))))
+#+end_src
+*** Zig
+#+begin_src emacs-lisp
+    (use-package zig-mode
+      :straight t)
+#+end_src
+** Editor Conf
+#+BEGIN_SRC emacs-lisp
+    (use-package editorconfig
+      :straight t
+      :diminish editorconfig-mode
+      :config
+      (editorconfig-mode 1))
+#+END_SRC
+
+* Other Packages
+All the package setups that don't need much tweaking.
 ** Terminal
 *** Eat
 Eat(Emulate A Terminal) is a terminal emulator within Emacs.
@@ -888,27 +1151,8 @@ We setup eat with eshell, if you want to use bash, zsh etc., check out their git
       :hook ('eshell-load-hook #'eat-eshell-mode))
 #+end_src
 
-** Harpoon
-Harpoon is a quick and easy way to find your way around your files 
-#+begin_src emacs-lisp
-    (use-package harpoon
-      :straight t)
-#+end_src
-** Docker
-#+begin_src emacs-lisp
-    (use-package docker
-      :straight t
-      :bind ("C-c d" . docker))
-#+end_src
-
-** Rest Client
-#+begin_src emacs-lisp
-    (use-package restclient
-      :straight t
-      :mode (("\\.http\\'" . restclient-mode)))
-#+end_src
-
 ** Git
+Version Controll for everything
 *** Magit
 Complete text-based user interface to Git.
 #+begin_src emacs-lisp
@@ -940,169 +1184,32 @@ Highlights uncommitted changes on the left side of the window (area also known a
       :init (global-diff-hl-mode))
 #+end_src
 
-** Dev Docs
+** Projectile
+Project interaction library for Emacs.
 #+begin_src emacs-lisp
-    (use-package devdocs
+    (use-package projectile
+      :straight t
+      :init
+      (projectile-mode)
+      :custom
+      (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
+      (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
+      (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
+
+    ;; Use Bookmarks for smaller, not standard projects
+#+end_src
+
+** Docker
+#+begin_src emacs-lisp
+    (use-package docker
+      :straight t
+      :bind ("C-c d" . docker))
+#+end_src
+
+** CRUX
+#+begin_src emacs-lisp
+    (use-package crux
       :straight t)
-#+end_src
-** Rainbow Delimiters
-Adds colors to brackets.
-#+begin_src emacs-lisp
-    (use-package rainbow-delimiters
-      :straight t
-      :hook (prog-mode . rainbow-delimiters-mode))
-#+end_src
-
-* Other Packages
-All the package setups that don't need much tweaking.
-** Nerd Icons
-For icons and more helpful UI.
-This is an icon set that can be used with dired, ibuffer and other Emacs programs.
-
-Don't forget to use nerd-icons-install-fonts.
-
-We use Nerd icons because it has more, better icons and all-the-icons only supports GUI.
-While nerd-icons supports both GUI and TUI.
-#+begin_src emacs-lisp
-    (use-package nerd-icons
-      :straight t
-      :if (display-graphic-p))
-
-    (use-package nerd-icons-dired
-      :straight t
-      :hook (dired-mode . (lambda () (nerd-icons-dired-mode t))))
-
-    (use-package nerd-icons-ibuffer
-      :straight t
-      :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
-#+end_src
-
-** EWW Tweaks
-#+begin_src emacs-lisp
-    ;;(setq eww-retrieve-command
-    ;;     '("chromium" "--headless" "--dump-dom"))
-#+end_src
-
-** Dired tweaks
-Delete intermediate buffers when navigating through dired.
-
-#+BEGIN_SRC emacs-lisp
-    (use-package dired
-      :after evil-collection
-      :straight nil
-      :commands (dired dired-jump)
-      :config
-      (evil-collection-define-key 'normal 'dired-mode-map "c" 'dired-create-empty-file)
-      :custom
-      (setq delete-by-moving-to-trash t))
-
-    (use-package dired-open
-      :commands (dired dired-jump)
-      :config
-      (setq dired-open-extensions '(("png" . "feh")
-                                    ("mkv" . "mpv"))))
-
-    (use-package dired-hide-dotfiles
-      :straight t
-      :hook (dired-mode . dired-hide-dotfiles-mode)
-      :config
-      (evil-collection-define-key 'normal 'dired-mode-map "H" 'dired-hide-dotfiles-mode))
-#+END_SRC
-
-** Drag Stuff
-#+BEGIN_SRC emacs-lisp
-    (use-package drag-stuff
-      :straight t
-      :config
-      (evil-define-key 'normal 'prog-mode-map (kbd "C-j") 'drag-stuff-down)
-      (evil-define-key 'normal 'prog-mode-map (kbd "C-k") 'drag-stuff-up))
-#+END_SRC
-
-** Corfu
-Enhances in-buffer completion with a small completion popup.
-Corfu is a small package, which relies on the Emacs completion facilities and concentrates on providing a polished completion.
-For more configuration options check out their [[https://github.com/minad/corfu][git repository]].
-Notes:
-- To enter Orderless field separator, use M-SPC.
-#+begin_src emacs-lisp
-    (use-package corfu
-      :straight t
-      :after orderless
-      ;; Optional customizations
-      :custom
-      (corfu-cycle nil)
-      (corfu-auto t)                 ;; Enable auto completion
-      (corfu-auto-prefix 2)          ;; Minimum length of prefix for auto completion.
-      (corfu-popupinfo-mode t)       ;; Enable popup information
-      (corfu-popupinfo-delay 0.15)   ;; Lower popupinfo delay to 0.15 seconds from 2 seconds
-      (corfu-separator ?\s)          ;; Orderless field separator, Use M-SPC to enter separator
-
-      (corfu-count 14)
-      (corfu-scroll-margin 4)        ;; Use scroll margin
-      (completion-ignore-case t)
-      (tab-always-indent 'complete)
-      (corfu-preview-current nil) ;; Don't insert completion without confirmation
-      (completion-styles '(orderless basic))
-      :init
-      (global-corfu-mode))
-
-    (use-package nerd-icons-corfu
-      :straight t
-      :after corfu
-      :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-#+end_src
-
-*** Kind Icons
-
-#+BEGIN_SRC emacs-lisp
-    (use-package kind-icon
-      :straight t
-      :after corfu
-      :custom
-      (kind-icon-use-icons t)
-      (kind-icon-default-face 'corfu-default) ; Have background color be the same as `corfu' face background
-      (kind-icon-blend-background nil)  ; Use midpoint color between foreground and background colors ("blended")?
-      (kind-icon-blend-frac 0.08)
-      :config
-      (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-#+END_SRC
-
-** Cape
-Provides Completion At Point Extensions which can be used in combination with Corfu, Company or the default completion UI.
-Notes:
-- The functions that are added later will be the first in the completion list.
-- Take care when adding Capfs (Completion-at-point-functions) to the list since each of the Capfs adds a small runtime cost.
-Read the [[https://github.com/minad/cape#configuration][configuration section]] in Cape's readme for more information.
-#+begin_src emacs-lisp
-    (use-package cape
-      :straight t
-      :after corfu
-      :init
-      (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
-      (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
-      (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
-      (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
-      (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
-
-      ;;(add-to-list 'completion-at-point-functions #'cape-abbrev) ;; Complete abbreviation
-      (add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
-      ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
-      (add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
-      ;;(add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
-      ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
-      ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
-      )
-#+end_src
-
-** Orderless
-Completion style that divides the pattern into space-separated components, and matches candidates that match all of the components in any order.
-Recomended for packages like vertico, corfu.
-#+begin_src emacs-lisp
-    (use-package orderless
-      :straight t
-      :custom
-      (completion-styles '(orderless basic))
-      (completion-category-overrides '((file (styles basic partial-completion)))))
 #+end_src
 
 ** Embark
@@ -1118,212 +1225,107 @@ Recomended for packages like vertico, corfu.
       :straight t)
 #+end_src
 
-** Vertico and Marginalia
-- Vertico: Provides a performant and minimalistic vertical completion UI based on the default completion system.
-- Savehist: Saves completion history.
-- Marginalia: Adds extra metadata for completions in the margins (like descriptions).
-- Nerd-icons-completion: Adds icons to completion candidates using the built in completion metadata functions.
-
-We use this packages, because they use emacs native functions. Unlike Ivy or Helm.
-One alternative is ivy and counsel, check out the [[https://github.com/MiniApollo/kickstart.emacs/wiki][project wiki]] for more inforomation.
-#+begin_src emacs-lisp
-    (use-package vertico
-      :straight t
-      :bind (:map vertico-map
-                  ("<tab>" . vertico-insert)
-                  ("C-j" . vertico-next)
-                  ("C-f" . vertico-exit)
-                  ("C-K" . vertico-previous))
-      :custom
-      (vertico-cycle t)
-      (vertico-count 13)                    ; Number of candidates to display
-      (vertico-resize t)
-      :init
-      (vertico-mode))
-
-    (savehist-mode) ;; Enables save history mode
-
-    (use-package marginalia
-      :straight t
-      :after vertico
-      :ensure t
-      :custom
-      (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-      :init
-      (marginalia-mode))
-
-    (use-package nerd-icons-completion
-      :straight t
-      :after marginalia
-      :config
-      (nerd-icons-completion-mode)
-      :hook
-      ('marginalia-mode-hook . 'nerd-icons-completion-marginalia-setup))
-#+end_src
-
-** Templates
-#+BEGIN_SRC emacs-lisp
-    ;; Configure tempel for templating support.
-    (use-package tempel
-      :straight t
-      :bind (("M-." . tempel-complete))
-      :init
-      ;; Set up tempel for different modes.
-      (defun tempel-setup-capf ()
-        (setq-local completion-at-point-functions
-                    (cons #'tempel-expand
-                          completion-at-point-functions)))
-      (add-hook 'conf-mode-hook 'tempel-setup-capf)
-      (add-hook 'prog-mode-hook 'tempel-setup-capf)
-      (add-hook 'text-mode-hook 'tempel-setup-capf))
-
-    ;; Install tempel-collection for additional templates.
-    (use-package tempel-collection
-      :straight t
-      :after tempel)
-#+END_SRC
-
-** Consult
-Provides search and navigation commands based on the Emacs completion function.
-Check out their [[https://github.com/minad/consult][git repository]] for more awesome functions.
-#+begin_src emacs-lisp
-    (use-package consult
-      :straight t
-      ;; Enable automatic preview at point in the *Completions* buffer. This is
-      ;; relevant when you use the default completion UI.
-      :hook (completion-list-mode . consult-preview-at-point-mode)
-      :init
-      ;; Optionally configure the register formatting. This improves the register
-      ;; preview for `consult-register', `consult-register-load',
-      ;; `consult-register-store' and the Emacs built-ins.
-      (setq register-preview-delay 0.5
-            register-preview-function #'consult-register-format)
-
-      ;; Optionally tweak the register preview window.
-      ;; This adds thin lines, sorting and hides the mode line of the window.
-      (advice-add #'register-preview :override #'consult-register-window)
-
-      ;; Use Consult to select xref locations with preview
-      (setq xref-show-xrefs-function #'consult-xref
-            xref-show-definitions-function #'consult-xref)
-      :config
-      ;; Optionally configure preview. The default value
-      ;; is 'any, such that any key triggers the preview.
-      ;; (setq consult-preview-key 'any)
-      ;; (setq consult-preview-key "M-.")
-      ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-
-      ;; For some commands and buffer sources it is useful to configure the
-      ;; :preview-key on a per-command basis using the `consult-customize' macro.
-      ;; (consult-customize
-      ;; consult-theme :preview-key '(:debounce 0.2 any)
-      ;; consult-ripgrep consult-git-grep consult-grep
-      ;; consult-bookmark consult-recent-file consult-xref
-      ;; consult--source-bookmark consult--source-file-register
-      ;; consult--source-recent-file consult--source-project-recent-file
-      ;; :preview-key "M-."
-      ;; :preview-key '(:debounce 0.4 any))
-
-      ;; By default `consult-project-function' uses `project-root' from project.el.
-      ;; Optionally configure a different project root function.
-       ;;;; 1. project.el (the default)
-      ;; (setq consult-project-function #'consult--default-project--function)
-       ;;;; 2. vc.el (vc-root-dir)
-      ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-       ;;;; 3. locate-dominating-file
-      ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-       ;;;; 4. projectile.el (projectile-project-root)
-      (autoload 'projectile-project-root "projectile")
-      (setq consult-project-function (lambda (_) (projectile-project-root)))
-       ;;;; 5. No project support
-      ;; (setq consult-project-function nil)
-      )
-#+end_src
-
-** Diminish
-This package implements hiding or abbreviation of the modeline displays (lighters) of minor-modes.
-With this package installed, you can add ‘:diminish’ to any use-package block to hide that particular mode in the modeline.
-#+begin_src emacs-lisp
-    (use-package diminish
-      :straight t)
-#+end_src
-
-** Eldoc
-#+BEGIN_SRC emacs-lisp
-    (setq eldoc-echo-area-use-multiline-p nil)
-
-    (use-package eldoc-box
-      :straight t
-      :config
-      ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
-      (setq eldoc-box-hover-mode nil)
-      (setq eldoc-box-cleanup-interval 3))
-
-#+END_SRC
-
 ** Helpful
 #+BEGIN_SRC emacs-lisp
     (use-package helpful
       :straight t)
 #+END_SRC
 
-** Which-Key
-Which-key is a helper utility for keychords (which key to press).
+** Dev Docs
 #+begin_src emacs-lisp
-    (use-package which-key
-      :straight t
-      :init
-      (which-key-mode 1)
-      :diminish
-      :custom
-      (which-key-side-window-location 'bottom)
-      (which-key-sort-order #'which-key-key-order-alpha) ;; Same as default, except single characters are sorted alphabetically
-      (which-key-sort-uppercase-first nil)
-      (which-key-add-column-padding 1) ;; Number of spaces to add to the left of each column
-      (which-key-min-display-lines 6)  ;; Increase the minimum lines to display, because the default is only 1
-      (which-key-idle-delay 0.8)       ;; Set the time delay (in seconds) for the which-key popup to appear
-      (which-key-max-description-length 25)
-      (which-key-allow-imprecise-window-fit nil)) ;; Fixes which-key window slipping out in Emacs Daemon
-#+end_src
-
-** System Packages
-#+begin_src emacs-lisp
-    (use-package system-packages
+    (use-package devdocs
       :straight t)
 #+end_src
-
-** CRUX
-#+begin_src emacs-lisp
-    (use-package crux
-      :straight t)
-#+end_src
-
-** Undo Tree 
-#+begin_src emacs-lisp
-    (use-package undo-tree
-      :straight t
-      :config (global-undo-tree-mode))
-#+end_src
-** Wgrep 
-- [ ] No idea how to use this but seems usefull please get used to it
-#+begin_src emacs-lisp
-    (use-package wgrep
-      :straight t
-      :bind ( :map grep-mode-map
-              ("e" . wgrep-change-to-wgrep-mode)
-              ("C-x C-q" . wgrep-change-to-wgrep-mode)
-              ("C-c C-c" . wgrep-finish-edit)))
-#+end_src
-** Litter
-#+begin_src emacs-lisp
-    (use-package no-littering
-      :straight t)
-#+end_src
-
-** Pdf Tools
+** File Modes
+*** Pdf Tools
 #+begin_src emacs-lisp
     (use-package pdf-tools
       :straight t)
+#+end_src
+
+*** Markdown
+#+begin_src emacs-lisp
+    (use-package markdown-mode
+      :straight t
+      :mode ("README\\.md\\'" . gfm-mode)
+      :init (setq markdown-command "multimarkdown")
+      :bind (:map markdown-mode-map
+                  ("C-c C-e" . markdown-down)))
+#+end_src
+
+*** Quarto
+#+begin_src emacs-lisp
+    (use-package poly-markdown
+      :straight t)
+
+    (use-package quarto-mode
+      :straight t
+      :mode (("\\.Rmd" . poly-quarto-mode)))
+
+    (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
+#+end_src
+*** Org Mode
+
+#+begin_src emacs-lisp
+    (use-package org
+      :straight nil
+      :custom
+      (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
+
+      :hook
+      (org-mode . org-indent-mode))
+
+    (custom-set-faces
+     '(org-level-1 ((t (:inherit outline-1 :height 1.5))))
+     '(org-level-2 ((t (:inherit outline-2 :height 1.4))))
+     '(org-level-3 ((t (:inherit outline-3 :height 1.3))))
+     '(org-level-4 ((t (:inherit outline-4 :height 1.2))))
+     '(org-level-5 ((t (:inherit outline-5 :height 1.1))))
+     '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
+     '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
+#+end_src
+
+**** Table of Contents
+#+begin_src emacs-lisp
+    (use-package toc-org
+      :straight t
+      :commands toc-org-enable
+      :hook (org-mode . toc-org-mode))
+#+end_src
+
+**** Org Modern
+#+BEGIN_SRC emacs-lisp
+    (use-package org-modern
+      :straight t
+      :hook (org-mode . org-modern-mode))
+#+END_SRC
+
+**** Org Excalidraw
+#+BEGIN_SRC emacs-lisp
+    (use-package org-excalidraw
+      :straight (:type git :host github :repo "wdavew/org-excalidraw")
+      :config
+      (setq org-excalidraw-directory "~/code/Cadmus/__Assets/Excalidraw/"))
+#+END_SRC
+
+**** Center Org Buffer
+#+BEGIN_SRC emacs-lisp
+    (defun start/org-mode-visual-fill ()
+      (setq visual-fill-column-width 200
+            visual-fill-column-center-text t)
+      (visual-fill-column-mode 1))
+
+    (use-package visual-fill-column
+      :straight t
+      :hook (org-mode . start/org-mode-visual-fill))
+#+END_SRC
+
+*** Http File Mode / Rest Client
+Sending request the quick and easy way
+#+begin_src emacs-lisp
+    (use-package restclient
+      :straight t
+      :mode (("\\.http\\'" . restclient-mode)))
 #+end_src
 
 ** Theme Magic
