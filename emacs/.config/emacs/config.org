@@ -41,6 +41,7 @@
     - [[#org-mode][Org Mode]]
     - [[#markdown][Markdown]]
     - [[#quarto][Quarto]]
+    - [[#zig][Zig]]
   - [[#error][Error]]
   - [[#treesitter][Treesitter]]
   - [[#terminal][Terminal]]
@@ -73,6 +74,7 @@
   - [[#which-key][Which-Key]]
   - [[#system-packages][System Packages]]
   - [[#crux][CRUX]]
+  - [[#undo-tree][Undo Tree]]
   - [[#wgrep][Wgrep]]
   - [[#litter][Litter]]
   - [[#pdf-tools][Pdf Tools]]
@@ -88,10 +90,10 @@ But try emacs its pretty nice.
 - [ ] Some Dired tweaks
 - [ ] Debugging without dap-mode use Dape
 - [ ] Add polymode 
-    - [ ] Nested treesitter
-    - [ ] Quarto
-    - [ ] TailwindCSS inside of HTML
-    - [ ] General how to weave langs
+  - [ ] Nested treesitter
+  - [ ] Quarto
+  - [ ] TailwindCSS inside of HTML
+  - [ ] General how to weave langs
 
 * Important to load first
 ** Startup Performance
@@ -290,7 +292,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
 
       (start/leader-keys
         "b" '(:ignore t :wk "Buffers")
-        "b b" '(switch-to-buffer :wk "Switch to buffer")
+        "b b" '(consult-buffer :wk "Switch to buffer")
         "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
         "b C" '(clean-buffer-list :wk "Clean buffer list")
         "b i" '(ibuffer :wk "Ibuffer")
@@ -412,6 +414,10 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "m E s" '(eshell :which-key "Eshell")
         "m E W" '(eww-readable :which-key "Wreadble")
         "m E w" '(eww :which-key "EWW emacs web wowser"))
+
+      (start/leader-keys
+        "u" '(:ignore t :wk "Undo")
+        "u t" '(undo-tree-visualize :wk "Undo Tree"))
 
       (start/leader-keys
         "t" '(:ignore t :wk "Terminal")
@@ -798,11 +804,19 @@ Manage python virtual enviroment
 
 *** Quarto
 #+begin_src emacs-lisp
-    ;; (use-package quarto-mode
-    ;;   :straight t
-    ;;   :mode (("\\.Rmd" . poly-quarto-mode)))
+    (use-package poly-markdown
+      :straight t)
 
-    ;; (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
+    (use-package quarto-mode
+      :straight t
+      :mode (("\\.Rmd" . poly-quarto-mode)))
+
+    (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
+#+end_src
+*** Zig
+#+begin_src emacs-lisp
+    (use-package zig-mode
+      :straight t)
 #+end_src
 ** Error
 #+BEGIN_SRC emacs-lisp
@@ -830,6 +844,7 @@ Manage python virtual enviroment
     		(css "https://github.com/tree-sitter/tree-sitter-css")
     		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
     		(html "https://github.com/tree-sitter/tree-sitter-html")
+    		(zig "https://github.com/GrayJack/tree-sitter-zig")
     		(go "https://github.com/tree-sitter/tree-sitter-go")
             (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
     		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
@@ -1283,7 +1298,14 @@ Which-key is a helper utility for keychords (which key to press).
       :straight t)
 #+end_src
 
+** Undo Tree 
+#+begin_src emacs-lisp
+    (use-package undo-tree
+      :straight t
+      :config (global-undo-tree-mode))
+#+end_src
 ** Wgrep 
+- [ ] No idea how to use this but seems usefull please get used to it
 #+begin_src emacs-lisp
     (use-package wgrep
       :straight t

@@ -162,7 +162,7 @@
 
   (start/leader-keys
     "b" '(:ignore t :wk "Buffers")
-    "b b" '(switch-to-buffer :wk "Switch to buffer")
+    "b b" '(consult-buffer :wk "Switch to buffer")
     "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
     "b C" '(clean-buffer-list :wk "Clean buffer list")
     "b i" '(ibuffer :wk "Ibuffer")
@@ -284,6 +284,10 @@
     "m E s" '(eshell :which-key "Eshell")
     "m E W" '(eww-readable :which-key "Wreadble")
     "m E w" '(eww :which-key "EWW emacs web wowser"))
+
+  (start/leader-keys
+    "u" '(:ignore t :wk "Undo")
+    "u t" '(undo-tree-visualize :wk "Undo Tree"))
 
   (start/leader-keys
     "t" '(:ignore t :wk "Terminal")
@@ -565,11 +569,17 @@
   :bind (:map markdown-mode-map
               ("C-c C-e" . markdown-down)))
 
-;; (use-package quarto-mode
-;;   :straight t
-;;   :mode (("\\.Rmd" . poly-quarto-mode)))
+(use-package poly-markdown
+  :straight t)
 
-;; (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
+(use-package quarto-mode
+  :straight t
+  :mode (("\\.Rmd" . poly-quarto-mode)))
+
+(add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
+
+(use-package zig-mode
+  :straight t)
 
 (use-package flycheck
   :straight t)
@@ -592,6 +602,7 @@
 		(css "https://github.com/tree-sitter/tree-sitter-css")
 		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
 		(html "https://github.com/tree-sitter/tree-sitter-html")
+		(zig "https://github.com/GrayJack/tree-sitter-zig")
 		(go "https://github.com/tree-sitter/tree-sitter-go")
         (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
 		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
@@ -918,6 +929,10 @@
 
 (use-package crux
   :straight t)
+
+(use-package undo-tree
+  :straight t
+  :config (global-undo-tree-mode))
 
 (use-package wgrep
   :straight t
