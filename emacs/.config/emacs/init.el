@@ -39,7 +39,17 @@
                          ("nongnu" . "https://elpa.nongnu.org/nongnu/"))) ;; For Eat Terminal
 
 (use-package no-littering
-  :straight t)
+  :straight t
+  :config
+  (no-littering-theme-backups)
+
+  (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+
+  (require 'recentf)
+  (add-to-list 'recentf-exclude
+               (recentf-expand-file-name no-littering-var-directory))
+  (add-to-list 'recentf-exclude
+               (recentf-expand-file-name no-littering-etc-directory)))
 
 (use-package system-packages
   :straight t)
@@ -67,6 +77,7 @@
   ;;(recentf-mode t) ;; Enable recent file mode
 
   (truncate-lines t)
+  (gnus-agent nil)
   (display-line-numbers-type 'relative) ;; Relative line numbers
   (global-display-line-numbers-mode t)  ;; Display line numbers
 
@@ -273,11 +284,14 @@
 
   (start/leader-keys
     "u" '(:ignore t :wk "Undo")
-    "u t" '(undo-tree-visualize :wk "Undo Tree"))
+    "u t" '(undo-tree-visualize :wk "Undo Tree Visualize"))
 
   (start/leader-keys
     "t" '(:ignore t :wk "Terminal")
-    "t t" '(eat :wk "Terminal toggle")))
+    "t P" '(eat-project :wk "Terminal project toggle full")
+    "t p" '(eat-project-other-window :wk "Terminal project toggle")
+    "t T" '(eat :wk "Terminal toggle full")
+    "t t" '(eat-other-window :wk "Terminal toggle")))
 
 (require 'tramp)
 (add-to-list 'tramp-remote-path 'tramp-default-remote-path)
@@ -813,8 +827,11 @@
 	;; location
 	(with-temp-file out-file (insert out-contents))))
 
-(use-package zig-mode
-  :straight t)
+;; (use-package zig-mode
+;;   :straight t)
+
+(use-package zig-ts-mode
+  :straight (:type git :host github :repo "malbertzard/zig-ts-mode"))
 
 (use-package editorconfig
   :straight t
@@ -872,7 +889,9 @@
          ("C-c C-e" . embark-export)))
 
 (use-package embark-consult
-  :straight t)
+  :straight t ; only need to install it, embark loads it after consult if found
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package helpful
   :straight t)
@@ -921,14 +940,53 @@
   :commands toc-org-enable
   :hook (org-mode . toc-org-mode))
 
+(use-package org-roam
+  :straight t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/code/RoamNotes")
+  (org-roam-completion-everywhere t)
+  (org-roam-capture-templates
+   '(("d" "default" plain "%?"
+      :if-new
+      (file+head "${slug}.org"
+                 "#+title: ${title}\n\n")
+      :unnarrowd t)
+     ("p" "project" plain (file "~/code/RoamNotes/Templates/ProjectTemplate.org")
+      :if-new
+      (file+head "Projects/${slug}.org"
+                 "#+title: ${title}\n\n")
+      :unnarrowd t)
+     ("a" "area" plain (file "~/code/RoamNotes/Templates/AreaTemplate.org")
+      :if-new
+      (file+head "Area/${slug}.org"
+                 "#+title: ${title}\n\n")
+      :unnarrowd t)
+     ("r" "resource" plain (file "~/code/RoamNotes/Templates/ResourceTemplate.org")
+      :if-new
+      (file+head "Resource/${slug}.org"
+                 "#+title: ${title}\n\n")
+      :unnarrowd t)
+     ("A" "archive" plain "%?"
+      :if-new
+      (file+head "Archive/${slug}.org"
+                 "#+title: ${title}\n\n")
+      :unnarrowd t)))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n c" . org-roam-capture)
+         ("C-c n i" . org-roam-node-insert))
+  :config
+  (org-roam-db-autosync-mode))
+
 (use-package org-modern
   :straight t
   :hook (org-mode . org-modern-mode))
 
-(use-package org-excalidraw
-  :straight (:type git :host github :repo "wdavew/org-excalidraw")
-  :config
-  (setq org-excalidraw-directory "~/code/Cadmus/__Assets/Excalidraw/"))
+(use-package org-download
+  :straight t
+  :config (add-hook 'dired-mode-hook 'org-download-enable))
 
 (defun start/org-mode-visual-fill ()
   (setq visual-fill-column-width 200
