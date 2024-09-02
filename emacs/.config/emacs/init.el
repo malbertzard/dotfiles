@@ -45,6 +45,11 @@
 
   (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
 
+  (setq create-lockfiles nil)
+
+  (setq auto-save-file-name-transforms
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+
   (require 'recentf)
   (add-to-list 'recentf-exclude
                (recentf-expand-file-name no-littering-var-directory))
@@ -134,6 +139,20 @@
 
   (start/leader-keys
     "p" '(projectile-command-map :wk "Projectile"))
+
+  (start/leader-keys
+    "n" '(:ignore t :wk "Notes")
+    "n u" '(org-roam-ui-open :wk "UI open")
+    "n i" '(org-roam-node-insert :wk "Insert node")
+    "n f" '(org-roam-node-find :wk "Find node")
+    "n c" '(org-roam-capture :wk "Capture")
+    "n C" '(:ignore t :wk "Citar")
+    "n C o" '(citar-open-note :wk "Open Note")
+    "n C O" '(citar-open :wk "Open Entry")
+    "n C i" '(:ignore t :wk "Citar insert")
+    "n C i k" '(citar-insert-keys :wk "Insert keys")
+    "n C i c" '(citar-insert-citation :wk "Insert citation")
+    "n C i c" '(citar-insert-reference :wk "Insert references"))
 
   (start/leader-keys
     "f" '(:ignore t :wk "find")
@@ -297,8 +316,8 @@
 (add-to-list 'tramp-remote-path 'tramp-default-remote-path)
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 
-;;(setq eww-retrieve-command
-;;     '("chromium" "--headless" "--dump-dom"))
+(setq eww-retrieve-command
+      '("chromium" "--headless" "--dump-dom"))
 
 (use-package dired
   :after evil-collection
@@ -843,6 +862,35 @@
   :straight t
   :hook ('eshell-load-hook #'eat-eshell-mode))
 
+(use-package elfeed
+  :straight t
+  :config
+  (setf url-queue-timeout 30)
+  (setq-default elfeed-search-filter "@1-week-ago +unread ")
+  (add-hook 'elfeed-new-entry-hook
+            (elfeed-make-tagger :feed-url "youtube\\.com"
+                                :add '(video youtube)))
+  (add-hook 'elfeed-new-entry-hook
+            (elfeed-make-tagger :before "2 weeks ago"
+                                :remove 'unread)))
+
+(setq elfeed-feeds
+      '(
+        ("https://tympanus.net/codrops/feed" frontend blog)
+        ))
+
+(use-package citar
+  :straight t
+  :custom
+  (citar-bibliography '("~/bib/Zotero.bib")))
+
+(use-package citar-org-roam
+  :straight t
+  :after (citar org-roam)
+  :config
+  (citar-org-roam-mode)
+  (setq citar-org-roam-capture-template-key "n"))
+
 (use-package magit
   :straight t
   :commands magit-status)
@@ -922,6 +970,13 @@
   :straight nil
   :custom
   (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
+  (org-startup-indented t)
+  (org-startup-with-inline-images t)
+  (org-image-actual-width '(450))
+  (org-fold-catch-invisible-edits 'error)
+  (org-pretty-entities t)
+  (org-id-link-to-org-use-id t)
+  (org-fold-catch-invisible-edits 'show)
 
   :hook
   (org-mode . org-indent-mode))
@@ -951,34 +1006,42 @@
    '(("d" "default" plain "%?"
       :if-new
       (file+head "${slug}.org"
-                 "#+title: ${title}\n\n")
+                 "#+title: ${title}\n#+created: %U\n\n")
       :unnarrowd t)
-     ("p" "project" plain (file "~/code/RoamNotes/Templates/ProjectTemplate.org")
+     ("n" "literature note" plain
+      "%?"
+      :target
+      (file+head
+       "%(expand-file-name org-roam-directory)/Resource/Literature/${citar-citekey}.org"
+       "#+title: ${note-title}.\n#+created: %U\n\n")
+      :unnarrowed t)
+     ("f" "fleeting" plain "%?"
       :if-new
-      (file+head "Projects/${slug}.org"
+      (file+head "Area/fleeting/${slug}.org"
+                 "#+title: ${title}\n#+created: %U\n\n")
+      :unnarrowd t)
+     ("p" "project" plain "%?"
+      :if-new
+      (file+head "Project/${slug}.org"
                  "#+title: ${title}\n\n")
       :unnarrowd t)
-     ("a" "area" plain (file "~/code/RoamNotes/Templates/AreaTemplate.org")
+     ("a" "area" plain "%?"
       :if-new
       (file+head "Area/${slug}.org"
-                 "#+title: ${title}\n\n")
+                 "#+title: ${title}\n#+created: %U\n\n")
       :unnarrowd t)
-     ("r" "resource" plain (file "~/code/RoamNotes/Templates/ResourceTemplate.org")
+     ("r" "resource" plain "%?"
       :if-new
       (file+head "Resource/${slug}.org"
-                 "#+title: ${title}\n\n")
-      :unnarrowd t)
-     ("A" "archive" plain "%?"
-      :if-new
-      (file+head "Archive/${slug}.org"
-                 "#+title: ${title}\n\n")
+                 "#+title: ${title}\n#+created: %U\n\n")
       :unnarrowd t)))
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n c" . org-roam-capture)
-         ("C-c n i" . org-roam-node-insert))
   :config
+  (setq org-roam-db-gc-threshold most-positive-fixnum)
   (org-roam-db-autosync-mode))
+
+(use-package org-roam-ui
+  :straight t
+  :after org-roam)
 
 (use-package org-modern
   :straight t

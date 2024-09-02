@@ -65,6 +65,12 @@
 - [[#other-packages][Other Packages]]
   - [[#terminal][Terminal]]
     - [[#eat][Eat]]
+  - [[#rss-reader][RSS Reader]]
+    - [[#elfeed][Elfeed]]
+    - [[#rss-reader-feed][RSS Reader Feed]]
+  - [[#citar][Citar]]
+    - [[#base][Base]]
+    - [[#org-integartion][Org Integartion]]
   - [[#git][Git]]
     - [[#magit][Magit]]
     - [[#git-gutter][Git Gutter]]
@@ -89,8 +95,7 @@ This is my home which I build. You should use this this is for me and me only.
 But try emacs its pretty nice.
 
 * Stuff I need to do
-- [ ] TODO: Auto compile the init.el to init.elc with straight
-- [ ] TODO: Some Dired tweaks
+- [X] TODO: Some Dired tweaks
 - [ ] TODO: Debugging without dap-mode use Dape
 - [ ] TODO: Add polymode 
   - [ ] TODO: Nested treesitter
@@ -170,6 +175,11 @@ automatically exports the configuration here to the associated output files.
       (no-littering-theme-backups)
 
       (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+
+      (setq create-lockfiles nil)
+
+      (setq auto-save-file-name-transforms
+            `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
       (require 'recentf)
       (add-to-list 'recentf-exclude
@@ -277,6 +287,20 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
 
       (start/leader-keys
         "p" '(projectile-command-map :wk "Projectile"))
+
+      (start/leader-keys
+        "n" '(:ignore t :wk "Notes")
+        "n u" '(org-roam-ui-open :wk "UI open")
+        "n i" '(org-roam-node-insert :wk "Insert node")
+        "n f" '(org-roam-node-find :wk "Find node")
+        "n c" '(org-roam-capture :wk "Capture")
+        "n C" '(:ignore t :wk "Citar")
+        "n C o" '(citar-open-note :wk "Open Note")
+        "n C O" '(citar-open :wk "Open Entry")
+        "n C i" '(:ignore t :wk "Citar insert")
+        "n C i k" '(citar-insert-keys :wk "Insert keys")
+        "n C i c" '(citar-insert-citation :wk "Insert citation")
+        "n C i c" '(citar-insert-reference :wk "Insert references"))
 
       (start/leader-keys
         "f" '(:ignore t :wk "find")
@@ -446,8 +470,8 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
 
 ** EWW Tweaks
 #+begin_src emacs-lisp
-    ;;(setq eww-retrieve-command
-    ;;     '("chromium" "--headless" "--dump-dom"))
+    (setq eww-retrieve-command
+          '("chromium" "--headless" "--dump-dom"))
 #+end_src
 
 ** Dired tweaks
@@ -1167,6 +1191,48 @@ We setup eat with eshell, if you want to use bash, zsh etc., check out their git
       :straight t
       :hook ('eshell-load-hook #'eat-eshell-mode))
 #+end_src
+** RSS Reader
+
+*** Elfeed
+#+begin_src emacs-lisp
+    (use-package elfeed
+      :straight t
+      :config
+      (setf url-queue-timeout 30)
+      (setq-default elfeed-search-filter "@1-week-ago +unread ")
+      (add-hook 'elfeed-new-entry-hook
+                (elfeed-make-tagger :feed-url "youtube\\.com"
+                                    :add '(video youtube)))
+      (add-hook 'elfeed-new-entry-hook
+                (elfeed-make-tagger :before "2 weeks ago"
+                                    :remove 'unread)))
+
+#+end_src
+*** RSS Reader Feed
+#+begin_src emacs-lisp
+    (setq elfeed-feeds
+          '(
+            ("https://tympanus.net/codrops/feed" frontend blog)
+            ))
+#+end_src
+
+** Citar
+*** Base
+#+begin_src emacs-lisp
+    (use-package citar
+      :straight t
+      :custom
+      (citar-bibliography '("~/bib/Zotero.bib")))
+#+end_src
+*** Org Integartion
+#+begin_src emacs-lisp
+    (use-package citar-org-roam
+      :straight t
+      :after (citar org-roam)
+      :config
+      (citar-org-roam-mode)
+      (setq citar-org-roam-capture-template-key "n"))
+#+end_src
 
 ** Git
 Version Controll for everything
@@ -1290,6 +1356,13 @@ Project interaction library for Emacs.
       :straight nil
       :custom
       (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
+      (org-startup-indented t)
+      (org-startup-with-inline-images t)
+      (org-image-actual-width '(450))
+      (org-fold-catch-invisible-edits 'error)
+      (org-pretty-entities t)
+      (org-id-link-to-org-use-id t)
+      (org-fold-catch-invisible-edits 'show)
 
       :hook
       (org-mode . org-indent-mode))
@@ -1312,8 +1385,6 @@ Project interaction library for Emacs.
       :hook (org-mode . toc-org-mode))
 #+end_src
 
-
-
 **** Org Roam
 #+BEGIN_SRC emacs-lisp
     (use-package org-roam
@@ -1327,34 +1398,42 @@ Project interaction library for Emacs.
        '(("d" "default" plain "%?"
           :if-new
           (file+head "${slug}.org"
-                     "#+title: ${title}\n\n")
+                     "#+title: ${title}\n#+created: %U\n\n")
           :unnarrowd t)
-         ("p" "project" plain (file "~/code/RoamNotes/Templates/ProjectTemplate.org")
+         ("n" "literature note" plain
+          "%?"
+          :target
+          (file+head
+           "%(expand-file-name org-roam-directory)/Resource/Literature/${citar-citekey}.org"
+           "#+title: ${note-title}.\n#+created: %U\n\n")
+          :unnarrowed t)
+         ("f" "fleeting" plain "%?"
           :if-new
-          (file+head "Projects/${slug}.org"
+          (file+head "Area/fleeting/${slug}.org"
+                     "#+title: ${title}\n#+created: %U\n\n")
+          :unnarrowd t)
+         ("p" "project" plain "%?"
+          :if-new
+          (file+head "Project/${slug}.org"
                      "#+title: ${title}\n\n")
           :unnarrowd t)
-         ("a" "area" plain (file "~/code/RoamNotes/Templates/AreaTemplate.org")
+         ("a" "area" plain "%?"
           :if-new
           (file+head "Area/${slug}.org"
-                     "#+title: ${title}\n\n")
+                     "#+title: ${title}\n#+created: %U\n\n")
           :unnarrowd t)
-         ("r" "resource" plain (file "~/code/RoamNotes/Templates/ResourceTemplate.org")
+         ("r" "resource" plain "%?"
           :if-new
           (file+head "Resource/${slug}.org"
-                     "#+title: ${title}\n\n")
-          :unnarrowd t)
-         ("A" "archive" plain "%?"
-          :if-new
-          (file+head "Archive/${slug}.org"
-                     "#+title: ${title}\n\n")
+                     "#+title: ${title}\n#+created: %U\n\n")
           :unnarrowd t)))
-      :bind (("C-c n l" . org-roam-buffer-toggle)
-             ("C-c n f" . org-roam-node-find)
-             ("C-c n c" . org-roam-capture)
-             ("C-c n i" . org-roam-node-insert))
       :config
+      (setq org-roam-db-gc-threshold most-positive-fixnum)
       (org-roam-db-autosync-mode))
+
+    (use-package org-roam-ui
+      :straight t
+      :after org-roam)
 #+END_SRC
 
 **** Org Modern
@@ -1366,12 +1445,10 @@ Project interaction library for Emacs.
 
 **** Org Download
 #+BEGIN_SRC emacs-lisp
-        (use-package org-download
-    	  :straight t
-          :config (add-hook 'dired-mode-hook 'org-download-enable))
+    (use-package org-download
+      :straight t
+      :config (add-hook 'dired-mode-hook 'org-download-enable))
 #+END_SRC
-
-[[excalidraw:/home/malb/test/bea6aae9-2cfe-47f0-a58f-2da7d27fb12f.excalidraw.svg]]
 **** Center Org Buffer
 #+BEGIN_SRC emacs-lisp
     (defun start/org-mode-visual-fill ()
