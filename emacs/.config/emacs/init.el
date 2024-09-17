@@ -147,6 +147,7 @@
     "n f" '(org-roam-node-find :wk "Find node")
     "n c" '(org-roam-capture :wk "Capture")
     "n C" '(:ignore t :wk "Citar")
+    "n C t" '(citar-org-roam-open-current-refs :wk "Open this")
     "n C o" '(citar-open-note :wk "Open Note")
     "n C O" '(citar-open :wk "Open Entry")
     "n C i" '(:ignore t :wk "Citar insert")
@@ -770,14 +771,6 @@
 ;; Install all langs
 ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
 
-(use-package treesit-auto
-  :straight t
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
-
 (use-package eglot
   :straight nil ;; Don't install eglot because it's now built-in
   :config
@@ -948,7 +941,10 @@
   :straight t)
 
 (use-package pdf-tools
-  :straight t)
+  :straight t
+  :config
+  (pdf-tools-install)
+  (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1))))
 
 (use-package markdown-mode
   :straight t
@@ -990,49 +986,52 @@
  '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
  '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
 
+(add-hook 'org-mode-hook 'visual-line-mode)
+
+(use-package org-noter
+  :straight t
+  :after org)
+
 (use-package toc-org
   :straight t
+  :after org
   :commands toc-org-enable
   :hook (org-mode . toc-org-mode))
 
 (use-package org-roam
   :straight t
+  :after org
   :init
   (setq org-roam-v2-ack t)
   :custom
-  (org-roam-directory "~/code/RoamNotes")
+  (org-roam-directory "~/code/Cadmus")
   (org-roam-completion-everywhere t)
   (org-roam-capture-templates
    '(("d" "default" plain "%?"
       :if-new
-      (file+head "${slug}.org"
+      (file+head "2_Areas/Fleeting/${slug}.org"
                  "#+title: ${title}\n#+created: %U\n\n")
       :unnarrowd t)
      ("n" "literature note" plain
       "%?"
       :target
       (file+head
-       "%(expand-file-name org-roam-directory)/Resource/Literature/${citar-citekey}.org"
+       "%(expand-file-name org-roam-directory)/3_Resources/Literature/${citar-citekey}.org"
        "#+title: ${note-title}.\n#+created: %U\n\n")
       :unnarrowed t)
-     ("f" "fleeting" plain "%?"
-      :if-new
-      (file+head "Area/fleeting/${slug}.org"
-                 "#+title: ${title}\n#+created: %U\n\n")
-      :unnarrowd t)
      ("p" "project" plain "%?"
       :if-new
-      (file+head "Project/${slug}.org"
+      (file+head "1_Projects/${slug}.org"
                  "#+title: ${title}\n\n")
       :unnarrowd t)
      ("a" "area" plain "%?"
       :if-new
-      (file+head "Area/${slug}.org"
+      (file+head "2_Areas/${slug}.org"
                  "#+title: ${title}\n#+created: %U\n\n")
       :unnarrowd t)
      ("r" "resource" plain "%?"
       :if-new
-      (file+head "Resource/${slug}.org"
+      (file+head "3_Resources/${slug}.org"
                  "#+title: ${title}\n#+created: %U\n\n")
       :unnarrowd t)))
   :config
@@ -1041,14 +1040,16 @@
 
 (use-package org-roam-ui
   :straight t
-  :after org-roam)
+  :after  org org-roam)
 
 (use-package org-modern
   :straight t
+  :after  org
   :hook (org-mode . org-modern-mode))
 
 (use-package org-download
   :straight t
+  :after  org
   :config (add-hook 'dired-mode-hook 'org-download-enable))
 
 (defun start/org-mode-visual-fill ()
@@ -1058,6 +1059,7 @@
 
 (use-package visual-fill-column
   :straight t
+  :after  org
   :hook (org-mode . start/org-mode-visual-fill))
 
 (use-package restclient

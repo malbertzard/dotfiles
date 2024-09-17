@@ -295,6 +295,7 @@ To search and replace, use query-replace-regexp to replace one by one C-M-% (SPC
         "n f" '(org-roam-node-find :wk "Find node")
         "n c" '(org-roam-capture :wk "Capture")
         "n C" '(:ignore t :wk "Citar")
+        "n C t" '(citar-org-roam-open-current-refs :wk "Open this")
         "n C o" '(citar-open-note :wk "Open Note")
         "n C O" '(citar-open :wk "Open Entry")
         "n C i" '(:ignore t :wk "Citar insert")
@@ -1062,14 +1063,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
     ;; Install all langs
     ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
-
-    (use-package treesit-auto
-      :straight t
-      :custom
-      (treesit-auto-install 'prompt)
-      :config
-      (treesit-auto-add-to-auto-mode-alist 'all)
-      (global-treesit-auto-mode))
 #+END_SRC
 
 ** Eglot
@@ -1325,7 +1318,10 @@ Project interaction library for Emacs.
 *** Pdf Tools
 #+begin_src emacs-lisp
     (use-package pdf-tools
-      :straight t)
+      :straight t
+      :config
+      (pdf-tools-install)
+      (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1))))
 #+end_src
 
 *** Markdown
@@ -1375,12 +1371,22 @@ Project interaction library for Emacs.
      '(org-level-5 ((t (:inherit outline-5 :height 1.1))))
      '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
      '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
+
+    (add-hook 'org-mode-hook 'visual-line-mode)
+#+end_src
+
+**** Org Noter
+#+begin_src emacs-lisp
+    (use-package org-noter
+      :straight t
+      :after org)
 #+end_src
 
 **** Table of Contents
 #+begin_src emacs-lisp
     (use-package toc-org
       :straight t
+      :after org
       :commands toc-org-enable
       :hook (org-mode . toc-org-mode))
 #+end_src
@@ -1389,42 +1395,38 @@ Project interaction library for Emacs.
 #+BEGIN_SRC emacs-lisp
     (use-package org-roam
       :straight t
+      :after org
       :init
       (setq org-roam-v2-ack t)
       :custom
-      (org-roam-directory "~/code/RoamNotes")
+      (org-roam-directory "~/code/Cadmus")
       (org-roam-completion-everywhere t)
       (org-roam-capture-templates
        '(("d" "default" plain "%?"
           :if-new
-          (file+head "${slug}.org"
+          (file+head "2_Areas/Fleeting/${slug}.org"
                      "#+title: ${title}\n#+created: %U\n\n")
           :unnarrowd t)
          ("n" "literature note" plain
           "%?"
           :target
           (file+head
-           "%(expand-file-name org-roam-directory)/Resource/Literature/${citar-citekey}.org"
+           "%(expand-file-name org-roam-directory)/3_Resources/Literature/${citar-citekey}.org"
            "#+title: ${note-title}.\n#+created: %U\n\n")
           :unnarrowed t)
-         ("f" "fleeting" plain "%?"
-          :if-new
-          (file+head "Area/fleeting/${slug}.org"
-                     "#+title: ${title}\n#+created: %U\n\n")
-          :unnarrowd t)
          ("p" "project" plain "%?"
           :if-new
-          (file+head "Project/${slug}.org"
+          (file+head "1_Projects/${slug}.org"
                      "#+title: ${title}\n\n")
           :unnarrowd t)
          ("a" "area" plain "%?"
           :if-new
-          (file+head "Area/${slug}.org"
+          (file+head "2_Areas/${slug}.org"
                      "#+title: ${title}\n#+created: %U\n\n")
           :unnarrowd t)
          ("r" "resource" plain "%?"
           :if-new
-          (file+head "Resource/${slug}.org"
+          (file+head "3_Resources/${slug}.org"
                      "#+title: ${title}\n#+created: %U\n\n")
           :unnarrowd t)))
       :config
@@ -1433,13 +1435,14 @@ Project interaction library for Emacs.
 
     (use-package org-roam-ui
       :straight t
-      :after org-roam)
+      :after  org org-roam)
 #+END_SRC
 
 **** Org Modern
 #+BEGIN_SRC emacs-lisp
     (use-package org-modern
       :straight t
+      :after  org
       :hook (org-mode . org-modern-mode))
 #+END_SRC
 
@@ -1447,6 +1450,7 @@ Project interaction library for Emacs.
 #+BEGIN_SRC emacs-lisp
     (use-package org-download
       :straight t
+      :after  org
       :config (add-hook 'dired-mode-hook 'org-download-enable))
 #+END_SRC
 **** Center Org Buffer
@@ -1458,6 +1462,7 @@ Project interaction library for Emacs.
 
     (use-package visual-fill-column
       :straight t
+      :after  org
       :hook (org-mode . start/org-mode-visual-fill))
 #+END_SRC
 
