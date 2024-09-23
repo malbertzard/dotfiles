@@ -127,6 +127,10 @@
   (general-define-key
    :states 'insert
    "C-v" 'yank)
+
+  (general-define-key
+   :states 'normal
+   "C-." 'embark-act)
   (general-define-key
    :keymaps 'minibuffer-mode-map
    "C-v" 'yank)
@@ -141,11 +145,19 @@
     "p" '(projectile-command-map :wk "Projectile"))
 
   (start/leader-keys
+    "P" '(perspective-map :wk "Perspective"))
+
+  (start/leader-keys
     "n" '(:ignore t :wk "Notes")
+    "n d" '(org-roam-dailies-map :wk "Dailies")
     "n u" '(org-roam-ui-open :wk "UI open")
     "n i" '(org-roam-node-insert :wk "Insert node")
     "n f" '(org-roam-node-find :wk "Find node")
     "n c" '(org-roam-capture :wk "Capture")
+    "n s" '(consult-org-roam-search :wk "Search")
+    "n S" '(:ignore t :wk "Show")
+    "n S b" '(consult-org-roam-backlinks :wk "Show backlinks")
+    "n S f" '(consult-org-roam-forward-links :wk "Show forward links")
     "n C" '(:ignore t :wk "Citar")
     "n C t" '(citar-org-roam-open-current-refs :wk "Open this")
     "n C o" '(citar-open-note :wk "Open Note")
@@ -317,6 +329,8 @@
 (add-to-list 'tramp-remote-path 'tramp-default-remote-path)
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 
+(setq calendar-week-start-day 1)
+
 (setq eww-retrieve-command
       '("chromium" "--headless" "--dump-dom"))
 
@@ -325,9 +339,8 @@
   :straight nil
   :commands (dired dired-jump)
   :config
-  (evil-collection-define-key 'normal 'dired-mode-map "c" 'dired-create-empty-file)
-  :custom
-  (setq delete-by-moving-to-trash t))
+  (setq delete-by-moving-to-trash t)
+  (setq dired-listing-switches "-aBhl  --group-directories-first"))
 
 (use-package dired-open
   :commands (dired dired-jump)
@@ -444,7 +457,7 @@
   (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
   (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
   (evil-want-C-i-jump nil)      ;; Disables C-i jump
-  (evil-undo-system 'undo-redo) ;; C-r to redo
+  (evil-undo-system 'undo-tree) ;; C-r to redo
   (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
   ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
   :bind (:map evil-motion-state-map
@@ -456,7 +469,29 @@
   :after evil
   :config
   ;; Setting where to use evil-collection
-  (setq evil-collection-mode-list '(dired ibuffer magit corfu vertico consult))
+  (setq evil-collection-mode-list '(
+        dired
+        wdired
+        wgrep
+        magit
+        ibuffer
+        corfu
+        vertico
+        consult
+        compile
+        dape
+        docker
+        eglot
+        pdf
+        doc-view
+        eww
+        org-roam
+        flycheck
+        ediff
+        diff-mode
+        diff-hl
+        proced
+        embark))
   (evil-collection-init))
 
 (use-package evil-surround
@@ -696,6 +731,10 @@
 
 (setq eldoc-echo-area-use-multiline-p nil)
 
+(setq eldoc-documentation-strategy 'eldoc-documentation-compose)
+
+(setq eldoc-idle-delay 0.5)
+
 (use-package eldoc-box
   :straight t
   :config
@@ -741,8 +780,7 @@
           (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
 (setq treesit-language-source-alist
-      '(
-        (bash "https://github.com/tree-sitter/tree-sitter-bash")
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
 		(cmake "https://github.com/uyha/tree-sitter-cmake")
 		(css "https://github.com/tree-sitter/tree-sitter-css")
 		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
@@ -750,6 +788,7 @@
 		(zig "https://github.com/GrayJack/tree-sitter-zig")
 		(go "https://github.com/tree-sitter/tree-sitter-go")
         (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+        (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
 		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
 		(json "https://github.com/tree-sitter/tree-sitter-json")
 		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
@@ -760,29 +799,27 @@
 		(toml "https://github.com/tree-sitter/tree-sitter-toml")
 		(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
 		(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-		(yaml "https://github.com/ikatyang/tree-sitter-yaml"))
-	  )
-
-(setq treesit-font-lock-level 4)
-
-(use-package tree-sitter-langs
-  :straight t)
+		(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
 ;; Install all langs
 ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+
+(setq treesit-font-lock-level 4)
+
+(use-package treesit-auto
+  :straight t
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 (use-package eglot
   :straight nil ;; Don't install eglot because it's now built-in
   :config
   (evil-define-key 'normal 'eglot-mode-map
     "K" 'eldoc-box-help-at-point)
-  (add-hook 'python-mode-hook 'eglot-ensure)
-  (add-hook 'php-mode-hook 'eglot-ensure)
-  (add-hook 'go-mode-hook 'eglot-ensure)
-  (add-hook 'rust-mode-hook 'eglot-ensure)
-  (add-hook 'ruby-mode-hook 'eglot-ensure)
-  (add-hook 'yaml-mode-hook 'eglot-ensure)
-  (add-hook 'bash-mode-hook 'eglot-ensure)
+  (add-hook 'go-ts-mode-hook 'eglot-ensure)
+  (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
+  (add-hook 'python-ts-mode-hook 'eglot-ensure)
   :custom
   (eglot-autoshutdown t)
   (fset #'jsonrpc--log-event #'ignore)
@@ -791,6 +828,14 @@
   (eglot-events-buffer-size 0)
   (eglot-sync-connect nil)
   (eglot-extend-to-xref nil))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(gdscript-mode . ("localhost:6005"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
@@ -804,8 +849,11 @@
   (add-to-list 'eglot-server-programs
                '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 
-;; (use-package dape
-;;   :hook (prog-mode . eglot))
+(use-package dape
+  :straight t
+  :config 
+  (setq dape-cwd-fn 'projectile-project-root)
+  (setq dape-buffer-window-arrangement 'right))
 
 (defun pyrightconfig-write (virtualenv)
   (interactive "DEnv: ")
@@ -844,6 +892,15 @@
 
 (use-package zig-ts-mode
   :straight (:type git :host github :repo "malbertzard/zig-ts-mode"))
+
+(use-package gdscript-mode
+  :straight (gdscript-mode
+             :type git
+             :host github
+             :repo "godotengine/emacs-gdscript-mode")
+  :hook (gdscript-mode . eglot-ensure))
+
+(setq lsp-gdscript-port 6008)
 
 (use-package editorconfig
   :straight t
@@ -914,6 +971,15 @@
   (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
 
 ;; Use Bookmarks for smaller, not standard projects
+
+(setq persp-suppress-no-prefix-key-warning 't)
+(use-package perspective
+  :straight t
+  :init
+  (persp-mode))
+
+(use-package persp-projectile
+  :straight t)
 
 (use-package docker
   :straight t
@@ -988,15 +1054,22 @@
 
 (add-hook 'org-mode-hook 'visual-line-mode)
 
-(use-package org-noter
-  :straight t
-  :after org)
+(setq org-startup-folded 'fold)
+
+;; (use-package org-noter
+;;   :straight t
+;;   :after org)
 
 (use-package toc-org
   :straight t
   :after org
   :commands toc-org-enable
   :hook (org-mode . toc-org-mode))
+
+(use-package org-download
+  :straight t
+  :after  org
+  :config (add-hook 'dired-mode-hook 'org-download-enable))
 
 (use-package org-roam
   :straight t
@@ -1010,47 +1083,54 @@
    '(("d" "default" plain "%?"
       :if-new
       (file+head "2_Areas/Fleeting/${slug}.org"
-                 "#+title: ${title}\n#+created: %U\n\n")
+                 "#+title: ${title}\n#+created: %U\n#+filetags: :fleeting: \n\n")
       :unnarrowd t)
      ("n" "literature note" plain
       "%?"
       :target
       (file+head
        "%(expand-file-name org-roam-directory)/3_Resources/Literature/${citar-citekey}.org"
-       "#+title: ${note-title}.\n#+created: %U\n\n")
+       "#+title: ${note-title}\n#+created: %U\n#+filetags: :literatur:resource: \n\n")
       :unnarrowed t)
      ("p" "project" plain "%?"
       :if-new
       (file+head "1_Projects/${slug}.org"
-                 "#+title: ${title}\n\n")
+                 "#+title: ${title}\n#+created: %U\n#+filetags: :project: \n\n")
       :unnarrowd t)
      ("a" "area" plain "%?"
       :if-new
       (file+head "2_Areas/${slug}.org"
-                 "#+title: ${title}\n#+created: %U\n\n")
+                 "#+title: ${title}\n#+created: %U\n#+filetags: :area: \n\n")
       :unnarrowd t)
      ("r" "resource" plain "%?"
       :if-new
       (file+head "3_Resources/${slug}.org"
-                 "#+title: ${title}\n#+created: %U\n\n")
+                 "#+title: ${title}\n#+created: %U\n#+filetags: :resource: \n\n")
       :unnarrowd t)))
   :config
   (setq org-roam-db-gc-threshold most-positive-fixnum)
+  (setq org-roam-dailies-directory "2_Areas/journal/")
   (org-roam-db-autosync-mode))
 
 (use-package org-roam-ui
   :straight t
   :after  org org-roam)
 
-(use-package org-modern
+(use-package consult-org-roam
   :straight t
-  :after  org
-  :hook (org-mode . org-modern-mode))
-
-(use-package org-download
-  :straight t
-  :after  org
-  :config (add-hook 'dired-mode-hook 'org-download-enable))
+  :after org-roam
+  :init
+  (require 'consult-org-roam)
+  ;; Activate the minor mode
+  (consult-org-roam-mode 1)
+  :custom
+  ;; Use `ripgrep' for searching with `consult-org-roam-search'
+  (consult-org-roam-grep-func #'consult-ripgrep)
+  ;; Configure a custom narrow key for `consult-buffer'
+  (consult-org-roam-buffer-narrow-key ?r)
+  ;; Display org-roam buffers right after non-org-roam buffers
+  ;; in consult-buffer (and not down at the bottom)
+  (consult-org-roam-buffer-after-buffers t))
 
 (defun start/org-mode-visual-fill ()
   (setq visual-fill-column-width 200
@@ -1061,6 +1141,11 @@
   :straight t
   :after  org
   :hook (org-mode . start/org-mode-visual-fill))
+
+(use-package org-modern
+  :straight t
+  :after  org
+  :hook (org-mode . org-modern-mode))
 
 (use-package restclient
   :straight t
