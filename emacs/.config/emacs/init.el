@@ -491,6 +491,7 @@
         diff-mode
         diff-hl
         proced
+        calc
         embark))
   (evil-collection-init))
 
@@ -820,6 +821,7 @@
   (add-hook 'go-ts-mode-hook 'eglot-ensure)
   (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
   (add-hook 'python-ts-mode-hook 'eglot-ensure)
+  (add-hook 'rust-ts-mode-hook 'eglot-ensure)
   :custom
   (eglot-autoshutdown t)
   (fset #'jsonrpc--log-event #'ignore)
@@ -836,6 +838,10 @@
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
                '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs

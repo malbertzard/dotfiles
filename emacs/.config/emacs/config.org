@@ -708,6 +708,7 @@ Because im a Vim Goblin
             diff-mode
             diff-hl
             proced
+            calc
             embark))
       (evil-collection-init))
 #+end_src
@@ -1135,6 +1136,7 @@ Not adding all LSPs to ensure so that I can select when to do this for some lang
       (add-hook 'go-ts-mode-hook 'eglot-ensure)
       (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
       (add-hook 'python-ts-mode-hook 'eglot-ensure)
+      (add-hook 'rust-ts-mode-hook 'eglot-ensure)
       :custom
       (eglot-autoshutdown t)
       (fset #'jsonrpc--log-event #'ignore)
@@ -1151,6 +1153,10 @@ Not adding all LSPs to ensure so that I can select when to do this for some lang
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
                    '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
