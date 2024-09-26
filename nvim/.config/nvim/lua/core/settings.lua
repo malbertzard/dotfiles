@@ -65,9 +65,10 @@ M.lsp_servers = {
   "ruby_lsp",
   "clangd",
   "bashls",
+  "rust_analyzer",
 
   -- Work JS Stuff
-  "tsserver",
+  -- "tsserver",
 
   -- Work Php Stuff
   -- "phpactor",

@@ -10,33 +10,38 @@ require("core.utils.functions").on_attach(function(client, buffer)
   require("core.plugins.lsp.keys").on_attach(client, buffer)
 end)
 
-vim.diagnostic.config({
+local _border = "single"
+
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
+  vim.lsp.handlers.hover, {
+    border = _border
+  }
+)
+
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
+  vim.lsp.handlers.signature_help, {
+    border = _border
+  }
+)
+
+vim.diagnostic.config{
   virtual_text = false,
-  float = {
-    focusable = false,
-    style = "minimal",
-    border = "none",
-    header = "",
-    prefix = "",
-  },
+  float={border=_border},
   signs = true,
   underline = true,
   update_in_insert = true,
   severity_sort = false,
-})
+}
 
 ---- sign column
--- local icons = require("core.utils.icons")
+local icons = require("core.utils.icons")
 --
--- for type, icon in pairs(icons.diagnostics) do
---   local hl = "DiagnosticSign" .. type
---   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = '' })
--- end
+for type, icon in pairs(icons.diagnostics) do
+  local hl = "DiagnosticSign" .. type
+  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = '' })
+end
 
 for _, lsp in ipairs(settings.lsp_servers) do
-  if lsp == "rust_analyzer" then
-    goto continue
-  end
   nvim_lsp[lsp].setup({
     capabilities = capabilities,
     flags = { debounce_text_changes = 150 },

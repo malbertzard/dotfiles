@@ -1119,7 +1119,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 ** Eglot
 Language Server Protocol Support for Emacs. The built-in is now Eglot (with emacs 29).
 
-Eglot is fast and minimal, but requires manual setup for LSP servers (downloading).
+eglot is fast and minimal, but requires manual setup for LSP servers (downloading).
 For more [[https://www.gnu.org/software/emacs/manual/html_mono/eglot.html][information how to use.]] One alternative to Eglot is Lsp-mode, check out the [[https://github.com/MiniApollo/kickstart.emacs/wiki][project wiki]] page for more information.
 
 Eglot is easy to set up, but the only difficult part is downloading and setting up the lsp servers.
