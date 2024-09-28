@@ -1,5 +1,6 @@
 local settings = require("core.settings")
 local nvim_lsp = require("lspconfig")
+local icons = require("core.utils.icons")
 
 local lsp_settings = require("core.plugins.lsp.settings")
 
@@ -24,22 +25,20 @@ vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
   }
 )
 
-vim.diagnostic.config{
+vim.diagnostic.config {
   virtual_text = false,
-  float={border=_border},
-  signs = true,
+  float = { border = _border },
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = icons.diagnostics.Error,
+      [vim.diagnostic.severity.WARN] = icons.diagnostics.Warn,
+      [vim.diagnostic.severity.HINT] = icons.diagnostics.Hint,
+      [vim.diagnostic.severity.INFO] = icons.diagnostics.INFO,
+    } },
   underline = true,
   update_in_insert = true,
   severity_sort = false,
 }
-
----- sign column
-local icons = require("core.utils.icons")
---
-for type, icon in pairs(icons.diagnostics) do
-  local hl = "DiagnosticSign" .. type
-  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = '' })
-end
 
 for _, lsp in ipairs(settings.lsp_servers) do
   nvim_lsp[lsp].setup({

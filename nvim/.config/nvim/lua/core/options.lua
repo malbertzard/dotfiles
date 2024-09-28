@@ -48,8 +48,6 @@ vim.opt.fillchars.eob = " "
 vim.opt.shortmess:append("c")
 vim.opt.whichwrap:append("<,>,[,],h,l")
 vim.opt.iskeyword:append("-")
-vim.opt.foldlevel = 99
-vim.opt.foldmethod = "syntax"
 vim.opt.fileformats = { "unix", "dos" }
 vim.opt.wildignorecase = true          -- When set case is ignored when completing file names and directories
 vim.opt.wildmode = "longest:full,full" -- Command-line completion mode
@@ -58,3 +56,4 @@ vim.opt.mouse = "a"                    -- allow the mouse to be used in neovim
 vim.opt.spelllang = 'en'
 
 vim.g.python3_host_prog = vim.fn.expand("~/.virtualenvs/neovim/bin/python3")
+

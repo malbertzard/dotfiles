@@ -1,9 +1,6 @@
 local M = {
   "AckslD/nvim-FeMaco.lua",
-  ft = {"markdown", "quarto"},
-  keys = {
-    { "<localleader>E", "<cmd>FeMaco<cr>", "Edit Code Block" }
-  },
+  ft = { "markdown", "quarto" },
   config = "require('femaco').setup()",
 }
 

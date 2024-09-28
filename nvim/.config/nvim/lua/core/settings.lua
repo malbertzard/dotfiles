@@ -5,8 +5,6 @@ local M = {}
 M.brightness = "dark"
 M.theme = "gruvbox_16"
 M.enable_noice = false
-M.enable_db = false
-M.enable_notebook = true
 
 -- random or see alpha/headers
 -- Currently does not work

@@ -6,7 +6,7 @@ local function cmd(command)
 end
 
 local hint = [[
- _J_: next                 _K_: previous
+ _N_: next                 _P_: previous
  _L_: list suggestions     _f_: use first suggestion
  _A_: add word             _S_: switch spelllang
 
@@ -35,8 +35,8 @@ Hydra({
   mode = "n",
   body = "<Leader>z",
   heads = {
-    { "J", "]s" },
-    { "K", "[s" },
+    { "N", "]s" },
+    { "P", "[s" },
     { "A", "zg" },
     { "L", cmd("Telescope spell_suggest") },
     { "S", function()
