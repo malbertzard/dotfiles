@@ -7,7 +7,7 @@ local config = wezterm.config_builder()
 -- This is where you actually apply your config choices
 config.color_scheme = 'Gruvbox dark, pale (base16)'
 
-config.font_size = 10
+config.font_size = 12
 config.line_height = 1.0
 config.tab_bar_at_bottom = false
 config.hide_tab_bar_if_only_one_tab = true
