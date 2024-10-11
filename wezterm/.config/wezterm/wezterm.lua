@@ -1,4 +1,4 @@
--- Pull in the wezterm API
+-- Pull in the wezterm false
 local wezterm = require 'wezterm'
 
 -- This will hold the configuration.
@@ -7,10 +7,10 @@ local config = wezterm.config_builder()
 -- This is where you actually apply your config choices
 config.color_scheme = 'Gruvbox dark, pale (base16)'
 
-config.font_size = 12
+config.font_size = 11
 config.line_height = 1.0
 config.tab_bar_at_bottom = false
-config.hide_tab_bar_if_only_one_tab = true
+config.hide_tab_bar_if_only_one_tab = false
 
 -- Add these lines:
 config.leader = { key = 'b', mods = 'CTRL', timeout_milliseconds = 1000 }
@@ -61,6 +61,41 @@ config.keys = {
   { key = "d",  mods = "LEADER",       action = wezterm.action { CloseCurrentPane = { confirm = true } } },
   { key = "x",  mods = "LEADER",       action = wezterm.action { CloseCurrentPane = { confirm = true } } },
 }
+
+-- tabline
+local tabline = wezterm.plugin.require("https://github.com/michaelbrusegard/tabline.wez")
+tabline.setup({
+  options = {
+    icons_enabled = true,
+    theme = 'GruvboxDark',
+    color_overrides = {},
+    section_separators = {
+      left = wezterm.nerdfonts.pl_left_hard_divider,
+      right = wezterm.nerdfonts.pl_right_hard_divider,
+    },
+    component_separators = {
+      left = wezterm.nerdfonts.pl_left_soft_divider,
+      right = wezterm.nerdfonts.pl_right_soft_divider,
+    },
+    tab_separators = {
+      left = wezterm.nerdfonts.pl_left_hard_divider,
+      right = wezterm.nerdfonts.pl_right_hard_divider,
+    },
+  },
+  sections = {
+    tabline_a = {},
+    tabline_b = { 'workspace' },
+    tabline_c = { ' ' },
+    tab_active = { 'index', { 'process', padding = { left = 0, right = 1 } } },
+    tab_inactive = { 'index', { 'process', padding = { left = 0, right = 1 } } },
+    tabline_x = {},
+    tabline_y = { 'datetime', 'battery' },
+    tabline_z = { 'hostname' },
+  },
+  extensions = {},
+})
+tabline.apply_to_config(config)
+
 
 -- and finally, return the configuration to wezterm
 return config

@@ -38,8 +38,14 @@ M.treesitter_ensure_installed = {
   "markdown_inline",
   "http",
 
+  "make",
   "cmake",
   "dockerfile",
+  "editorconfig",
+  "tmux",
+
+  "gitcommit",
+  "gitignore",
 
   "css",
   "html",

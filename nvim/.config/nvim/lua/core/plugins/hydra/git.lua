@@ -1,8 +1,15 @@
 local Hydra = require("hydra")
 local gitsigns = require("gitsigns")
 
+local function cmd(command)
+  return table.concat({ "<Cmd>", command, "<CR>" })
+end
+
 local hint = [[
- _J_: next hunk _K_: prev hunk
+ _J_: next hunk    _K_: prev hunk
+ _s_: stage hunk   _u_: unstage hunk
+ _S_: stage buffer
+ _b_: blame line   _B_: blame
 ^^^^
 _q_: exit
 ]]
@@ -21,32 +28,13 @@ Hydra({
   mode = { "n", "x" },
   body = "<leader>gM",
   heads = {
-    {
-      "J",
-      function()
-        if vim.wo.diff then
-          return "]c"
-        end
-        vim.schedule(function()
-          gitsigns.next_hunk()
-        end)
-        return "<Ignore>"
-      end,
-      { expr = true },
-    },
-    {
-      "K",
-      function()
-        if vim.wo.diff then
-          return "[c"
-        end
-        vim.schedule(function()
-          gitsigns.prev_hunk()
-        end)
-        return "<Ignore>"
-      end,
-      { expr = true },
-    },
+    { "s", cmd("Gitsigns stage_hunk") },
+    { "S", cmd("Gitsigns stage_buffer") },
+    { "u", cmd("Gitsigns undo_stage_hunk") },
+    { "J", cmd("Gitsigns next_hunk") },
+    { "K", cmd("Gitsigns prev_hunk") },
+    { "b", cmd("Gitsigns blame_line") },
+    { "B", cmd("Gitsigns blame") },
     { "q", nil, opts },
   },
 })
