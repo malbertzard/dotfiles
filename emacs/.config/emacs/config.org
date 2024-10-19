@@ -132,6 +132,11 @@ Make startup faster by reducing the frequency of garbage collection. This will b
           (eval-print-last-sexp)))
       (load bootstrap-file nil 'nomessage))
 #+end_src
+
+This is a bad idea and I should fix erros but i dont want to be annoyed got stuff to do
+#+begin_src emacs-lisp
+    (setq warning-minimum-level :emergency)
+#+end_src
 ** Auto-tangle Configuration file
 
 Auto-Tangle Org configuration file for better startup times.
@@ -1022,7 +1027,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
     (setq eldoc-documentation-strategy 'eldoc-documentation-compose)
 
-    (setq eldoc-idle-delay 0.5)
+    (setq eldoc-idle-delay 0.1)
 
     (use-package eldoc-box
       :straight t
