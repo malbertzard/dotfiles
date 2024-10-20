@@ -58,6 +58,11 @@
 ;; Increase the amount of data which Emacs reads from the process
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 
+(custom-set-variables
+  '(auto-save-visited-mode t))
+;; This is a test
+(setq auto-save-visited-interval 2)
+
 (use-package minions
   :config (minions-mode 1))
 
@@ -281,45 +286,46 @@
   (setq dape-buffer-window-arrangement 'right))
 
 (use-package eglot
-  :straight nil ;; Don't install eglot because it's now built-in
-  :config
-  (add-hook 'go-ts-mode-hook 'eglot-ensure)
-  (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
-  (add-hook 'python-ts-mode-hook 'eglot-ensure)
-  (add-hook 'rust-ts-mode-hook 'eglot-ensure)
-  :custom
-  (eglot-autoshutdown t)
-  (fset #'jsonrpc--log-event #'ignore)
-  (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
-  (eglot-report-progress nil)
-  (eglot-events-buffer-size 0)
-  (eglot-sync-connect nil)
-  (eglot-extend-to-xref nil))
+      :straight nil ;; Don't install eglot because it's now built-in
+      :config
+      (add-hook 'go-ts-mode-hook 'eglot-ensure)
+      (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
+      (add-hook 'python-ts-mode-hook 'eglot-ensure)
+      (add-hook 'rust-ts-mode-hook 'eglot-ensure)
+      :custom
+      (eglot-autoshutdown t)
+      (fset #'jsonrpc--log-event #'ignore)
+      (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
+(setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
+      (eglot-report-progress nil)
+      (eglot-events-buffer-size 0)
+      (eglot-sync-connect nil)
+      (eglot-extend-to-xref nil))
 
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(gdscript-mode . ("localhost:6005"))))
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(gdscript-mode . ("localhost:6005"))))
 
-;;; Mason from neovim is just a great way to manage lsps
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
+    ;;; Mason from neovim is just a great way to manage lsps
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
 
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
 
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
 
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
 
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 
 (use-package eat
   :hook ('eshell-load-hook #'eat-eshell-mode))
@@ -547,10 +553,23 @@
   (call-interactively 'pop-global-mark)
   (setq global-mark-ring (nreverse global-mark-ring)))
 
-(global-set-key [M-j] (quote backward-global-mark))
-(global-set-key [M-l] (quote forward-global-mark))
+(global-set-key (kbd "M-j") 'backward-global-mark)
+(global-set-key (kbd "M-l") 'forward-global-mark)
 
+(defun my/find-buffer ()
+  "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
+  (interactive)
+  (if (projectile-project-p)
+      (consult-project-buffer)
+    (consult-buffer)))
 
+(global-set-key (kbd "C-c b C") 'clean-buffer-list)
+(global-set-key (kbd "C-c b k") 'kill-current-buffer)
+(global-set-key (kbd "C-c b K") 'kill-some-buffers)
+(global-set-key (kbd "C-c b O") 'crux-kill-other-buffers)
+(global-set-key (kbd "C-c b r") 'revert-buffer)
+(global-set-key (kbd "C-c b b") 'my/find-buffer)
+(global-set-key (kbd "C-c b i") 'ibuffer)
 
 (global-set-key (kbd "C-c w j") 'windmove-left)
 (global-set-key (kbd "C-c w l") 'windmove-right)
@@ -562,6 +581,11 @@
 
 (global-set-key (kbd "C-c w d") 'delete-window)
 (global-set-key (kbd "C-c w o") 'delete-other-windows)
+
+(global-set-key (kbd "C-c G G") 'magit-status)
+(global-set-key (kbd "C-c G s") 'git-gutter:stage-hunk)
+(global-set-key (kbd "C-c G i") 'git-gutter:previous-hunk)
+(global-set-key (kbd "C-c G k") 'git-gutter:next-hunk)
 
 (global-set-key (kbd "C-c t p") 'eat-project)
 (global-set-key (kbd "C-c t P") 'eat-project-other-window)

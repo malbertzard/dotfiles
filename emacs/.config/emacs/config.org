@@ -9,6 +9,7 @@
   - [[#keep-folders-clean][Keep folders clean]]
   - [[#sensible-defaults][Sensible Defaults]]
   - [[#performance-tweaks][Performance Tweaks]]
+  - [[#save-changes-automaticly][Save changes automaticly]]
 - [[#ui-stuff][UI Stuff]]
   - [[#hide-minor-modes-in-modeline][Hide Minor Modes in Modeline]]
   - [[#theme][Theme]]
@@ -141,6 +142,13 @@ use-package: Configures use-package for package management, ensuring packages ar
     (setq read-process-output-max (* 1024 1024)) ;; 1mb
 #+END_SRC
 
+** Save changes automaticly
+#+BEGIN_SRC emacs-lisp
+    (custom-set-variables
+     '(auto-save-visited-mode t))
+
+    (setq auto-save-visited-interval 2)
+#+END_SRC
 * UI Stuff
 ** Hide Minor Modes in Modeline
 #+BEGIN_SRC emacs-lisp
@@ -425,6 +433,7 @@ Connection flycheck with eglot and the lsps
       (eglot-autoshutdown t)
       (fset #'jsonrpc--log-event #'ignore)
       (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
+      (setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
       (eglot-report-progress nil)
       (eglot-events-buffer-size 0)
       (eglot-sync-connect nil)
@@ -434,7 +443,7 @@ Connection flycheck with eglot and the lsps
       (add-to-list 'eglot-server-programs
                    '(gdscript-mode . ("localhost:6005"))))
 
-    ;;; Mason from neovim is just a great way to manage lsps
+        ;;; Mason from neovim is just a great way to manage lsps
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
                    '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
@@ -743,6 +752,20 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+end_src
 *** Buffer 
 #+begin_src emacs-lisp
+    (defun my/find-buffer ()
+      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
+      (interactive)
+      (if (projectile-project-p)
+          (consult-project-buffer)
+        (consult-buffer)))
+
+    (global-set-key (kbd "C-c b C") 'clean-buffer-list)
+    (global-set-key (kbd "C-c b k") 'kill-current-buffer)
+    (global-set-key (kbd "C-c b K") 'kill-some-buffers)
+    (global-set-key (kbd "C-c b O") 'crux-kill-other-buffers)
+    (global-set-key (kbd "C-c b r") 'revert-buffer)
+    (global-set-key (kbd "C-c b b") 'my/find-buffer)
+    (global-set-key (kbd "C-c b i") 'ibuffer)
 #+END_SRC
 
 *** Switching Windows
