@@ -1,6 +1,3 @@
-;; The default is 800 kilobytes. Measured in bytes.
-(setq gc-cons-threshold (* 50 1000 1000))
-
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -17,353 +14,73 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;; (use-package emacs
-;;   :straight nil
-;;   :after org-mode
-;;   :custom)
-;; (defun start/org-babel-tangle-config ()
-;;   "Automatically tangle our Emacs.org config file when we save it. Credit to Emacs From Scratch for this one!"
-;;   (when (string-equal (file-name-directory (buffer-file-name))
-;;                       (expand-file-name user-emacs-directory))
-;;     ;; Dynamic scoping to the rescue
-;;     (let ((org-confirm-babel-evaluate nil))
-;;       (org-babel-tangle))))
-
-;; (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'start/org-babel-tangle-config)))
-
-(setq straight-use-package 'use-package)
-
-(setq package-archives '(("melpa" . "https://melpa.org/packages/") ;; Sets default package repositories
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")
-                         ("nongnu" . "https://elpa.nongnu.org/nongnu/"))) ;; For Eat Terminal
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
 
 (use-package no-littering
-  :straight t
   :config
-  (no-littering-theme-backups)
+  (no-littering-theme-backups))
 
-  (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
-
-  (setq create-lockfiles nil)
-
-  (setq auto-save-file-name-transforms
-        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
-
-  (require 'recentf)
-  (add-to-list 'recentf-exclude
-               (recentf-expand-file-name no-littering-var-directory))
-  (add-to-list 'recentf-exclude
-               (recentf-expand-file-name no-littering-etc-directory)))
-
-(use-package system-packages
-  :straight t)
-
-(use-package diminish
-  :straight t)
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 
 (use-package emacs
   :custom
-  (menu-bar-mode nil)         ;; Disable the menu bar
-  (scroll-bar-mode nil)       ;; Disable the scroll bar
-  (tool-bar-mode nil)         ;; Disable the tool bar
-  (inhibit-startup-screen t)  ;; Disable welcome screen
-
-  (delete-selection-mode t)   ;; Select text and delete it by typing.
-  (electric-indent-mode nil)  ;; Turn off the weird indenting that Emacs does by default.
-  (electric-pair-mode t)      ;; Turns on automatic parens pairing
+  (menu-bar-mode nil)         
+  (scroll-bar-mode nil)       
+  (tool-bar-mode nil)         
+  (inhibit-startup-screen t)  
+  (delete-selection-mode t)   
+  (electric-indent-mode nil)  
+  (electric-pair-mode t)      
   (display-battery-mode t)
-
   (ring-bell-function 'ignore)
-  (blink-cursor-mode nil)     ;; Don't blink cursor
-  (global-auto-revert-mode t) ;; Automatically reload file and show changes if the file has changed
-
-  (dired-kill-when-opening-new-dired-buffer t) ;; Dired don't create new buffer
-  ;;(recentf-mode t) ;; Enable recent file mode
-
+  (blink-cursor-mode nil)     
+  (global-auto-revert-mode t) 
+  (dired-kill-when-opening-new-dired-buffer t)
   (truncate-lines t)
   (gnus-agent nil)
-  (display-line-numbers-type 'relative) ;; Relative line numbers
-  (global-display-line-numbers-mode t)  ;; Display line numbers
-
-  (dolist (mode '(org-mode-hook
-                  term-mode-hook
-                  shell-mode-hook
-                  treemacs-mode-hook
-                  eshell-mode-hook))
-
-    (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
+  (display-line-numbers-type 'relative) 
+  (global-display-line-numbers-mode t)
   (defalias 'yes-or-no-p 'y-or-n-p)
-
-  (mouse-wheel-progressive-speed nil) ;; Disable progressive speed when scrolling
-  (scroll-conservatively 10) ;; Smooth scrolling
+  (mouse-wheel-progressive-speed nil) 
+  (scroll-conservatively 10)
   (scroll-margin 10)
-  
-  ;; (split-height-threshold nil) ;;Default split vertical
-  ;; (split-width-threshold 0)
-
+  (split-height-threshold nil)
+  (split-width-threshold 0)
   (tab-width 4)
-
-  (make-backup-files nil) ;; Stop creating ~ backup files
-  (auto-save-default nil) ;; Stop creating # auto save files
+  (make-backup-files nil)
+  (auto-save-default nil)
   :hook
-  (prog-mode . (lambda () (hs-minor-mode t))) ;; Enable folding hide/show globally
-  :config
-  ;; Move customization variables to a separate file and load it, avoid filling up init.el with unnecessary variables
-  ;; (custom-file (locate-user-emacs-file "custom-vars.el"))
-  ;; (load custom-file 'noerror 'nomessage)
-  :bind (
-         ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
-         )
-  ;; Fix general.el leader key not working instantly in messages buffer with evil mode
-  )
+  (prog-mode . (lambda () (hs-minor-mode t))))
 
-(use-package general
-  :straight t
-  :after evil
-  :config
-  (general-evil-setup)
-  (general-define-key
-   :states 'insert
-   "C-v" 'yank)
+;; Make gc pauses faster by decreasing the threshold.
+(setq gc-cons-threshold (* 2 1000 1000))
+;; Increase the amount of data which Emacs reads from the process
+(setq read-process-output-max (* 1024 1024)) ;; 1mb
 
-  (general-define-key
-   :states 'normal
-   "C-." 'embark-act)
-  (general-define-key
-   :keymaps 'minibuffer-mode-map
-   "C-v" 'yank)
-  ;; Set up 'SPC' as the leader key
-  (general-create-definer start/leader-keys
-    :states '(normal insert visual motion emacs)
-    :keymaps 'override
-    :prefix "SPC"           ;; Set leader key
-    :global-prefix "C-SPC") ;; Set global leader key
-
-  (start/leader-keys
-    "p" '(projectile-command-map :wk "Projectile"))
-
-  (start/leader-keys
-    "P" '(perspective-map :wk "Perspective"))
-
-  (start/leader-keys
-    "n" '(:ignore t :wk "Notes")
-    "n d" '(org-roam-dailies-map :wk "Dailies")
-    "n u" '(org-roam-ui-open :wk "UI open")
-    "n i" '(org-roam-node-insert :wk "Insert node")
-    "n f" '(org-roam-node-find :wk "Find node")
-    "n c" '(org-roam-capture :wk "Capture")
-    "n s" '(consult-org-roam-search :wk "Search")
-    "n S" '(:ignore t :wk "Show")
-    "n S b" '(consult-org-roam-backlinks :wk "Show backlinks")
-    "n S f" '(consult-org-roam-forward-links :wk "Show forward links")
-    "n C" '(:ignore t :wk "Citar")
-    "n C t" '(citar-org-roam-open-current-refs :wk "Open this")
-    "n C o" '(citar-open-note :wk "Open Note")
-    "n C O" '(citar-open :wk "Open Entry")
-    "n C i" '(:ignore t :wk "Citar insert")
-    "n C i k" '(citar-insert-keys :wk "Insert keys")
-    "n C i c" '(citar-insert-citation :wk "Insert citation")
-    "n C i c" '(citar-insert-reference :wk "Insert references"))
-
-  (start/leader-keys
-    "f" '(:ignore t :wk "find")
-    "f f" '(find-file :wk "Search for files")
-    "f g" '(consult-ripgrep :wk "Ripgrep search in files")
-    "f l" '(consult-line :wk "Find line")
-    "f o" '(consult-outline :wk "Find Outline")
-    "f i" '(consult-imenu :wk "Imenu buffer locations"))
-
-  (start/leader-keys
-    "C" '(:ignore t :wk "Compile")
-    "C o" '(compile-or-open :wk "Compile or open")
-    "C c" '(projectile-compile-project :wk "Compile Project")
-    "C r" '(recompile :wk "Recompile")
-    "C k" '(kill-compilation :wk "Kill compilation")
-    "C s" '(:ignore t :wk "Switch")
-    "C s i" '(comint-mode :wk "Make interactive mode")
-    "C s c" '(compilation-mode :wk "Make compilation mode")
-    "C e" '(:ignore t :wk "Errors")
-    "C e l" '(consult-compile-error :wk "List compile errors")
-    "C e j" '(compilation-next-error :wk "Next compile error")
-    "C e k" '(compilation-previous-error :wk "Previous compile error"))
-
-  (start/leader-keys
-    "b" '(:ignore t :wk "Buffers")
-    "b b" '(consult-buffer :wk "Switch to buffer")
-    "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
-    "b C" '(clean-buffer-list :wk "Clean buffer list")
-    "b i" '(ibuffer :wk "Ibuffer")
-    "b k" '(kill-current-buffer :wk "Kill current buffer")
-    "b K" '(kill-some-buffers :wk "Kill multiple buffers")
-    "b O" '(crux-kill-other-buffers :wk "Kill all other buffers")
-    "b n" '(next-buffer :wk "Next buffer")
-    "b p" '(previous-buffer :wk "Previous buffer")
-    "b s" '(crux-create-scratch-buffer :wk "Scratch buffer")
-    "b r" '(revert-buffer :wk "Reload buffer")
-    "b R" '(rename-buffer :wk "Rename buffer"))
-
-  (start/leader-keys
-    "d" '(:ignore t :wk "Dired")
-    "d S" '(crux-sudo-edit :wk "Sudo edit file")
-    "d d" '(dired :wk "Open dired")
-    "d j" '(dired-jump :wk "Dired jump to current")
-    "d w" '(wdired-change-to-wdired-mode :wk "Writable dired")
-    "d f" '(wdired-finish-edit :wk "Writable dired finish edit"))
-
-  (start/leader-keys
-    "H" '(:ignore t :wk "Help")
-    "H d" '(devdocs-lookup :wk "DevDocs")
-    "H c" #'(helpful-command :wk "Command")
-    "H f" #'(helpful-function :wk "Function")
-    "H a" #'(helpful-at-point :wk "At point")
-    "H k" #'(helpful-key :wk "Key")
-    "H C" #'(helpful-callable :wk "Callable")
-    "H m" '(woman :wk "Man pages")
-    "H v" #'(helpful-variable :wk "Variable"))
-
-  (start/leader-keys
-    :keymaps 'prog-mode-map
-    "e" '(:ignore t :wk "Errors")
-    "e j" '(flycheck-next-error :wk "Next Error")
-    "e k" '(flycheck-previous-error :wk "Next Error")
-    "e l" '(flycheck-list-errors :wk "List Errors in Buffer")
-    "e e" '(flycheck-explain-error-at-point :wk "Explain Error")
-    "e d" '(flycheck-display-error-at-point :wk "Disply Error"))
-
-  (start/leader-keys
-    :keymaps 'eglot-mode-map
-    "l" '(:ignore t :wk "LSP")
-    "l d" '(eglot-find-declaration :wk "Find Declaration")
-    "l i" '(eglot-find-implementation :wk "Find Implementation")
-    "l t" '(eglot-find-type-definition :wk "Find Type definition")
-    "l I" '(eglot-code-action-organize-imports :wk "Organize Imports")
-    "l a" '(eglot-code-actions :wk "Code Actions")
-    "l f" '(eglot-format-buffer :wk "Format Buffer")
-    "l r" '(eglot-rename  :wk "Rename"))
-
-  (start/leader-keys
-    ;; :keymaps 'prog-mode-map
-    "h" '(:ignore t :wk "Harpoon")
-    "h a" '(harpoon-add-file :wk "Add file")
-    "h t" '(harpoon-toggle-file :wk "Toggle file")
-    "h l" '(harpoon-toggle-quick-menu :wk "List")
-    "h c" '(harpoon-clear :wk "Clear")
-    "h d" '(harpoon-delete-item :wk "Delete")
-    "h 1" '(harpoon-go-to-1 :wk "Go to 1")
-    "h 2" '(harpoon-go-to-2 :wk "Go to 2")
-    "h 3" '(harpoon-go-to-3 :wk "Go to 3")
-    "h 4" '(harpoon-go-to-4 :wk "Go to 4")
-    "h 5" '(harpoon-go-to-5 :wk "Go to 5")
-    "h 6" '(harpoon-go-to-6 :wk "Go to 6")
-    "h 7" '(harpoon-go-to-7 :wk "Go to 7")
-    "h 8" '(harpoon-go-to-8 :wk "Go to 8")
-    "h 9" '(harpoon-go-to-9 :wk "Go to 9"))
-
-  (start/leader-keys
-    "g" '(:ignore t :wk "Git")
-    "g /" '(magit-displatch :wk "Magit dispatch")
-    "g ." '(magit-file-displatch :wk "Magit file dispatch")
-    "g b" '(magit-branch-checkout :wk "Switch branch")
-    "g c" '(:ignore t :wk "Create")
-    "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
-    "g c c" '(magit-commit-create :wk "Create commit")
-    "g c f" '(magit-commit-fixup :wk "Create fixup commit")
-    "g C" '(magit-clone :wk "Clone repo")
-    "g f" '(:ignore t :wk "Find")
-    "g f c" '(magit-show-commit :wk "Show commit")
-    "g f f" '(magit-find-file :wk "Magit find file")
-    "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
-    "g F" '(magit-fetch :wk "Git fetch")
-    "g g" '(magit-status :wk "Magit status")
-    "g i" '(magit-init :wk "Initialize git repo")
-    "g l" '(magit-log-buffer-file :wk "Magit buffer log")
-    "g r" '(vc-revert :wk "Git revert file")
-    "g s" '(magit-stage-file :wk "Git stage file")
-    "g t" '(git-timemachine :wk "Git time machine")
-    "g u" '(magit-stage-file :wk "Git unstage file"))
-
-  (start/leader-keys
-    "m" '(:ignore t :wk "Misc")
-    "m d" '(dashboard-open :wk "Dashboard open")
-
-    "m c" '(:ignore t :wk "Config")
-    "m c C" '(crux-recompile-init :wk "Compile Init")
-    "m c o" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Open emacs config")
-    "m c R" '(restart-emacs :wk "Restart emacs")
-    "m c q" '(save-buffers-kill-emacs :wk "Quit Emacs and Daemon")
-    "m c r" '((lambda () (interactive)
-                (load-file "~/.config/emacs/init.el"))
-              :wk "Reload Emacs config")
-
-    "m T" '(:ignore t :wk "Toggle")
-    "m T t" '(visual-line-mode :wk "Toggle truncated lines (wrap)")
-    "m T l" '(display-line-numbers-mode :wk "Toggle line numbers")
-    "m E" '(:ignore t :wk "Ediff/Eshell/Eval/EWW")
-    "m E b" '(eval-buffer :wk "Evaluate elisp in buffer")
-    "m E d" '(eval-defun :wk "Evaluate defun containing or after point")
-    "m E e" '(eval-expression :wk "Evaluate and elisp expression")
-    "m E f" '(ediff-files :wk "Run ediff on a pair of files")
-    "m E F" '(ediff-files3 :wk "Run ediff on three files")
-    "m E h" '(counsel-esh-history :which-key "Eshell history")
-    "m E l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-    "m E r" '(eval-region :wk "Evaluate elisp in region")
-    "m E R" '(eww-reload :which-key "Reload current page in EWW")
-    "m E s" '(eshell :which-key "Eshell")
-    "m E W" '(eww-readable :which-key "Wreadble")
-    "m E w" '(eww :which-key "EWW emacs web wowser"))
-
-  (start/leader-keys
-    "u" '(:ignore t :wk "Undo")
-    "u t" '(undo-tree-visualize :wk "Undo Tree Visualize"))
-
-  (start/leader-keys
-    "t" '(:ignore t :wk "Terminal")
-    "t P" '(eat-project :wk "Terminal project toggle full")
-    "t p" '(eat-project-other-window :wk "Terminal project toggle")
-    "t T" '(eat :wk "Terminal toggle full")
-    "t t" '(eat-other-window :wk "Terminal toggle")))
-
-(require 'tramp)
-(add-to-list 'tramp-remote-path 'tramp-default-remote-path)
-(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
-
-(setq calendar-week-start-day 1)
-
-(setq eww-retrieve-command
-      '("chromium" "--headless" "--dump-dom"))
-
-(use-package dired
-  :after evil-collection
-  :straight nil
-  :commands (dired dired-jump)
-  :config
-  (setq delete-by-moving-to-trash t)
-  (setq dired-listing-switches "-aBhl  --group-directories-first"))
-
-(use-package dired-open
-  :commands (dired dired-jump)
-  :config
-  (setq dired-open-extensions '(("png" . "feh")
-                                ("mkv" . "mpv"))))
-
-(use-package dired-hide-dotfiles
-  :straight t
-  :hook (dired-mode . dired-hide-dotfiles-mode)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map "H" 'dired-hide-dotfiles-mode))
+(use-package minions
+  :config (minions-mode 1))
 
 (use-package doom-themes
-  :straight t
   :config
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
   (load-theme 'doom-gruvbox t)
   (doom-themes-org-config))
 
+(set-face-attribute 'default nil
+                    :height 120
+                    :weight 'medium)
+(setq-default line-spacing 0.15)
+
+(use-package emacs
+  :bind
+  ("C-+" . text-scale-increase)
+  ("C--" . text-scale-decrease)
+  ("<C-wheel-up>" . text-scale-increase)
+  ("<C-wheel-down>" . text-scale-decrease))
+
 (use-package dashboard
-  :straight t
   :custom
   (dashboard-banner-logo-title "With Great Power Comes Great Responsibility!")
   (dashboard-center-content t)
@@ -374,403 +91,149 @@
   (dashboard-set-heading-icons t)
   (dashboard-set-navigator t)
   (dashboard-show-shortcuts nil)
-  (dashboard-startupify-list '(   dashboard-insert-banner
-                                  dashboard-insert-newline
-                                  dashboard-insert-banner-title
-                                  dashboard-insert-items
-                                  dashboard-insert-newline
-                                  dashboard-insert-init-info))
+  (dashboard-startupify-list '(dashboard-insert-banner
+                               dashboard-insert-newline
+                               dashboard-insert-banner-title
+                               dashboard-insert-items
+                               dashboard-insert-newline
+                               dashboard-insert-init-info))
   (dashboard-startup-banner 'logo)
   :config (dashboard-setup-startup-hook))
 
-;; (add-to-list 'default-frame-alist '(alpha-background . 90)) ;; For all new frames henceforth
-
-(set-face-attribute 'default nil
-                    ;; :font "JetBrains Mono" ;; Set your favorite type of font or download JetBrains Mono
-                    :height 120
-                    :weight 'medium)
-;; This sets the default font on all graphical frames created after restarting Emacs.
-;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-;; are not right unless I also add this method of setting the default font.
-
-;;(add-to-list 'default-frame-alist '(font . "JetBrains Mono")) ;; Set your favorite font
-(setq-default line-spacing 0.15)
-
-(use-package emacs
-  :straight nil
-  :bind
-  ("C-+" . text-scale-increase)
-  ("C--" . text-scale-decrease)
-  ("<C-wheel-up>" . text-scale-increase)
-  ("<C-wheel-down>" . text-scale-decrease))
-
-(use-package nerd-icons
-  :straight t
-  :if (display-graphic-p))
-
-(use-package nerd-icons-dired
-  :straight t
-  :hook (dired-mode . (lambda () (nerd-icons-dired-mode t))))
-
-(use-package nerd-icons-ibuffer
-  :straight t
-  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
-
-(use-package doom-modeline
-  :straight t
-  :init (doom-modeline-mode 1)
-  :config
-  (setq doom-modeline-height 42
-        doom-modeline-percent-position nil
-        doom-modeline-position-line-format nil
-        doom-modeline-buffer-encoding nil
-        doom-modeline-position-column-format nil
-        doom-modeline-battery t
-        doom-modeline-icon t
-        doom-modeline-bar-width 5))
-
-(use-package which-key
-  :straight t
-  :init
-  (which-key-mode 1)
-  :diminish
+;;; Completions
+(use-package orderless
   :custom
-  (which-key-side-window-location 'bottom)
-  (which-key-sort-order #'which-key-key-order-alpha) ;; Same as default, except single characters are sorted alphabetically
-  (which-key-sort-uppercase-first nil)
-  (which-key-add-column-padding 1) ;; Number of spaces to add to the left of each column
-  (which-key-min-display-lines 6)  ;; Increase the minimum lines to display, because the default is only 1
-  (which-key-idle-delay 0.8)       ;; Set the time delay (in seconds) for the which-key popup to appear
-  (which-key-max-description-length 25)
-  (which-key-allow-imprecise-window-fit nil)) ;; Fixes which-key window slipping out in Emacs Daemon
-
-(use-package rainbow-delimiters
-  :straight t
-  :hook (prog-mode . rainbow-delimiters-mode))
-
-(use-package evil
-  :straight t
-  :config ;; Execute code After a package is loaded
-  (evil-mode)
-  (evil-set-initial-state 'eat-mode 'insert) ;; Set initial state in eat terminal to insert mode
-  :custom ;; Customization of package custom variables
-  (evil-want-keybinding nil)    ;; Disable evil bindings in other modes (It's not consistent and not good)
-  (evil-want-C-u-scroll t)      ;; Set C-u to scroll up
-  (evil-want-C-i-jump nil)      ;; Disables C-i jump
-  (evil-undo-system 'undo-tree) ;; C-r to redo
-  (org-return-follows-link t)   ;; Sets RETURN key in org-mode to follow links
-  ;; Unmap keys in 'evil-maps. If not done, org-return-follows-link will not work
-  :bind (:map evil-motion-state-map
-              ("SPC" . nil)
-              ("RET" . nil)))
-
-(use-package evil-collection
-  :straight t
-  :after evil
-  :config
-  ;; Setting where to use evil-collection
-  (setq evil-collection-mode-list '(
-        dired
-        wdired
-        wgrep
-        magit
-        ibuffer
-        corfu
-        vertico
-        consult
-        compile
-        dape
-        docker
-        eglot
-        pdf
-        doc-view
-        eww
-        org-roam
-        flycheck
-        ediff
-        diff-mode
-        diff-hl
-        proced
-        calc
-        embark))
-  (evil-collection-init))
-
-(use-package evil-surround
-  :straight t
-  :config
-  (global-evil-surround-mode 1))
-
-(use-package evil-visualstar
-  :straight t
-  :config
-  (global-evil-visualstar-mode 1))
-
-(use-package evil-commentary
-  :straight t
-  :after evil
-  :diminish
-  :config (evil-commentary-mode +1))
-
-(use-package evil-textobj-tree-sitter
-  :straight t
-  :after tree-sitter evil
-  :config
-  (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
-  (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner"))
-  (define-key evil-outer-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "class.outer"))
-  (define-key evil-inner-text-objects-map "c" (evil-textobj-tree-sitter-get-textobj "class.inner"))
-  (define-key evil-outer-text-objects-map "C" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
-  (define-key evil-inner-text-objects-map "C" (evil-textobj-tree-sitter-get-textobj "comment.outer"))
-  (define-key evil-outer-text-objects-map "o" (evil-textobj-tree-sitter-get-textobj "loop.outer"))
-  (define-key evil-inner-text-objects-map "o" (evil-textobj-tree-sitter-get-textobj "loop.inner"))
-  (define-key evil-outer-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj "conditional.outer"))
-  (define-key evil-inner-text-objects-map "a" (evil-textobj-tree-sitter-get-textobj "conditional.inner"))
-  (define-key evil-inner-text-objects-map "r" (evil-textobj-tree-sitter-get-textobj "parameter.inner"))
-  (define-key evil-outer-text-objects-map "r" (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
-  (define-key evil-normal-state-map (kbd "]r") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner")))
-  (define-key evil-normal-state-map (kbd "[r") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner" t)))
-  (define-key evil-normal-state-map (kbd "]R") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner" nil t)))
-  (define-key evil-normal-state-map (kbd "[R") (lambda () (interactive) (malb/goto-and-recenter "parameter.inner" t t)))
-  (define-key evil-normal-state-map (kbd "]a") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer")))
-  (define-key evil-normal-state-map (kbd "[a") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer" t)))
-  (define-key evil-normal-state-map (kbd "]A") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer" nil t)))
-  (define-key evil-normal-state-map (kbd "[A") (lambda () (interactive) (malb/goto-and-recenter "conditional.outer" t t)))
-  (define-key evil-normal-state-map (kbd "]c") (lambda () (interactive) (malb/goto-and-recenter "class.outer")))
-  (define-key evil-normal-state-map (kbd "[c") (lambda () (interactive) (malb/goto-and-recenter "class.outer" t)))
-  (define-key evil-normal-state-map (kbd "]C") (lambda () (interactive) (malb/goto-and-recenter "class.outer" nil t)))
-  (define-key evil-normal-state-map (kbd "[C") (lambda () (interactive) (malb/goto-and-recenter "class.outer" t t)))
-  (define-key evil-normal-state-map (kbd "]f") (lambda () (interactive) (malb/goto-and-recenter "function.outer")))
-  (define-key evil-normal-state-map (kbd "[f") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t)))
-  (define-key evil-normal-state-map (kbd "]F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" nil t)))
-  (define-key evil-normal-state-map (kbd "[F") (lambda () (interactive) (malb/goto-and-recenter "function.outer" t t))))
-
-(use-package undo-tree
-  :straight t
-  :config (global-undo-tree-mode))
-
-(use-package drag-stuff
-  :straight t
-  :config
-  (evil-define-key 'normal 'prog-mode-map (kbd "C-j") 'drag-stuff-down)
-  (evil-define-key 'normal 'prog-mode-map (kbd "C-k") 'drag-stuff-up))
-
-;; Configure tempel for templating support.
-(use-package tempel
-  :straight t
-  :bind (("M-." . tempel-complete))
-  :init
-  ;; Set up tempel for different modes.
-  (defun tempel-setup-capf ()
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf))
-
-;; Install tempel-collection for additional templates.
-(use-package tempel-collection
-  :straight t
-  :after tempel)
-
-(use-package harpoon
-  :straight t)
-
-(use-package wgrep
-  :straight t
-  :bind ( :map grep-mode-map
-          ("e" . wgrep-change-to-wgrep-mode)
-          ("C-x C-q" . wgrep-change-to-wgrep-mode)
-          ("C-c C-c" . wgrep-finish-edit)))
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
 
 (use-package corfu
-  :straight t
   :after orderless
-  ;; Optional customizations
   :custom
   (corfu-cycle nil)
-  (corfu-auto t)                 ;; Enable auto completion
-  (corfu-auto-prefix 2)          ;; Minimum length of prefix for auto completion.
-  (corfu-popupinfo-mode t)       ;; Enable popup information
-  (corfu-popupinfo-delay 0.15)   ;; Lower popupinfo delay to 0.15 seconds from 2 seconds
-  (corfu-separator ?\s)          ;; Orderless field separator, Use M-SPC to enter separator
-
+  (corfu-auto t)
+  (corfu-auto-prefix 2)
+  (corfu-popupinfo-mode t)
+  (corfu-popupinfo-delay 0.15)
+  (corfu-separator ?\s)
   (corfu-count 14)
-  (corfu-scroll-margin 4)        ;; Use scroll margin
+  (corfu-scroll-margin 4)
   (completion-ignore-case t)
   (tab-always-indent 'complete)
-  (corfu-preview-current nil) ;; Don't insert completion without confirmation
+  (corfu-preview-current nil)
   (completion-styles '(orderless basic))
   :init
   (global-corfu-mode))
 
 (use-package nerd-icons-corfu
-  :straight t
   :after corfu
   :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package kind-icon
-  :straight t
   :after corfu
   :custom
   (kind-icon-use-icons t)
-  (kind-icon-default-face 'corfu-default) ; Have background color be the same as `corfu' face background
-  (kind-icon-blend-background nil)  ; Use midpoint color between foreground and background colors ("blended")?
+  (kind-icon-default-face 'corfu-default)
+  (kind-icon-blend-background nil)
   (kind-icon-blend-frac 0.08)
   :config
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package cape
-  :straight t
   :after corfu
   :init
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev) ;; Complete word from current buffers
-  (add-to-list 'completion-at-point-functions #'cape-dict) ;; Dictionary completion
-  (add-to-list 'completion-at-point-functions #'cape-file) ;; Path completion
-  (add-to-list 'completion-at-point-functions #'cape-elisp-block) ;; Complete elisp in Org or Markdown mode
-  (add-to-list 'completion-at-point-functions #'cape-keyword) ;; Keyword/Snipet completion
-
-  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev) ;; Complete abbreviation
-  (add-to-list 'completion-at-point-functions #'cape-history) ;; Complete from Eshell, Comint or minibuffer history
-  ;;(add-to-list 'completion-at-point-functions #'cape-line) ;; Complete entire line from current buffer
-  (add-to-list 'completion-at-point-functions #'cape-elisp-symbol) ;; Complete Elisp symbol
-  ;;(add-to-list 'completion-at-point-functions #'cape-tex) ;; Complete Unicode char from TeX command, e.g. \hbar
-  ;;(add-to-list 'completion-at-point-functions #'cape-sgml) ;; Complete Unicode char from SGML entity, e.g., &alpha
-  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345) ;; Complete Unicode char using RFC 1345 mnemonics
-  )
-
-(use-package orderless
-  :straight t
-  :custom
-  (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-dict)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+  (add-to-list 'completion-at-point-functions #'cape-keyword)
+  (add-to-list 'completion-at-point-functions #'cape-history)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-symbol))
 
 (use-package vertico
-  :straight t
   :bind (:map vertico-map
               ("<tab>" . vertico-insert)
-              ("C-j" . vertico-next)
-              ("C-f" . vertico-exit)
-              ("C-K" . vertico-previous))
+              ("C-k" . vertico-next)
+              ("C-j" . vertico-exit)
+              ("C-i" . vertico-previous))
   :custom
   (vertico-cycle t)
-  (vertico-count 13)                    ; Number of candidates to display
+  (vertico-count 13)
   (vertico-resize t)
   :init
   (vertico-mode))
 
-(savehist-mode) ;; Enables save history mode
-
 (use-package marginalia
-  :straight t
   :after vertico
-  :ensure t
   :custom
   (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
   :init
   (marginalia-mode))
 
 (use-package nerd-icons-completion
-  :straight t
   :after marginalia
   :config
   (nerd-icons-completion-mode)
   :hook
-  ('marginalia-mode-hook . 'nerd-icons-completion-marginalia-setup))
+  (marginalia-mode-hook . nerd-icons-completion-marginalia-setup))
 
-(use-package consult
-  :straight t
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-  :init
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
+(use-package embark
+  :bind (("C-." . embark-act)
+         :map minibuffer-local-map
+         ("C-c C-c" . embark-collect)
+         ("C-c C-e" . embark-export)))
 
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
+(use-package embark-consult
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-  :config
-  ;; Optionally configure preview. The default value
-  ;; is 'any, such that any key triggers the preview.
-  ;; (setq consult-preview-key 'any)
-  ;; (setq consult-preview-key "M-.")
-  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+(use-package org
+  :custom
+  (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
+  (org-startup-indented t)
+  (org-startup-with-inline-images t)
+  (org-image-actual-width '(450))
+  (org-fold-catch-invisible-edits 'error)
+  (org-pretty-entities t)
+  (org-id-link-to-org-use-id t)
+  (org-fold-catch-invisible-edits 'show)
 
-  ;; For some commands and buffer sources it is useful to configure the
-  ;; :preview-key on a per-command basis using the `consult-customize' macro.
-  ;; (consult-customize
-  ;; consult-theme :preview-key '(:debounce 0.2 any)
-  ;; consult-ripgrep consult-git-grep consult-grep
-  ;; consult-bookmark consult-recent-file consult-xref
-  ;; consult--source-bookmark consult--source-file-register
-  ;; consult--source-recent-file consult--source-project-recent-file
-  ;; :preview-key "M-."
-  ;; :preview-key '(:debounce 0.4 any))
+  :hook
+  (org-mode . org-indent-mode))
 
-  ;; By default `consult-project-function' uses `project-root' from project.el.
-  ;; Optionally configure a different project root function.
-   ;;;; 1. project.el (the default)
-  ;; (setq consult-project-function #'consult--default-project--function)
-   ;;;; 2. vc.el (vc-root-dir)
-  ;; (setq consult-project-function (lambda (_) (vc-root-dir)))
-   ;;;; 3. locate-dominating-file
-  ;; (setq consult-project-function (lambda (_) (locate-dominating-file "." ".git")))
-   ;;;; 4. projectile.el (projectile-project-root)
-  (autoload 'projectile-project-root "projectile")
-  (setq consult-project-function (lambda (_) (projectile-project-root)))
-   ;;;; 5. No project support
-  ;; (setq consult-project-function nil)
-  )
+(custom-set-faces
+ '(org-level-1 ((t (:inherit outline-1 :height 1.5))))
+ '(org-level-2 ((t (:inherit outline-2 :height 1.4))))
+ '(org-level-3 ((t (:inherit outline-3 :height 1.3))))
+ '(org-level-4 ((t (:inherit outline-4 :height 1.2))))
+ '(org-level-5 ((t (:inherit outline-5 :height 1.1))))
+ '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
+ '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
 
-(setq eldoc-echo-area-use-multiline-p nil)
+(add-hook 'org-mode-hook 'visual-line-mode)
 
-(setq eldoc-documentation-strategy 'eldoc-documentation-compose)
+(setq org-startup-folded 'fold)
 
-(setq eldoc-idle-delay 0.5)
+(use-package toc-org
+  :after org
+  :commands toc-org-enable
+  :hook (org-mode . toc-org-mode))
 
-(use-package eldoc-box
-  :straight t
-  :config
-  ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
-  (setq eldoc-box-hover-mode nil)
-  (setq eldoc-box-cleanup-interval 3))
+(defun start/org-mode-visual-fill ()
+  (setq visual-fill-column-width 200
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
 
-(require 'ansi-color)
-(defun endless/colorize-compilation ()
-  "Colorize from `compilation-filter-start' to `point'."
-  (let ((inhibit-read-only t))
-    (ansi-color-apply-on-region
-     compilation-filter-start (point))))
+(use-package visual-fill-column
+  :after  org
+  :hook (org-mode . start/org-mode-visual-fill))
 
-(add-hook 'compilation-filter-hook
-          #'endless/colorize-compilation)
+(use-package org-modern
+  :after  org
+  :hook (org-mode . org-modern-mode))
 
-(defun compile-or-open ()
-  "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
-  (interactive)
-  (let ((compilation-buffer (get-buffer "*compilation*")))
-    (if compilation-buffer
-        (progn
-          (unless (get-buffer-window compilation-buffer)
-            (save-selected-window
-              (select-window (split-window-below -15))
-              (switch-to-buffer compilation-buffer)
-              (shrink-window-if-larger-than-buffer))))
-      (call-interactively 'compile))))
-
-(use-package flycheck
-  :straight t)
+(use-package flycheck)
 
 (use-package flycheck-eglot
-  :straight t
   :after (flycheck eglot)
   :config
   (global-flycheck-eglot-mode 1))
@@ -801,7 +264,6 @@
 		(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
 		(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
 		(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-
 ;; Install all langs
 ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
 
@@ -813,11 +275,14 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
+(use-package dape
+  :config 
+  (setq dape-cwd-fn 'projectile-project-root)
+  (setq dape-buffer-window-arrangement 'right))
+
 (use-package eglot
   :straight nil ;; Don't install eglot because it's now built-in
   :config
-  (evil-define-key 'normal 'eglot-mode-map
-    "K" 'eldoc-box-help-at-point)
   (add-hook 'go-ts-mode-hook 'eglot-ensure)
   (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
   (add-hook 'python-ts-mode-hook 'eglot-ensure)
@@ -835,6 +300,7 @@
   (add-to-list 'eglot-server-programs
                '(gdscript-mode . ("localhost:6005"))))
 
+;;; Mason from neovim is just a great way to manage lsps
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
                '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
@@ -855,312 +321,312 @@
   (add-to-list 'eglot-server-programs
                '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 
-(use-package dape
-  :straight t
-  :config 
-  (setq dape-cwd-fn 'projectile-project-root)
-  (setq dape-buffer-window-arrangement 'right))
-
-(defun pyrightconfig-write (virtualenv)
-  (interactive "DEnv: ")
-
-  (let* (;; file-truename and tramp-file-local-name ensure that neither `~' nor
-		 ;; the Tramp prefix (e.g. "/ssh:my-host:") wind up in the final
-		 ;; absolute directory path.
-		 (venv-dir (tramp-file-local-name (file-truename virtualenv)))
-
-		 ;; Given something like /path/to/.venv/, this strips off the trailing `/'.
-		 (venv-file-name (directory-file-name venv-dir))
-
-		 ;; Naming convention for venvPath matches the field for
-		 ;; pyrightconfig.json.  `file-name-directory' gets us the parent path
-		 ;; (one above .venv).
-		 (venvPath (file-name-directory venv-file-name))
-
-		 ;; Grabs just the `.venv' off the end of the venv-file-name.
-		 (venv (file-name-base venv-file-name))
-
-		 ;; Eglot demands that `pyrightconfig.json' is in the project root
-		 ;; folder.
-		 (base-dir (vc-git-root default-directory))
-		 (out-file (expand-file-name "pyrightconfig.json" base-dir))
-
-		 ;; Finally, get a string with the JSON payload.
-		 (out-contents (json-encode (list :venvPath venvPath :venv venv))))
-
-	;; Emacs uses buffers for everything.  This creates a temp buffer, inserts
-	;; the JSON payload, then flushes that content to final `pyrightconfig.json'
-	;; location
-	(with-temp-file out-file (insert out-contents))))
-
-;; (use-package zig-mode
-;;   :straight t)
-
-(use-package zig-ts-mode
-  :straight (:type git :host github :repo "malbertzard/zig-ts-mode"))
-
-(use-package gdscript-mode
-  :straight (gdscript-mode
-             :type git
-             :host github
-             :repo "godotengine/emacs-gdscript-mode")
-  :hook (gdscript-mode . eglot-ensure))
-
-(setq lsp-gdscript-port 6008)
-
-(use-package editorconfig
-  :straight t
-  :diminish editorconfig-mode
-  :config
-  (editorconfig-mode 1))
-
 (use-package eat
-  :straight t
   :hook ('eshell-load-hook #'eat-eshell-mode))
 
-(use-package elfeed
+(use-package docker
   :straight t
-  :config
-  (setf url-queue-timeout 30)
-  (setq-default elfeed-search-filter "@1-week-ago +unread ")
-  (add-hook 'elfeed-new-entry-hook
-            (elfeed-make-tagger :feed-url "youtube\\.com"
-                                :add '(video youtube)))
-  (add-hook 'elfeed-new-entry-hook
-            (elfeed-make-tagger :before "2 weeks ago"
-                                :remove 'unread)))
-
-(setq elfeed-feeds
-      '(
-        ("https://tympanus.net/codrops/feed" frontend blog)
-        ))
-
-(use-package citar
-  :straight t
-  :custom
-  (citar-bibliography '("~/bib/Zotero.bib")))
-
-(use-package citar-org-roam
-  :straight t
-  :after (citar org-roam)
-  :config
-  (citar-org-roam-mode)
-  (setq citar-org-roam-capture-template-key "n"))
-
-(use-package magit
-  :straight t
-  :commands magit-status)
-
-(use-package magit-todos
-  :straight t
-  :after magit
-  :config (magit-todos-mode 1))
-
-(use-package git-gutter
-  :straight t
-  :config(global-git-gutter-mode +1))
-
-(use-package diff-hl
-  :straight t
-  :hook ((dired-mode         . diff-hl-dired-mode-unless-remote)
-         (magit-pre-refresh  . diff-hl-magit-pre-refresh)
-         (magit-post-refresh . diff-hl-magit-post-refresh))
-  :init (global-diff-hl-mode))
+  :bind ("C-c d" . docker))
 
 (use-package projectile
-  :straight t
   :init
   (projectile-mode)
   :custom
   (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
   (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
   (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
-
-;; Use Bookmarks for smaller, not standard projects
-
 (setq persp-suppress-no-prefix-key-warning 't)
+
 (use-package perspective
-  :straight t
   :init
   (persp-mode))
 
-(use-package persp-projectile
-  :straight t)
+;;; Each Project has its own perspective
+(use-package persp-projectile)
 
-(use-package docker
-  :straight t
-  :bind ("C-c d" . docker))
-
-(use-package crux
-  :straight t)
-
-(use-package embark
-  :straight t
-  :bind (("C-." . embark-act)
-         :map minibuffer-local-map
-         ("C-c C-c" . embark-collect)
-         ("C-c C-e" . embark-export)))
-
-(use-package embark-consult
-  :straight t ; only need to install it, embark loads it after consult if found
-  :hook
-  (embark-collect-mode . consult-preview-at-point-mode))
-
-(use-package helpful
-  :straight t)
-
-(use-package devdocs
-  :straight t)
-
-(use-package pdf-tools
-  :straight t
+(use-package editorconfig
   :config
-  (pdf-tools-install)
-  (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1))))
+  (editorconfig-mode 1))
 
-(use-package markdown-mode
-  :straight t
-  :mode ("README\\.md\\'" . gfm-mode)
-  :init (setq markdown-command "multimarkdown")
-  :bind (:map markdown-mode-map
-              ("C-c C-e" . markdown-down)))
+(use-package harpoon)
 
-(use-package poly-markdown
-  :straight t)
+(use-package magit
+  :commands magit-status)
 
-(use-package quarto-mode
-  :straight t
-  :mode (("\\.Rmd" . poly-quarto-mode)))
+(use-package magit-todos
+  :after magit
+  :config (magit-todos-mode 1))
 
-(add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-quarto-mode))
+(use-package git-gutter
+  :config(global-git-gutter-mode +1))
 
-(use-package org
-  :straight nil
-  :custom
-  (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
-  (org-startup-indented t)
-  (org-startup-with-inline-images t)
-  (org-image-actual-width '(450))
-  (org-fold-catch-invisible-edits 'error)
-  (org-pretty-entities t)
-  (org-id-link-to-org-use-id t)
-  (org-fold-catch-invisible-edits 'show)
+(use-package undo-tree
+  :config (global-undo-tree-mode))
 
-  :hook
-  (org-mode . org-indent-mode))
+(use-package helpful)
 
-(custom-set-faces
- '(org-level-1 ((t (:inherit outline-1 :height 1.5))))
- '(org-level-2 ((t (:inherit outline-2 :height 1.4))))
- '(org-level-3 ((t (:inherit outline-3 :height 1.3))))
- '(org-level-4 ((t (:inherit outline-4 :height 1.2))))
- '(org-level-5 ((t (:inherit outline-5 :height 1.1))))
- '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
- '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
+(use-package system-packages)
 
-(add-hook 'org-mode-hook 'visual-line-mode)
+(use-package devdocs)
 
-(setq org-startup-folded 'fold)
-
-;; (use-package org-noter
-;;   :straight t
-;;   :after org)
-
-(use-package toc-org
-  :straight t
-  :after org
-  :commands toc-org-enable
-  :hook (org-mode . toc-org-mode))
-
-(use-package org-download
-  :straight t
-  :after  org
-  :config (add-hook 'dired-mode-hook 'org-download-enable))
-
-(use-package org-roam
-  :straight t
-  :after org
+(use-package consult
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
   :init
-  (setq org-roam-v2-ack t)
-  :custom
-  (org-roam-directory "~/code/Cadmus")
-  (org-roam-completion-everywhere t)
-  (org-roam-capture-templates
-   '(("d" "default" plain "%?"
-      :if-new
-      (file+head "2_Areas/Fleeting/${slug}.org"
-                 "#+title: ${title}\n#+created: %U\n#+filetags: :fleeting: \n\n")
-      :unnarrowd t)
-     ("n" "literature note" plain
-      "%?"
-      :target
-      (file+head
-       "%(expand-file-name org-roam-directory)/3_Resources/Literature/${citar-citekey}.org"
-       "#+title: ${note-title}\n#+created: %U\n#+filetags: :literatur:resource: \n\n")
-      :unnarrowed t)
-     ("p" "project" plain "%?"
-      :if-new
-      (file+head "1_Projects/${slug}.org"
-                 "#+title: ${title}\n#+created: %U\n#+filetags: :project: \n\n")
-      :unnarrowd t)
-     ("a" "area" plain "%?"
-      :if-new
-      (file+head "2_Areas/${slug}.org"
-                 "#+title: ${title}\n#+created: %U\n#+filetags: :area: \n\n")
-      :unnarrowd t)
-     ("r" "resource" plain "%?"
-      :if-new
-      (file+head "3_Resources/${slug}.org"
-                 "#+title: ${title}\n#+created: %U\n#+filetags: :resource: \n\n")
-      :unnarrowd t)))
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
   :config
-  (setq org-roam-db-gc-threshold most-positive-fixnum)
-  (setq org-roam-dailies-directory "2_Areas/journal/")
-  (org-roam-db-autosync-mode))
+  (autoload 'projectile-project-root "projectile")
+  (setq consult-project-function (lambda (_) (projectile-project-root)))
+  )
 
-(use-package org-roam-ui
-  :straight t
-  :after  org org-roam)
+(use-package crux)
 
-(use-package consult-org-roam
-  :straight t
-  :after org-roam
-  :init
-  (require 'consult-org-roam)
-  ;; Activate the minor mode
-  (consult-org-roam-mode 1)
-  :custom
-  ;; Use `ripgrep' for searching with `consult-org-roam-search'
-  (consult-org-roam-grep-func #'consult-ripgrep)
-  ;; Configure a custom narrow key for `consult-buffer'
-  (consult-org-roam-buffer-narrow-key ?r)
-  ;; Display org-roam buffers right after non-org-roam buffers
-  ;; in consult-buffer (and not down at the bottom)
-  (consult-org-roam-buffer-after-buffers t))
+(use-package meow)
 
-(defun start/org-mode-visual-fill ()
-  (setq visual-fill-column-width 200
-        visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
+(defun meow-setup ()
+  (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
+  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
 
-(use-package visual-fill-column
-  :straight t
-  :after  org
-  :hook (org-mode . start/org-mode-visual-fill))
+  (meow-thing-register 'angle
+                       '(pair (";") (":"))
+                       '(pair (";") (":")))
 
-(use-package org-modern
-  :straight t
-  :after  org
-  :hook (org-mode . org-modern-mode))
+  (setq meow-char-thing-table
+        '((?( . round)
+			(?[ . square)
+			  (?{ . curly)
+			  (?< . angle)
+			  (?s . string)
+			  (?p . paragraph)
+			  (?l . line)
+			  (?b . buffer)))
 
-(use-package restclient
-  :straight t
-  :mode (("\\.http\\'" . restclient-mode)))
+		  (meow-leader-define-key
+		   ;; Use SPC (0-9) for digit arguments.
+		   '("1" . meow-digit-argument)
+		   '("2" . meow-digit-argument)
+		   '("3" . meow-digit-argument)
+		   '("4" . meow-digit-argument)
+		   '("5" . meow-digit-argument)
+		   '("6" . meow-digit-argument)
+		   '("7" . meow-digit-argument)
+		   '("8" . meow-digit-argument)
+		   '("9" . meow-digit-argument)
+		   '("0" . meow-digit-argument)
+		   '("-" . meow-keypad-describe-key)
+		   '("_" . meow-cheatsheet))
 
-(use-package theme-magic
-  :straight t)
+		  (meow-normal-define-key
+		   ;; expansion
+		   '("0" . meow-expand-0)
+		   '("1" . meow-expand-1)
+		   '("2" . meow-expand-2)
+		   '("3" . meow-expand-3)
+		   '("4" . meow-expand-4)
+		   '("5" . meow-expand-5)
+		   '("6" . meow-expand-6)
+		   '("7" . meow-expand-7)
+		   '("8" . meow-expand-8)
+		   '("9" . meow-expand-9)
+		   '("ä" . meow-reverse)
 
-;; Make gc pauses faster by decreasing the threshold.
-(setq gc-cons-threshold (* 2 1000 1000))
-;; Increase the amount of data which Emacs reads from the process
-(setq read-process-output-max (* 1024 1024)) ;; 1mb
+		   ;; movement
+		   '("i" . meow-prev)
+		   '("k" . meow-next)
+		   '("j" . meow-left)
+		   '("l" . meow-right)
+
+		   '("z" . meow-search)
+		   '("-" . meow-visit)
+
+		   ;; expansion
+		   '("I" . meow-prev-expand)
+		   '("K" . meow-next-expand)
+		   '("J" . meow-left-expand)
+		   '("L" . meow-right-expand)
+		   
+		   '("u" . meow-back-word)
+		   '("U" . meow-back-symbol)
+		   '("o" . meow-next-word)
+		   '("O" . meow-next-symbol)
+		   '("a" . meow-mark-word)
+		   '("A" . meow-mark-symbol)
+		   '("s" . meow-line)
+		   '("S" . meow-goto-line)
+		   '("w" . meow-block)
+		   '("q" . meow-join)
+		   '("g" . meow-grab)
+		   '("G" . meow-pop-grab)
+		   '("m" . meow-swap-grab)
+		   '("M" . meow-sync-grab)
+		   '("p" . meow-cancel-selection)
+		   '("P" . meow-pop-selection)
+
+		   '("x" . meow-till)
+		   '("y" . meow-find)
+
+		   '("," . meow-beginning-of-thing)
+		   '("." . meow-end-of-thing)
+		   '(";" . meow-inner-of-thing)
+		   '(":" . meow-bounds-of-thing)
+
+		   ;; editing
+		   '("d" . meow-kill)
+		   '("f" . meow-change)
+		   '("t" . meow-delete)
+		   '("c" . meow-save)
+		   '("v" . meow-yank)
+		   '("V" . meow-yank-pop)
+
+		   '("e" . meow-insert)
+		   '("E" . meow-open-above)
+		   '("r" . meow-append)
+		   '("R" . meow-open-below)
+
+		   '("h" . undo-tree-undo)
+		   '("H" . undo-tree-redo)
+
+		   '("b" . open-line)
+		   '("B" . split-line)
+
+		   '("ü" . indent-rigidly-left-to-tab-stop)
+		   '("+" . indent-rigidly-right-to-tab-stop)
+
+		   ;; ignore escape
+		   '("<escape>" . ignore)))
+
+		(meow-setup)
+		(setq meow-keypad-leader-dispatch "C-c")
+		(meow-global-mode 1)
+
+(use-package meow-tree-sitter
+  :after (meow treesitter))
+(meow-tree-sitter-register-defaults)
+
+(defun marker-is-point-p (marker)
+  "test if marker is current point"
+  (and (eq (marker-buffer marker) (current-buffer))
+       (= (marker-position marker) (point))))
+
+(defun push-mark-maybe () 
+  "push mark onto `global-mark-ring' if mark head or tail is not current location"
+  (if (not global-mark-ring) (error "global-mark-ring empty")
+    (unless (or (marker-is-point-p (car global-mark-ring))
+                (marker-is-point-p (car (reverse global-mark-ring))))
+      (push-mark))))
+
+
+(defun backward-global-mark () 
+  "use `pop-global-mark', pushing current point if not on ring."
+  (interactive)
+  (push-mark-maybe)
+  (when (marker-is-point-p (car global-mark-ring))
+    (call-interactively 'pop-global-mark))
+  (call-interactively 'pop-global-mark))
+
+(defun forward-global-mark ()
+  "hack `pop-global-mark' to go in reverse, pushing current point if not on ring."
+  (interactive)
+  (push-mark-maybe)
+  (setq global-mark-ring (nreverse global-mark-ring))
+  (when (marker-is-point-p (car global-mark-ring))
+    (call-interactively 'pop-global-mark))
+  (call-interactively 'pop-global-mark)
+  (setq global-mark-ring (nreverse global-mark-ring)))
+
+(global-set-key [M-j] (quote backward-global-mark))
+(global-set-key [M-l] (quote forward-global-mark))
+
+
+
+(global-set-key (kbd "C-c w j") 'windmove-left)
+(global-set-key (kbd "C-c w l") 'windmove-right)
+(global-set-key (kbd "C-c w i") 'windmove-up)
+(global-set-key (kbd "C-c w k") 'windmove-down)
+
+(global-set-key (kbd "C-c w v") 'split-window-right)
+(global-set-key (kbd "C-c w s") 'split-window-below)
+
+(global-set-key (kbd "C-c w d") 'delete-window)
+(global-set-key (kbd "C-c w o") 'delete-other-windows)
+
+(global-set-key (kbd "C-c t p") 'eat-project)
+(global-set-key (kbd "C-c t P") 'eat-project-other-window)
+(global-set-key (kbd "C-c t t") 'eat)
+(global-set-key (kbd "C-c t T") 'eat-other-window)
+
+(global-set-key (kbd "C-c l d") 'eglot-find-declaration)
+(global-set-key (kbd "C-c l i") 'eglot-find-implementation)
+(global-set-key (kbd "C-c l t") 'eglot-find-typeDefinition)
+(global-set-key (kbd "C-c l a") 'eglot-code-actions)
+(global-set-key (kbd "C-c l I") 'eglot-code-action-organize-imports)
+(global-set-key (kbd "C-c l f") 'eglot-format-buffer)
+(global-set-key (kbd "C-c l r") 'eglot-rename)
+
+(global-set-key (kbd "C-c e i") 'flycheck-previous-error)
+(global-set-key (kbd "C-c e k") 'flycheck-next-error)
+(global-set-key (kbd "C-c e l") 'flycheck-list-errors)
+(global-set-key (kbd "C-c e e") 'flycheck-explain-error-at-point)
+(global-set-key (kbd "C-c e d") 'flycheck-display-error-at-point)
+
+(defun compile-or-open ()
+  "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
+  (interactive)
+  (let ((compilation-buffer (get-buffer "*compilation*")))
+    (if compilation-buffer
+        (progn
+          (unless (get-buffer-window compilation-buffer)
+            (save-selected-window
+              (select-window (split-window-below -15))
+              (switch-to-buffer compilation-buffer)
+              (shrink-window-if-larger-than-buffer))))
+      (call-interactively 'compile))))
+
+(global-set-key (kbd "C-c C o") 'compile-or-open)
+(global-set-key (kbd "C-c C c") 'projectile-compile-project)
+(global-set-key (kbd "C-c C r") 'recompile)
+(global-set-key (kbd "C-c C k") 'kill-compilation)
+
+(global-set-key (kbd "C-c C e i") 'compilation-next-error)
+(global-set-key (kbd "C-c C e k") 'compilation-previous-error)
+(global-set-key (kbd "C-c C e l") 'consult-compile-error)
+
+(defun my/find-file ()
+  "Use `projectile-find-file` if in a project, otherwise `find-file`."
+  (interactive)
+  (if (projectile-project-p)
+      (projectile-find-file)
+    (find-file)))
+
+
+(global-set-key (kbd "C-c f f") 'my/find-file)
+(global-set-key (kbd "C-c f F") 'find-file)
+(global-set-key (kbd "C-c f g") 'consult-ripgrep)
+(global-set-key (kbd "C-c f o") 'consult-outline)
+
+(global-set-key (kbd "C-c 1") 'harpoon-go-to-1)
+(global-set-key (kbd "C-c 2") 'harpoon-go-to-2)
+(global-set-key (kbd "C-c 3") 'harpoon-go-to-3)
+(global-set-key (kbd "C-c 4") 'harpoon-go-to-4)
+(global-set-key (kbd "C-c 5") 'harpoon-go-to-5)
+
+(global-set-key (kbd "C-c H a") 'harpoon-add-file)
+(global-set-key (kbd "C-c H l") 'harpoon-toggle-quick-menu)
+(global-set-key (kbd "C-c H f") 'harpoon-toggle-file)
+(global-set-key (kbd "C-c H H") 'harpoon-quick-menu-hydra)
+
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+(define-key projectile-mode-map (kbd "C-c P") 'perspective-map)
