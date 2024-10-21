@@ -45,11 +45,13 @@
   (mouse-wheel-progressive-speed nil) 
   (scroll-conservatively 10)
   (scroll-margin 10)
-  (split-height-threshold nil)
-  (split-width-threshold 0)
   (tab-width 4)
   (make-backup-files nil)
   (auto-save-default nil)
+  :config
+  :bind (
+		 ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
+		 )
   :hook
   (prog-mode . (lambda () (hs-minor-mode t))))
 
@@ -59,12 +61,51 @@
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 
 (custom-set-variables
-  '(auto-save-visited-mode t))
-;; This is a test
+ '(auto-save-visited-mode t))
+
 (setq auto-save-visited-interval 2)
 
+(use-package time
+  :config
+  (setq display-time-24hr-format t)
+  (setq display-time-default-load-average nil)
+  (display-time-mode 1))
+
+(use-package battery
+  :config
+  (setq battery-mode-line-format "[%b%p%%]")  ; Custom battery format to ensure the percentage sign is included
+  (display-battery-mode 1))
+
+(defun simple-mode-line-render (left right)
+  "Return a string of `window-width' length.
+        Containing LEFT, and RIGHT aligned respectively."
+  (let ((available-width
+         (- (window-total-width)
+            (+ (length (format-mode-line left))
+               (length (format-mode-line right))))))
+    (append left
+            (list (format (format "%%%ds" available-width) ""))
+            right)))
+
 (use-package minions
-  :config (minions-mode 1))
+  :config (minions-mode 1)
+  :init
+  (setq-default
+   mode-line-format
+   '((:eval
+      (simple-mode-line-render
+       ;; Left.
+       (quote ("%e "
+			   mode-line-remote
+			   ":"
+               mode-line-buffer-identification
+               "%l:%c"
+    		   " - %p"))
+       ;; Right.
+       (quote (""
+               mode-line-frame-identification
+               mode-line-modes
+               mode-line-misc-info)))))))
 
 (use-package doom-themes
   :config
@@ -78,32 +119,14 @@
                     :weight 'medium)
 (setq-default line-spacing 0.15)
 
+
+
 (use-package emacs
   :bind
   ("C-+" . text-scale-increase)
   ("C--" . text-scale-decrease)
   ("<C-wheel-up>" . text-scale-increase)
   ("<C-wheel-down>" . text-scale-decrease))
-
-(use-package dashboard
-  :custom
-  (dashboard-banner-logo-title "With Great Power Comes Great Responsibility!")
-  (dashboard-center-content t)
-  (dashboard-items '((projects . 5)))
-  (dashboard-set-file-icons t)
-  (dashboard-set-footer nil)
-  (dashboard-projects-backend 'projectile)
-  (dashboard-set-heading-icons t)
-  (dashboard-set-navigator t)
-  (dashboard-show-shortcuts nil)
-  (dashboard-startupify-list '(dashboard-insert-banner
-                               dashboard-insert-newline
-                               dashboard-insert-banner-title
-                               dashboard-insert-items
-                               dashboard-insert-newline
-                               dashboard-insert-init-info))
-  (dashboard-startup-banner 'logo)
-  :config (dashboard-setup-startup-hook))
 
 ;;; Completions
 (use-package orderless
@@ -120,7 +143,7 @@
   (corfu-popupinfo-mode t)
   (corfu-popupinfo-delay 0.15)
   (corfu-separator ?\s)
-  (corfu-count 14)
+  (corfu-count 10)
   (corfu-scroll-margin 4)
   (completion-ignore-case t)
   (tab-always-indent 'complete)
@@ -157,9 +180,9 @@
 (use-package vertico
   :bind (:map vertico-map
               ("<tab>" . vertico-insert)
-              ("C-k" . vertico-next)
-              ("C-j" . vertico-exit)
-              ("C-i" . vertico-previous))
+              ("C-j" . vertico-next)
+              ("C-k" . vertico-previous)
+			  ("C-l" . vertico-exit))
   :custom
   (vertico-cycle t)
   (vertico-count 13)
@@ -190,6 +213,23 @@
 (use-package embark-consult
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
+
+(use-package obsidian
+  :demand t
+  :config
+  (obsidian-specify-path "~/code/Cadmus/")
+  (global-obsidian-mode t)
+  :custom
+  (obsidian-inbox-directory "Inbox")
+  (obsidian-daily-notes-directory "Daily Notes")
+  :bind (:map obsidian-mode-map
+			  ("C-c C-o" . obsidian-follow-link-at-point)
+			  ("C-c C-b" . obsidian-backlink-jump)
+			  ("C-c C-l" . obsidian-insert-wikilink)))
+
+(use-package markdown-mode
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown"))
 
 (use-package org
   :custom
@@ -229,14 +269,30 @@
   (visual-fill-column-mode 1))
 
 (use-package visual-fill-column
-  :after  org
-  :hook (org-mode . start/org-mode-visual-fill))
+  :after (org markdown-mode) 
+  :hook
+  (org-mode . start/org-mode-visual-fill))
 
 (use-package org-modern
   :after  org
   :hook (org-mode . org-modern-mode))
 
+(setq eldoc-echo-area-use-multiline-p nil)
+
+(setq eldoc-documentation-strategy 'eldoc-documentation-compose)
+
+(setq eldoc-idle-delay 0.1)
+
+(use-package eldoc-box
+  :after eglot      
+  :config
+  ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
+  (setq eldoc-box-hover-mode nil)
+  (setq eldoc-box-cleanup-interval 3))
+
 (use-package flycheck)
+
+(use-package flycheck-projectile)
 
 (use-package flycheck-eglot
   :after (flycheck eglot)
@@ -286,46 +342,56 @@
   (setq dape-buffer-window-arrangement 'right))
 
 (use-package eglot
-      :straight nil ;; Don't install eglot because it's now built-in
-      :config
-      (add-hook 'go-ts-mode-hook 'eglot-ensure)
-      (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
-      (add-hook 'python-ts-mode-hook 'eglot-ensure)
-      (add-hook 'rust-ts-mode-hook 'eglot-ensure)
-      :custom
-      (eglot-autoshutdown t)
-      (fset #'jsonrpc--log-event #'ignore)
-      (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
+  :straight nil ;; Don't install eglot because it's now built-in
+  :config
+  (add-hook 'go-ts-mode-hook 'eglot-ensure)
+  (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
+  (add-hook 'python-ts-mode-hook 'eglot-ensure)
+  (add-hook 'rust-ts-mode-hook 'eglot-ensure)
+  :custom
+  (eglot-autoshutdown t)
+  (fset #'jsonrpc--log-event #'ignore)
+  (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
+  (eglot-report-progress nil)
+  (eglot-events-buffer-size 0)
+  (eglot-sync-connect nil)
+  (eglot-extend-to-xref nil)
+  :bind (:map eglot-mode-map
+    		  ("C-c l l" . eldoc-box-help-at-point)
+    		  ("C-c l d" . eglot-find-declaration)
+    		  ("C-c l i" . eglot-find-implementation)
+    		  ("C-c l t" . eglot-find-typeDefinition)
+    		  ("C-c l a" . eglot-code-actions)
+    		  ("C-c l I" . eglot-code-action-organize-imports)
+    		  ("C-c l f" . eglot-format-buffer)
+    		  ("C-c l r" . eglot-rename)))
+
 (setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
-      (eglot-report-progress nil)
-      (eglot-events-buffer-size 0)
-      (eglot-sync-connect nil)
-      (eglot-extend-to-xref nil))
 
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(gdscript-mode . ("localhost:6005"))))
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(gdscript-mode . ("localhost:6005"))))
 
-    ;;; Mason from neovim is just a great way to manage lsps
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
+          ;;; Mason from neovim is just a great way to manage lsps
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
 
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
 
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
 
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
 
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 
 (use-package eat
   :hook ('eshell-load-hook #'eat-eshell-mode))
@@ -403,120 +469,98 @@
 (use-package meow)
 
 (defun meow-setup ()
-  (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
-  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
+  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+  (meow-motion-overwrite-define-key
+   '("j" . meow-next)
+   '("k" . meow-prev)
+   '("<escape>" . ignore))
+  (meow-leader-define-key
+   ;; SPC j/k will run the original command in MOTION state.
+   '("j" . "H-j")
+   '("k" . "H-k")
+   ;; Use SPC (0-9) for digit arguments.
+   '("1" . meow-digit-argument)
+   '("2" . meow-digit-argument)
+   '("3" . meow-digit-argument)
+   '("4" . meow-digit-argument)
+   '("5" . meow-digit-argument)
+   '("6" . meow-digit-argument)
+   '("7" . meow-digit-argument)
+   '("8" . meow-digit-argument)
+   '("9" . meow-digit-argument)
+   '("0" . meow-digit-argument)
+   '("/" . meow-keypad-describe-key)
+   '("?" . meow-cheatsheet))
 
-  (meow-thing-register 'angle
-                       '(pair (";") (":"))
-                       '(pair (";") (":")))
+  (meow-normal-define-key
+   '("0" . meow-expand-0)
+   '("9" . meow-expand-9)
+   '("8" . meow-expand-8)
+   '("7" . meow-expand-7)
+   '("6" . meow-expand-6)
+   '("5" . meow-expand-5)
+   '("4" . meow-expand-4)
+   '("3" . meow-expand-3)
+   '("2" . meow-expand-2)
+   '("1" . meow-expand-1)
 
-  (setq meow-char-thing-table
-        '((?( . round)
-			(?[ . square)
-			  (?{ . curly)
-			  (?< . angle)
-			  (?s . string)
-			  (?p . paragraph)
-			  (?l . line)
-			  (?b . buffer)))
+   '("-" . negative-argument)
+   '(";" . meow-reverse)
+   '("," . meow-inner-of-thing)
+   '("." . meow-bounds-of-thing)
+   '("[" . meow-beginning-of-thing)
+   '("]" . meow-end-of-thing)
+   '("a" . meow-append)
+   '("A" . meow-open-below)
+   '("b" . meow-back-word)
+   '("B" . meow-back-symbol)
+   '("c" . meow-change)
+   '("d" . meow-delete)
+   '("D" . meow-backward-delete)
+   '("e" . meow-next-word)
+   '("E" . meow-next-symbol)
+   '("f" . meow-find)
+   '("g" . meow-cancel-selection)
+   '("G" . meow-grab)
+   '("h" . meow-left)
+   '("H" . meow-left-expand)
+   '("i" . meow-insert)
+   '("I" . meow-open-above)
+   '("j" . meow-next)
+   '("J" . meow-next-expand)
+   '("k" . meow-prev)
+   '("K" . meow-prev-expand)
+   '("l" . meow-right)
+   '("L" . meow-right-expand)
+   '("m" . meow-join)
+   '("n" . meow-search)
+   '("o" . meow-block)
+   '("O" . meow-to-block)
+   '("p" . meow-yank)
+   '("q" . meow-quit)
+   '("Q" . meow-goto-line)
+   '("r" . meow-replace)
+   '("R" . meow-swap-grab)
+   '("s" . meow-kill)
+   '("t" . meow-till)
+   
+   '("u" . undo-tree-undo)
+   '("U" . undo-tree-redo)
 
-		  (meow-leader-define-key
-		   ;; Use SPC (0-9) for digit arguments.
-		   '("1" . meow-digit-argument)
-		   '("2" . meow-digit-argument)
-		   '("3" . meow-digit-argument)
-		   '("4" . meow-digit-argument)
-		   '("5" . meow-digit-argument)
-		   '("6" . meow-digit-argument)
-		   '("7" . meow-digit-argument)
-		   '("8" . meow-digit-argument)
-		   '("9" . meow-digit-argument)
-		   '("0" . meow-digit-argument)
-		   '("-" . meow-keypad-describe-key)
-		   '("_" . meow-cheatsheet))
+   '("v" . meow-visit)
+   '("w" . meow-mark-word)
+   '("W" . meow-mark-symbol)
+   '("x" . meow-line)
+   '("X" . meow-goto-line)
+   '("y" . meow-save)
+   '("Y" . meow-sync-grab)
+   '("z" . meow-pop-selection)
+   '("'" . repeat)
+   '("<escape>" . ignore)))
 
-		  (meow-normal-define-key
-		   ;; expansion
-		   '("0" . meow-expand-0)
-		   '("1" . meow-expand-1)
-		   '("2" . meow-expand-2)
-		   '("3" . meow-expand-3)
-		   '("4" . meow-expand-4)
-		   '("5" . meow-expand-5)
-		   '("6" . meow-expand-6)
-		   '("7" . meow-expand-7)
-		   '("8" . meow-expand-8)
-		   '("9" . meow-expand-9)
-		   '("ä" . meow-reverse)
-
-		   ;; movement
-		   '("i" . meow-prev)
-		   '("k" . meow-next)
-		   '("j" . meow-left)
-		   '("l" . meow-right)
-
-		   '("z" . meow-search)
-		   '("-" . meow-visit)
-
-		   ;; expansion
-		   '("I" . meow-prev-expand)
-		   '("K" . meow-next-expand)
-		   '("J" . meow-left-expand)
-		   '("L" . meow-right-expand)
-		   
-		   '("u" . meow-back-word)
-		   '("U" . meow-back-symbol)
-		   '("o" . meow-next-word)
-		   '("O" . meow-next-symbol)
-		   '("a" . meow-mark-word)
-		   '("A" . meow-mark-symbol)
-		   '("s" . meow-line)
-		   '("S" . meow-goto-line)
-		   '("w" . meow-block)
-		   '("q" . meow-join)
-		   '("g" . meow-grab)
-		   '("G" . meow-pop-grab)
-		   '("m" . meow-swap-grab)
-		   '("M" . meow-sync-grab)
-		   '("p" . meow-cancel-selection)
-		   '("P" . meow-pop-selection)
-
-		   '("x" . meow-till)
-		   '("y" . meow-find)
-
-		   '("," . meow-beginning-of-thing)
-		   '("." . meow-end-of-thing)
-		   '(";" . meow-inner-of-thing)
-		   '(":" . meow-bounds-of-thing)
-
-		   ;; editing
-		   '("d" . meow-kill)
-		   '("f" . meow-change)
-		   '("t" . meow-delete)
-		   '("c" . meow-save)
-		   '("v" . meow-yank)
-		   '("V" . meow-yank-pop)
-
-		   '("e" . meow-insert)
-		   '("E" . meow-open-above)
-		   '("r" . meow-append)
-		   '("R" . meow-open-below)
-
-		   '("h" . undo-tree-undo)
-		   '("H" . undo-tree-redo)
-
-		   '("b" . open-line)
-		   '("B" . split-line)
-
-		   '("ü" . indent-rigidly-left-to-tab-stop)
-		   '("+" . indent-rigidly-right-to-tab-stop)
-
-		   ;; ignore escape
-		   '("<escape>" . ignore)))
-
-		(meow-setup)
-		(setq meow-keypad-leader-dispatch "C-c")
-		(meow-global-mode 1)
+(meow-setup)
+(setq meow-keypad-leader-dispatch "C-c")
+(meow-global-mode 1)
 
 (use-package meow-tree-sitter
   :after (meow treesitter))
@@ -553,7 +597,7 @@
   (call-interactively 'pop-global-mark)
   (setq global-mark-ring (nreverse global-mark-ring)))
 
-(global-set-key (kbd "M-j") 'backward-global-mark)
+(global-set-key (kbd "M-h") 'backward-global-mark)
 (global-set-key (kbd "M-l") 'forward-global-mark)
 
 (defun my/find-buffer ()
@@ -571,10 +615,10 @@
 (global-set-key (kbd "C-c b b") 'my/find-buffer)
 (global-set-key (kbd "C-c b i") 'ibuffer)
 
-(global-set-key (kbd "C-c w j") 'windmove-left)
+(global-set-key (kbd "C-c w h") 'windmove-left)
 (global-set-key (kbd "C-c w l") 'windmove-right)
-(global-set-key (kbd "C-c w i") 'windmove-up)
-(global-set-key (kbd "C-c w k") 'windmove-down)
+(global-set-key (kbd "C-c w k") 'windmove-up)
+(global-set-key (kbd "C-c w j") 'windmove-down)
 
 (global-set-key (kbd "C-c w v") 'split-window-right)
 (global-set-key (kbd "C-c w s") 'split-window-below)
@@ -592,17 +636,10 @@
 (global-set-key (kbd "C-c t t") 'eat)
 (global-set-key (kbd "C-c t T") 'eat-other-window)
 
-(global-set-key (kbd "C-c l d") 'eglot-find-declaration)
-(global-set-key (kbd "C-c l i") 'eglot-find-implementation)
-(global-set-key (kbd "C-c l t") 'eglot-find-typeDefinition)
-(global-set-key (kbd "C-c l a") 'eglot-code-actions)
-(global-set-key (kbd "C-c l I") 'eglot-code-action-organize-imports)
-(global-set-key (kbd "C-c l f") 'eglot-format-buffer)
-(global-set-key (kbd "C-c l r") 'eglot-rename)
-
 (global-set-key (kbd "C-c e i") 'flycheck-previous-error)
 (global-set-key (kbd "C-c e k") 'flycheck-next-error)
 (global-set-key (kbd "C-c e l") 'flycheck-list-errors)
+(global-set-key (kbd "C-c e L") 'flycheck-projectile-list-errors)
 (global-set-key (kbd "C-c e e") 'flycheck-explain-error-at-point)
 (global-set-key (kbd "C-c e d") 'flycheck-display-error-at-point)
 
