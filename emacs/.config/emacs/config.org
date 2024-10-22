@@ -9,6 +9,7 @@
   - [[#keep-folders-clean][Keep folders clean]]
   - [[#sensible-defaults][Sensible Defaults]]
   - [[#performance-tweaks][Performance Tweaks]]
+  - [[#start-emacs-server-on-startup][Start emacs server on startup]]
   - [[#save-changes-automaticly][Save changes automaticly]]
 - [[#ui-stuff][UI Stuff]]
   - [[#modeline][Modeline]]
@@ -43,6 +44,7 @@
   - [[#perspective][Perspective]]
   - [[#editor-conf][Editor Conf]]
   - [[#harpoon][Harpoon]]
+  - [[#dired-tweaks][Dired Tweaks]]
   - [[#git-stuff][Git Stuff]]
     - [[#magit][Magit]]
     - [[#gutter][Gutter]]
@@ -147,6 +149,13 @@ use-package: Configures use-package for package management, ensuring packages ar
     (setq read-process-output-max (* 1024 1024)) ;; 1mb
 #+END_SRC
 
+** Start emacs server on startup
+Ensure the Emacs server is started if not already running
+#+begin_src emacs-lisp
+    (require 'server)
+    (unless (server-running-p)
+      (server-start))
+#+END_SRC
 ** Save changes automaticly
 #+BEGIN_SRC emacs-lisp
     (custom-set-variables
@@ -591,6 +600,28 @@ We want to use the same Configurations as out teamsmates
 #+BEGIN_SRC  emacs-lisp
     (use-package harpoon)
 #+END_SRC
+** Dired Tweaks
+#+BEGIN_SRC emacs-lisp 
+    (use-package dired
+      :straight nil ;; built-in
+      :hook
+      (dired-mode . dired-hide-details-mode)
+      :config
+      (setq dired-dwim-target t)                  ;; do what I mean
+      (setq dired-recursive-copies 'always)       ;; don't ask when copying directories
+      (setq dired-create-destination-dirs 'ask)
+      (setq dired-clean-confirm-killing-deleted-buffers nil)
+      (setq dired-make-directory-clickable t)
+      (setq dired-mouse-drag-files t)
+      (setq dired-kill-when-opening-new-dired-buffer t)   ;; Tidy up open buffers by default
+      (setq dired-use-ls-dired t
+            dired-listing-switches "-aBhl  --group-directories-first"))
+
+    (use-package nerd-icons-dired
+      :after dired
+      :hook
+      (dired-mode . nerd-icons-dired-mode))
+#+END_SRC
 ** Git Stuff
 *** Magit
 #+BEGIN_SRC emacs-lisp
@@ -736,8 +767,10 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        '("o" . meow-block)
        '("O" . meow-to-block)
        '("p" . meow-yank)
-       '("q" . meow-quit)
-       '("Q" . meow-goto-line)
+       
+       '("q" . meow-start-kmacro-or-insert-counter)
+       '("Q" . meow-end-or-call-kmacro)
+
        '("r" . meow-replace)
        '("R" . meow-swap-grab)
        '("s" . meow-kill)
@@ -903,6 +936,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (global-set-key (kbd "C-c f F") 'find-file)
     (global-set-key (kbd "C-c f g") 'consult-ripgrep)
     (global-set-key (kbd "C-c f o") 'consult-outline)
+    (global-set-key (kbd "C-c f l") 'consult-line)
 #+END_SRC
 **** Harpoon
 #+begin_src emacs-lisp

@@ -60,6 +60,10 @@
 ;; Increase the amount of data which Emacs reads from the process
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 
+(require 'server)
+(unless (server-running-p)
+  (server-start))
+
 (custom-set-variables
  '(auto-save-visited-mode t))
 
@@ -422,6 +426,26 @@
 
 (use-package harpoon)
 
+(use-package dired
+  :straight nil ;; built-in
+  :hook
+    (dired-mode . dired-hide-details-mode)
+  :config
+  (setq dired-dwim-target t)                  ;; do what I mean
+  (setq dired-recursive-copies 'always)       ;; don't ask when copying directories
+  (setq dired-create-destination-dirs 'ask)
+  (setq dired-clean-confirm-killing-deleted-buffers nil)
+  (setq dired-make-directory-clickable t)
+  (setq dired-mouse-drag-files t)
+  (setq dired-kill-when-opening-new-dired-buffer t)   ;; Tidy up open buffers by default
+  (setq dired-use-ls-dired t
+              dired-listing-switches "-aBhl  --group-directories-first"))
+
+(use-package nerd-icons-dired
+:after dired
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
 (use-package magit
   :commands magit-status)
 
@@ -537,8 +561,10 @@
    '("o" . meow-block)
    '("O" . meow-to-block)
    '("p" . meow-yank)
-   '("q" . meow-quit)
-   '("Q" . meow-goto-line)
+   
+   '("q" . meow-start-kmacro-or-insert-counter)
+   '("Q" . meow-end-or-call-kmacro)
+
    '("r" . meow-replace)
    '("R" . meow-swap-grab)
    '("s" . meow-kill)
@@ -677,6 +703,7 @@
 (global-set-key (kbd "C-c f F") 'find-file)
 (global-set-key (kbd "C-c f g") 'consult-ripgrep)
 (global-set-key (kbd "C-c f o") 'consult-outline)
+(global-set-key (kbd "C-c f l") 'consult-line)
 
 (global-set-key (kbd "C-c 1") 'harpoon-go-to-1)
 (global-set-key (kbd "C-c 2") 'harpoon-go-to-2)
