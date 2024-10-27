@@ -39,12 +39,8 @@
   (dired-kill-when-opening-new-dired-buffer t)
   (truncate-lines t)
   (gnus-agent nil)
-  (display-line-numbers-type 'relative) 
-  (global-display-line-numbers-mode t)
   (defalias 'yes-or-no-p 'y-or-n-p)
   (mouse-wheel-progressive-speed nil) 
-  (scroll-conservatively 10)
-  (scroll-margin 10)
   (tab-width 4)
   (make-backup-files nil)
   (auto-save-default nil)
@@ -68,6 +64,26 @@
  '(auto-save-visited-mode t))
 
 (setq auto-save-visited-interval 2)
+
+;;;(repeat-mode)
+
+(use-package emacs
+  :custom
+  (display-line-numbers-type 'relative) 
+  (global-display-line-numbers-mode t))
+
+(defun disable-line-numbers ()
+  "Disable display-line-numbers-mode for certain modes."
+  (display-line-numbers-mode 0))
+
+(add-hook 'dired-mode-hook 'disable-line-numbers)
+(add-hook 'org-mode-hook 'disable-line-numbers)
+(add-hook 'compilation-mode-hook 'disable-line-numbers)
+
+(use-package emacs
+  :custom
+  (scroll-conservatively 10)
+  (scroll-margin 10))
 
 (use-package time
   :config
@@ -218,6 +234,275 @@
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
+(setq eldoc-echo-area-use-multiline-p nil)
+
+(setq eldoc-documentation-strategy 'eldoc-documentation-compose)
+
+(setq eldoc-idle-delay 0.1)
+
+(use-package eldoc-box
+  :after eglot      
+  :config
+  ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
+  (setq eldoc-box-hover-mode nil)
+  (setq eldoc-box-cleanup-interval 3))
+
+(use-package flycheck)
+
+(use-package flycheck-projectile)
+
+(use-package flycheck-eglot
+  :after (flycheck eglot)
+  :config
+  (global-flycheck-eglot-mode 1))
+
+(use-package tree-sitter
+  :straight t
+  :config(global-tree-sitter-mode
+          (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
+
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+		(cmake "https://github.com/uyha/tree-sitter-cmake")
+		(css "https://github.com/tree-sitter/tree-sitter-css")
+		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+		(html "https://github.com/tree-sitter/tree-sitter-html")
+		(zig "https://github.com/GrayJack/tree-sitter-zig")
+		(php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src")
+		(go "https://github.com/tree-sitter/tree-sitter-go")
+        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+        (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
+		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+		(json "https://github.com/tree-sitter/tree-sitter-json")
+		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+		(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+		(make "https://github.com/alemuller/tree-sitter-make")
+		(rust "https://github.com/tree-sitter/tree-sitter-rust")
+		(python "https://github.com/tree-sitter/tree-sitter-python")
+		(toml "https://github.com/tree-sitter/tree-sitter-toml")
+		(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+		(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+		(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+;; Install all langs
+;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+
+(setq treesit-font-lock-level 4)
+
+(use-package treesit-auto
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
+(use-package dape
+  :preface
+  (setq dape-key-prefix "\C-c L")
+  :config 
+  (setq dape-cwd-fn 'projectile-project-root)
+  (setq dape-buffer-window-arrangement 'right)
+  (add-to-list 'dape-configs
+			   `(debugpy-flask
+				 modes (python-mode jinja2-mode)
+				 command "python"
+				 command-args ["-m" "debugpy.adapter" "--host" "0.0.0.0" "--port" :autoport]
+				 port :autoport
+				 :type "python"
+				 :request "launch"
+				 :module "flask"
+				 :args ["--app" "src" "run" "--no-debugger" "--no-reload"]
+				 :console "integratedTerminal"
+				 :showReturnValue t
+				 :justMyCode nil
+				 :jinja t
+				 :cwd dape-cwd-fn)
+			   ))
+
+(use-package eglot
+  :straight nil ;; Don't install eglot because it's now built-in
+  :config
+  (add-hook 'go-ts-mode-hook 'eglot-ensure)
+  (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
+  (add-hook 'python-ts-mode-hook 'eglot-ensure)
+  (add-hook 'rust-ts-mode-hook 'eglot-ensure)
+  (add-hook 'php-mode-hook 'eglot-ensure)
+  :custom
+  (eglot-autoshutdown t)
+  (fset #'jsonrpc--log-event #'ignore)
+  (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
+  (eglot-report-progress nil)
+  (eglot-events-buffer-size 0)
+  (eglot-sync-connect nil)
+  (eglot-extend-to-xref nil)
+  :bind (:map eglot-mode-map
+    		  ("C-c l l" . eldoc-box-help-at-point)
+    		  ("C-c l d" . eglot-find-declaration)
+    		  ("C-c l i" . eglot-find-implementation)
+    		  ("C-c l t" . eglot-find-typeDefinition)
+    		  ("C-c l a" . eglot-code-actions)
+    		  ("C-c l I" . eglot-code-action-organize-imports)
+    		  ("C-c l f" . eglot-format-buffer)
+    		  ("C-c l r" . eglot-rename)))
+
+(setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(gdscript-mode . ("localhost:6005"))))
+
+          ;;; Mason from neovim is just a great way to manage lsps
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(php-mode . ("~/.local/share/nvim/mason/bin/phpactor" "language-server"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
+
+(use-package eat
+  :hook ('eshell-load-hook #'eat-eshell-mode))
+
+(use-package docker
+  :straight t
+  :bind ("C-c d" . docker))
+
+(use-package projectile
+  :init
+  (projectile-mode)
+  :custom
+  (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
+  (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
+  (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
+(setq persp-suppress-no-prefix-key-warning 't)
+
+(use-package perspective
+  :init
+  (persp-mode))
+
+;;; Each Project has its own perspective
+(use-package persp-projectile)
+
+(use-package editorconfig
+  :config
+  (editorconfig-mode 1))
+
+(use-package magit
+  :commands magit-status)
+
+(use-package magit-todos
+  :after magit
+  :config (magit-todos-mode 1))
+
+(use-package git-gutter
+  :config(global-git-gutter-mode +1))
+
+(use-package wgrep)
+
+(use-package dired
+  :straight nil ;; built-in
+  :hook
+  (dired-mode . dired-hide-details-mode)
+  :config
+  (setq dired-dwim-target t)                  ;; do what I mean
+  (setq dired-recursive-copies 'always)       ;; don't ask when copying directories
+  (setq dired-create-destination-dirs 'ask)
+  (setq dired-clean-confirm-killing-deleted-buffers nil)
+  (setq dired-make-directory-clickable t)
+  (setq dired-mouse-drag-files t)
+  (setq dired-kill-when-opening-new-dired-buffer t)   ;; Tidy up open buffers by default
+  (setq dired-use-ls-dired t
+        dired-listing-switches "-aBhl  --group-directories-first"))
+
+(use-package nerd-icons-dired
+  :after dired
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package harpoon)
+
+(use-package undo-tree
+  :config (global-undo-tree-mode))
+
+(use-package helpful)
+
+(use-package system-packages)
+
+(use-package devdocs)
+
+(use-package consult
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+  :init
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+  :config
+  (autoload 'projectile-project-root "projectile")
+  (setq consult-project-function (lambda (_) (projectile-project-root)))
+  )
+
+(use-package crux)
+
+(use-package rust-mode
+  :init
+  (setq rust-mode-treesitter-derive t))
+
+(setq rustic-lsp-client 'eglot)
+(setq rustic-analyzer-command '("~/.local/share/nvim/mason/bin/rust-analyzer"))
+
+(use-package rustic
+  :after (rust-mode))
+
+(use-package php-mode)
+(defun my-php-mode-init ()
+  (subword-mode 1)
+  (setq-local show-trailing-whitespace t)
+  (setq-local ac-disable-faces '(font-lock-comment-face font-lock-string-face))
+  (add-hook 'hack-local-variables-hook 'php-ide-turn-on nil t))
+
+(with-eval-after-load 'php-mode
+  (add-hook 'php-mode-hook #'my-php-mode-init)
+  (custom-set-variables
+   '(php-mode-coding-style 'psr2)
+   '(php-mode-template-compatibility nil)
+   '(php-imenu-generic-expression 'php-imenu-generic-expression-simple))
+
+  ;; If you find phpcs to be bothersome, you can disable it.
+  (when (require 'flycheck nil)
+    (add-to-list 'flycheck-disabled-checkers 'php-phpmd)
+    (add-to-list 'flycheck-disabled-checkers 'php-phpcs)))
+
+(use-package pet
+  :config
+  (add-hook 'python-base-mode-hook 'pet-mode -10))
+
+(use-package pyvenv)
+
 (use-package obsidian
   :demand t
   :config
@@ -267,228 +552,9 @@
   :commands toc-org-enable
   :hook (org-mode . toc-org-mode))
 
-(defun start/org-mode-visual-fill ()
-  (setq visual-fill-column-width 200
-        visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
-
-(use-package visual-fill-column
-  :after (org markdown-mode) 
-  :hook
-  (org-mode . start/org-mode-visual-fill))
-
 (use-package org-modern
   :after  org
   :hook (org-mode . org-modern-mode))
-
-(setq eldoc-echo-area-use-multiline-p nil)
-
-(setq eldoc-documentation-strategy 'eldoc-documentation-compose)
-
-(setq eldoc-idle-delay 0.1)
-
-(use-package eldoc-box
-  :after eglot      
-  :config
-  ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
-  (setq eldoc-box-hover-mode nil)
-  (setq eldoc-box-cleanup-interval 3))
-
-(use-package flycheck)
-
-(use-package flycheck-projectile)
-
-(use-package flycheck-eglot
-  :after (flycheck eglot)
-  :config
-  (global-flycheck-eglot-mode 1))
-
-(use-package tree-sitter
-  :straight t
-  :config(global-tree-sitter-mode
-          (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
-
-(setq treesit-language-source-alist
-      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-		(cmake "https://github.com/uyha/tree-sitter-cmake")
-		(css "https://github.com/tree-sitter/tree-sitter-css")
-		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
-		(html "https://github.com/tree-sitter/tree-sitter-html")
-		(zig "https://github.com/GrayJack/tree-sitter-zig")
-		(go "https://github.com/tree-sitter/tree-sitter-go")
-        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-        (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
-		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-		(json "https://github.com/tree-sitter/tree-sitter-json")
-		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-		(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-		(make "https://github.com/alemuller/tree-sitter-make")
-		(rust "https://github.com/tree-sitter/tree-sitter-rust")
-		(python "https://github.com/tree-sitter/tree-sitter-python")
-		(toml "https://github.com/tree-sitter/tree-sitter-toml")
-		(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-		(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-		(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-;; Install all langs
-;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
-
-(setq treesit-font-lock-level 4)
-
-(use-package treesit-auto
-  :straight t
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
-
-(use-package dape
-  :config 
-  (setq dape-cwd-fn 'projectile-project-root)
-  (setq dape-buffer-window-arrangement 'right))
-
-(use-package eglot
-  :straight nil ;; Don't install eglot because it's now built-in
-  :config
-  (add-hook 'go-ts-mode-hook 'eglot-ensure)
-  (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
-  (add-hook 'python-ts-mode-hook 'eglot-ensure)
-  (add-hook 'rust-ts-mode-hook 'eglot-ensure)
-  :custom
-  (eglot-autoshutdown t)
-  (fset #'jsonrpc--log-event #'ignore)
-  (eglot-events-buffer-size 0) ;; No event buffers (Lsp server logs)
-  (eglot-report-progress nil)
-  (eglot-events-buffer-size 0)
-  (eglot-sync-connect nil)
-  (eglot-extend-to-xref nil)
-  :bind (:map eglot-mode-map
-    		  ("C-c l l" . eldoc-box-help-at-point)
-    		  ("C-c l d" . eglot-find-declaration)
-    		  ("C-c l i" . eglot-find-implementation)
-    		  ("C-c l t" . eglot-find-typeDefinition)
-    		  ("C-c l a" . eglot-code-actions)
-    		  ("C-c l I" . eglot-code-action-organize-imports)
-    		  ("C-c l f" . eglot-format-buffer)
-    		  ("C-c l r" . eglot-rename)))
-
-(setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(gdscript-mode . ("localhost:6005"))))
-
-          ;;; Mason from neovim is just a great way to manage lsps
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
-
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
-
-(use-package eat
-  :hook ('eshell-load-hook #'eat-eshell-mode))
-
-(use-package docker
-  :straight t
-  :bind ("C-c d" . docker))
-
-(use-package projectile
-  :init
-  (projectile-mode)
-  :custom
-  (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
-  (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
-  (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
-(setq persp-suppress-no-prefix-key-warning 't)
-
-(use-package perspective
-  :init
-  (persp-mode))
-
-;;; Each Project has its own perspective
-(use-package persp-projectile)
-
-(use-package editorconfig
-  :config
-  (editorconfig-mode 1))
-
-(use-package harpoon)
-
-(use-package dired
-  :straight nil ;; built-in
-  :hook
-    (dired-mode . dired-hide-details-mode)
-  :config
-  (setq dired-dwim-target t)                  ;; do what I mean
-  (setq dired-recursive-copies 'always)       ;; don't ask when copying directories
-  (setq dired-create-destination-dirs 'ask)
-  (setq dired-clean-confirm-killing-deleted-buffers nil)
-  (setq dired-make-directory-clickable t)
-  (setq dired-mouse-drag-files t)
-  (setq dired-kill-when-opening-new-dired-buffer t)   ;; Tidy up open buffers by default
-  (setq dired-use-ls-dired t
-              dired-listing-switches "-aBhl  --group-directories-first"))
-
-(use-package nerd-icons-dired
-:after dired
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
-
-(use-package magit
-  :commands magit-status)
-
-(use-package magit-todos
-  :after magit
-  :config (magit-todos-mode 1))
-
-(use-package git-gutter
-  :config(global-git-gutter-mode +1))
-
-(use-package undo-tree
-  :config (global-undo-tree-mode))
-
-(use-package helpful)
-
-(use-package system-packages)
-
-(use-package devdocs)
-
-(use-package consult
-  ;; Enable automatic preview at point in the *Completions* buffer. This is
-  ;; relevant when you use the default completion UI.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-  :init
-  ;; Optionally configure the register formatting. This improves the register
-  ;; preview for `consult-register', `consult-register-load',
-  ;; `consult-register-store' and the Emacs built-ins.
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
-
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  (advice-add #'register-preview :override #'consult-register-window)
-
-  ;; Use Consult to select xref locations with preview
-  (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-  :config
-  (autoload 'projectile-project-root "projectile")
-  (setq consult-project-function (lambda (_) (projectile-project-root)))
-  )
-
-(use-package crux)
 
 (use-package meow)
 
@@ -662,12 +728,22 @@
 (global-set-key (kbd "C-c t t") 'eat)
 (global-set-key (kbd "C-c t T") 'eat-other-window)
 
-(global-set-key (kbd "C-c e i") 'flycheck-previous-error)
-(global-set-key (kbd "C-c e k") 'flycheck-next-error)
+(global-set-key (kbd "C-c e k") 'flycheck-previous-error)
+(global-set-key (kbd "C-c e j") 'flycheck-next-error)
 (global-set-key (kbd "C-c e l") 'flycheck-list-errors)
 (global-set-key (kbd "C-c e L") 'flycheck-projectile-list-errors)
 (global-set-key (kbd "C-c e e") 'flycheck-explain-error-at-point)
 (global-set-key (kbd "C-c e d") 'flycheck-display-error-at-point)
+
+(use-package fancy-compilation
+  :config 
+  (setq fancy-compilation-override-colors nil)
+  :commands (fancy-compilation-mode))
+
+(setq compilation-scroll-output t)
+
+(with-eval-after-load 'compile
+  (fancy-compilation-mode))
 
 (defun compile-or-open ()
   "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
