@@ -15,6 +15,8 @@
   (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'use-package)
+(straight-use-package 'org)
+
 (setq straight-use-package-by-default t)
 
 (use-package no-littering
@@ -148,6 +150,10 @@
   ("<C-wheel-up>" . text-scale-increase)
   ("<C-wheel-down>" . text-scale-decrease))
 
+(use-package which-key)
+(setq which-key-popup-type 'minibuffer)
+(which-key-mode)
+
 ;;; Completions
 (use-package orderless
   :custom
@@ -196,6 +202,10 @@
   (add-to-list 'completion-at-point-functions #'cape-keyword)
   (add-to-list 'completion-at-point-functions #'cape-history)
   (add-to-list 'completion-at-point-functions #'cape-elisp-symbol))
+
+(advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+(setq completion-category-overrides '((eglot (styles orderless))
+                                      (eglot-capf (styles orderless))))
 
 (use-package vertico
   :bind (:map vertico-map
@@ -256,42 +266,47 @@
   :config
   (global-flycheck-eglot-mode 1))
 
+(use-package php-ts-mode
+  :straight (php-ts-mode :type git :host github :repo "emacs-php/php-ts-mode"))
+
 (use-package tree-sitter
-  :straight t
-  :config(global-tree-sitter-mode
-          (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
+      :config(global-tree-sitter-mode
+              (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
-(setq treesit-language-source-alist
-      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-		(cmake "https://github.com/uyha/tree-sitter-cmake")
-		(css "https://github.com/tree-sitter/tree-sitter-css")
-		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
-		(html "https://github.com/tree-sitter/tree-sitter-html")
-		(zig "https://github.com/GrayJack/tree-sitter-zig")
-		(php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src")
-		(go "https://github.com/tree-sitter/tree-sitter-go")
-        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-        (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
-		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-		(json "https://github.com/tree-sitter/tree-sitter-json")
-		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-		(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-		(make "https://github.com/alemuller/tree-sitter-make")
-		(rust "https://github.com/tree-sitter/tree-sitter-rust")
-		(python "https://github.com/tree-sitter/tree-sitter-python")
-		(toml "https://github.com/tree-sitter/tree-sitter-toml")
-		(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-		(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-		(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-;; Install all langs
-;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+    (setq treesit-language-source-alist
+          '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+        	(cmake "https://github.com/uyha/tree-sitter-cmake")
+        	(css "https://github.com/tree-sitter/tree-sitter-css")
+        	(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        	(html "https://github.com/tree-sitter/tree-sitter-html")
+        	(zig "https://github.com/GrayJack/tree-sitter-zig")
+        	(go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.1" "src")
+          (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+          (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
+        	(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        	(json "https://github.com/tree-sitter/tree-sitter-json")
+        	(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+        	(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+        	(make "https://github.com/alemuller/tree-sitter-make")
+        	(rust "https://github.com/tree-sitter/tree-sitter-rust")
+        	(php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src")
+        	;; (php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
+        	(python "https://github.com/tree-sitter/tree-sitter-python")
+        	(toml "https://github.com/tree-sitter/tree-sitter-toml")
+        	(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+        	(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+        	(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-(setq treesit-font-lock-level 4)
+    ;; Install all langs
+    ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
 
-(use-package treesit-auto
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
+    (setq treesit-font-lock-level 4)
+
+    (use-package treesit-auto
+      :config
+(delete 'php treesit-auto-langs)
+      (treesit-auto-add-to-auto-mode-alist 'all)
+      (global-treesit-auto-mode))
 
 (use-package dape
   :preface
@@ -323,7 +338,7 @@
   (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
   (add-hook 'python-ts-mode-hook 'eglot-ensure)
   (add-hook 'rust-ts-mode-hook 'eglot-ensure)
-  (add-hook 'php-mode-hook 'eglot-ensure)
+  (add-hook 'php-ts-mode-hook 'eglot-ensure)
   :custom
   (eglot-autoshutdown t)
   (fset #'jsonrpc--log-event #'ignore)
@@ -359,7 +374,7 @@
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
-               '(php-mode . ("~/.local/share/nvim/mason/bin/phpactor" "language-server"))))
+               '(php-ts-mode . ("~/.local/share/nvim/mason/bin/phpactor" "language-server"))))
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
@@ -373,12 +388,17 @@
   (add-to-list 'eglot-server-programs
                '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 
+;; (use-package eglot-booster
+;;   :straight (eglot-booster :type git :host github :repo "jdtsmith/eglot-booster")
+;; 	:after eglot
+;; 	:config	(eglot-booster-mode))
+
 (use-package eat
   :hook ('eshell-load-hook #'eat-eshell-mode))
 
 (use-package docker
   :straight t
-  :bind ("C-c d" . docker))
+  :bind ("C-c D" . docker))
 
 (use-package projectile
   :init
@@ -434,6 +454,13 @@
 
 (use-package harpoon)
 
+(use-package surround)
+
+(use-package move-text)
+
+(global-set-key (kbd "M-j") 'move-text-down)
+(global-set-key (kbd "M-k") 'move-text-up)
+
 (use-package undo-tree
   :config (global-undo-tree-mode))
 
@@ -477,25 +504,6 @@
 
 (use-package rustic
   :after (rust-mode))
-
-(use-package php-mode)
-(defun my-php-mode-init ()
-  (subword-mode 1)
-  (setq-local show-trailing-whitespace t)
-  (setq-local ac-disable-faces '(font-lock-comment-face font-lock-string-face))
-  (add-hook 'hack-local-variables-hook 'php-ide-turn-on nil t))
-
-(with-eval-after-load 'php-mode
-  (add-hook 'php-mode-hook #'my-php-mode-init)
-  (custom-set-variables
-   '(php-mode-coding-style 'psr2)
-   '(php-mode-template-compatibility nil)
-   '(php-imenu-generic-expression 'php-imenu-generic-expression-simple))
-
-  ;; If you find phpcs to be bothersome, you can disable it.
-  (when (require 'flycheck nil)
-    (add-to-list 'flycheck-disabled-checkers 'php-phpmd)
-    (add-to-list 'flycheck-disabled-checkers 'php-phpcs)))
 
 (use-package pet
   :config
@@ -596,6 +604,7 @@
 
    '("-" . negative-argument)
    '(";" . meow-reverse)
+   '("/" . comment-or-uncomment-region)
    '("," . meow-inner-of-thing)
    '("." . meow-bounds-of-thing)
    '("[" . meow-beginning-of-thing)
@@ -635,6 +644,8 @@
    '("R" . meow-swap-grab)
    '("s" . meow-kill)
    '("t" . meow-till)
+
+   (cons "S" surround-keymap)
    
    '("u" . undo-tree-undo)
    '("U" . undo-tree-redo)
@@ -773,7 +784,6 @@
   (if (projectile-project-p)
       (projectile-find-file)
     (find-file)))
-
 
 (global-set-key (kbd "C-c f f") 'my/find-file)
 (global-set-key (kbd "C-c f F") 'find-file)
