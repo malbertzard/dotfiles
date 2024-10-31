@@ -79,6 +79,7 @@
   (display-line-numbers-mode 0))
 
 (add-hook 'dired-mode-hook 'disable-line-numbers)
+(add-hook 'eat-mode-hook 'disable-line-numbers)
 (add-hook 'org-mode-hook 'disable-line-numbers)
 (add-hook 'compilation-mode-hook 'disable-line-numbers)
 
@@ -266,47 +267,71 @@
   :config
   (global-flycheck-eglot-mode 1))
 
-(use-package php-ts-mode
-  :straight (php-ts-mode :type git :host github :repo "emacs-php/php-ts-mode"))
-
 (use-package tree-sitter
-      :config(global-tree-sitter-mode
-              (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
+  :config(global-tree-sitter-mode
+          (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
-    (setq treesit-language-source-alist
-          '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-        	(cmake "https://github.com/uyha/tree-sitter-cmake")
-        	(css "https://github.com/tree-sitter/tree-sitter-css")
-        	(elisp "https://github.com/Wilfred/tree-sitter-elisp")
-        	(html "https://github.com/tree-sitter/tree-sitter-html")
-        	(zig "https://github.com/GrayJack/tree-sitter-zig")
-        	(go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.1" "src")
-          (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-          (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
-        	(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-        	(json "https://github.com/tree-sitter/tree-sitter-json")
-        	(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-        	(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-        	(make "https://github.com/alemuller/tree-sitter-make")
-        	(rust "https://github.com/tree-sitter/tree-sitter-rust")
-        	(php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src")
-        	;; (php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
-        	(python "https://github.com/tree-sitter/tree-sitter-python")
-        	(toml "https://github.com/tree-sitter/tree-sitter-toml")
-        	(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-        	(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-        	(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+(setq treesit-font-lock-level 4)
 
-    ;; Install all langs
-    ;; (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))
+(use-package treesit-auto
+  :config
+  (setq treesit-auto-langs '(lua ruby python rust go toml yaml json php))
+  (global-treesit-auto-mode))
 
-    (setq treesit-font-lock-level 4)
+(add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.ruby\\'" . ruby-ts-mode))
 
-    (use-package treesit-auto
-      :config
-(delete 'php treesit-auto-langs)
-      (treesit-auto-add-to-auto-mode-alist 'all)
-      (global-treesit-auto-mode))
+(use-package tree-sitter-langs)
+
+(defun my/move-tree-sitter-grammar-files ()
+  "Move all files from `tree-sitter-langs-grammar-dir/bin` to `~/.config/emacs/tree-sitter`,
+      appending 'libtree-sitter-' to the front of each filename."
+  (interactive)
+  (let* ((source-dir (expand-file-name "bin" tree-sitter-langs-grammar-dir))
+         (target-dir (expand-file-name "~/.config/emacs/tree-sitter"))
+         (files (directory-files source-dir t "^[^.].*"))) ; Get all files, excluding hidden files
+    (unless (file-exists-p target-dir)
+      (make-directory target-dir t)) ; Create target directory if it doesn't exist
+    (dolist (file files)
+      (let ((filename (file-name-nondirectory file))
+            (new-filename (concat "libtree-sitter-" (file-name-nondirectory file))))
+        (rename-file file (expand-file-name new-filename target-dir) t)))))
+
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+        (cmake "https://github.com/uyha/tree-sitter-cmake")
+        (css "https://github.com/tree-sitter/tree-sitter-css")
+        (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        (html "https://github.com/tree-sitter/tree-sitter-html")
+        (zig "https://github.com/GrayJack/tree-sitter-zig")
+        (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.1" "src")
+        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+        (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
+        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        (json "https://github.com/tree-sitter/tree-sitter-json")
+        (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+        (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+        (make "https://github.com/alemuller/tree-sitter-make")
+        (rust "https://github.com/tree-sitter/tree-sitter-rust")
+        (php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
+        (phpdoc "https://github.com/claytonrcarter/tree-sitter-phpdoc" "master" "src")
+        (twig "https://github.com/kaermorchen/tree-sitter-twig")
+        (python "https://github.com/tree-sitter/tree-sitter-python")
+        (toml "https://github.com/tree-sitter/tree-sitter-toml")
+        (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+        (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+        (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+;; Install all langs
+(defun my/treesitter-install-alist ()
+  "Install all ts parsers from treesitter alist"
+  (interactive)
+  (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist)))
+
+(use-package php-mode)
+
+(use-package lua-mode)
 
 (use-package dape
   :preface
@@ -338,7 +363,7 @@
   (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
   (add-hook 'python-ts-mode-hook 'eglot-ensure)
   (add-hook 'rust-ts-mode-hook 'eglot-ensure)
-  (add-hook 'php-ts-mode-hook 'eglot-ensure)
+  (add-hook 'php-mode-hook 'eglot-ensure)
   :custom
   (eglot-autoshutdown t)
   (fset #'jsonrpc--log-event #'ignore)
@@ -372,9 +397,13 @@
   (add-to-list 'eglot-server-programs
                '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
 
+;; (with-eval-after-load 'eglot
+;;   (add-to-list 'eglot-server-programs
+;;                '(php-ts-mode . ("~/.local/share/nvim/mason/bin/phpactor" "language-server"))))
+
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
-               '(php-ts-mode . ("~/.local/share/nvim/mason/bin/phpactor" "language-server"))))
+               '(php-mode . ("~/.local/share/nvim/mason/bin/intelephense" "--stdio"))))
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
@@ -778,6 +807,9 @@
 (global-set-key (kbd "C-c C e k") 'compilation-previous-error)
 (global-set-key (kbd "C-c C e l") 'consult-compile-error)
 
+(global-set-key (kbd "C-c r s") 'replace-string)
+(global-set-key (kbd "C-c r r") 'query-replace)
+
 (defun my/find-file ()
   "Use `projectile-find-file` if in a project, otherwise `find-file`."
   (interactive)
@@ -788,6 +820,7 @@
 (global-set-key (kbd "C-c f f") 'my/find-file)
 (global-set-key (kbd "C-c f F") 'find-file)
 (global-set-key (kbd "C-c f g") 'consult-ripgrep)
+(global-set-key (kbd "C-c f s") 'occur)
 (global-set-key (kbd "C-c f o") 'consult-outline)
 (global-set-key (kbd "C-c f l") 'consult-line)
 
