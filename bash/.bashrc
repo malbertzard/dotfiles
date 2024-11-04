@@ -85,7 +85,7 @@ alias la='ls -A'
 alias l='ls -CF'
 alias nv='nvim'
 alias c='clear'
-alias icat='wezterm imgcat'
+alias ya='yazi'
 
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
