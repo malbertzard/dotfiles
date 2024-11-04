@@ -75,7 +75,7 @@ M.lsp_servers = {
   -- "tsserver",
 
   -- Work Php Stuff
-  -- "phpactor",
+  "intelephense",
   -- "antlersls",
 
   -- Markup Langs

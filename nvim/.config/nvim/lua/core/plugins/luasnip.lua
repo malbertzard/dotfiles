@@ -1,10 +1,10 @@
 local M = {
   "L3MON4D3/LuaSnip",
-  event = "InsertEnter",
   dependencies = {
     "rafamadriz/friendly-snippets",
   },
-  config = function()
+
+	config = function()
     local ls = require("luasnip")
     local vsc = require("luasnip.loaders.from_vscode")
     local lua = require("luasnip.loaders.from_lua")
