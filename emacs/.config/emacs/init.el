@@ -128,7 +128,8 @@
        (quote (""
                mode-line-frame-identification
                mode-line-modes
-               mode-line-misc-info)))))))
+               mode-line-misc-info
+			   " ")))))))
 
 (use-package doom-themes
   :config
@@ -141,8 +142,6 @@
                     :height 120
                     :weight 'medium)
 (setq-default line-spacing 0.15)
-
-
 
 (use-package emacs
   :bind
@@ -267,6 +266,9 @@
   :config
   (global-flycheck-eglot-mode 1))
 
+(use-package ts-fold
+  :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
+
 (use-package tree-sitter
   :config(global-tree-sitter-mode
           (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
@@ -275,12 +277,15 @@
 
 (use-package treesit-auto
   :config
-  (setq treesit-auto-langs '(lua ruby python rust go toml yaml json php))
+  (setq treesit-auto-langs '(lua ruby zig python rust go toml yaml json php))
   (global-treesit-auto-mode))
 
 (add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.ruby\\'" . ruby-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
 
 (use-package tree-sitter-langs)
 
@@ -363,6 +368,8 @@
   (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
   (add-hook 'python-ts-mode-hook 'eglot-ensure)
   (add-hook 'rust-ts-mode-hook 'eglot-ensure)
+  (add-hook 'js-ts-mode-hook 'eglot-ensure)
+  (add-hook 'typescript-ts-mode-hook 'eglot-ensure)
   (add-hook 'php-mode-hook 'eglot-ensure)
   :custom
   (eglot-autoshutdown t)
@@ -373,14 +380,14 @@
   (eglot-sync-connect nil)
   (eglot-extend-to-xref nil)
   :bind (:map eglot-mode-map
-    		  ("C-c l l" . eldoc-box-help-at-point)
-    		  ("C-c l d" . eglot-find-declaration)
-    		  ("C-c l i" . eglot-find-implementation)
-    		  ("C-c l t" . eglot-find-typeDefinition)
-    		  ("C-c l a" . eglot-code-actions)
-    		  ("C-c l I" . eglot-code-action-organize-imports)
-    		  ("C-c l f" . eglot-format-buffer)
-    		  ("C-c l r" . eglot-rename)))
+        	  ("C-c l l" . eldoc-box-help-at-point)
+        	  ("C-c l d" . eglot-find-declaration)
+        	  ("C-c l i" . eglot-find-implementation)
+        	  ("C-c l t" . eglot-find-typeDefinition)
+        	  ("C-c l a" . eglot-code-actions)
+        	  ("C-c l I" . eglot-code-action-organize-imports)
+        	  ("C-c l f" . eglot-format-buffer)
+        	  ("C-c l r" . eglot-rename)))
 
 (setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
 
@@ -388,7 +395,7 @@
   (add-to-list 'eglot-server-programs
                '(gdscript-mode . ("localhost:6005"))))
 
-          ;;; Mason from neovim is just a great way to manage lsps
+              ;;; Mason from neovim is just a great way to manage lsps
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
                '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
@@ -412,6 +419,14 @@
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
                '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(typescript-ts-mode . ("~/.local/share/nvim/mason/bin/typescript-language-server" "--stdio"))))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '(js-ts-mode . ("~/.local/share/nvim/mason/bin/typescript-language-server" "--stdio"))))
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
@@ -523,16 +538,6 @@
   )
 
 (use-package crux)
-
-(use-package rust-mode
-  :init
-  (setq rust-mode-treesitter-derive t))
-
-(setq rustic-lsp-client 'eglot)
-(setq rustic-analyzer-command '("~/.local/share/nvim/mason/bin/rust-analyzer"))
-
-(use-package rustic
-  :after (rust-mode))
 
 (use-package pet
   :config
@@ -803,7 +808,7 @@
 (global-set-key (kbd "C-c C r") 'recompile)
 (global-set-key (kbd "C-c C k") 'kill-compilation)
 
-(global-set-key (kbd "C-c C e i") 'compilation-next-error)
+(global-set-key (kbd "C-c C e j") 'compilation-next-error)
 (global-set-key (kbd "C-c C e k") 'compilation-previous-error)
 (global-set-key (kbd "C-c C e l") 'consult-compile-error)
 

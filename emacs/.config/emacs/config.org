@@ -18,7 +18,6 @@
   - [[#modeline][Modeline]]
   - [[#theme][Theme]]
   - [[#font][Font]]
-  - [[#modeline-1][Modeline]]
   - [[#zoom][Zoom]]
   - [[#which-key][Which Key]]
 - [[#completions][Completions]]
@@ -29,6 +28,7 @@
   - [[#infos][Infos]]
   - [[#error][Error]]
   - [[#syntax-hightlighting][Syntax Hightlighting]]
+    - [[#folding][Folding]]
     - [[#treesitter-config][Treesitter Config]]
     - [[#php-mode][PHP Mode]]
     - [[#lua-mode][Lua Mode]]
@@ -59,7 +59,6 @@
   - [[#usefull-commands][Usefull commands]]
   - [[#collection-of-usefull-commands][Collection of usefull commands]]
 - [[#file-spezific-modes][File spezific Modes]]
-  - [[#rust][Rust]]
   - [[#python][Python]]
   - [[#markdown][Markdown]]
     - [[#obsidian][Obsidian]]
@@ -246,7 +245,8 @@ Ensure the Emacs server is started if not already running
            (quote (""
                    mode-line-frame-identification
                    mode-line-modes
-                   mode-line-misc-info)))))))
+                   mode-line-misc-info
+    			   " ")))))))
 
 #+END_SRC
 
@@ -268,10 +268,6 @@ Ensure the Emacs server is started if not already running
     (setq-default line-spacing 0.15)
 #+END_SRC
 
-** Modeline
-#+BEGIN_SRC emacs-lisp
-
-#+END_SRC
 ** Zoom
 #+BEGIN_SRC emacs-lisp
     (use-package emacs
@@ -419,6 +415,11 @@ Connection flycheck with eglot and the lsps
       (global-flycheck-eglot-mode 1))
 #+end_src
 ** Syntax Hightlighting
+*** Folding
+#+BEGIN_SRC emacs-lisp 
+    (use-package ts-fold
+      :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
+#+END_SRC
 *** Treesitter Config
 #+begin_src emacs-lisp
     (use-package tree-sitter
@@ -429,12 +430,15 @@ Connection flycheck with eglot and the lsps
 
     (use-package treesit-auto
       :config
-      (setq treesit-auto-langs '(lua ruby python rust go toml yaml json php))
+      (setq treesit-auto-langs '(lua ruby zig python rust go toml yaml json php))
       (global-treesit-auto-mode))
 
     (add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.ruby\\'" . ruby-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
 #+end_src
 **** Treesitter Pre Compiles Langs
 #+BEGIN_SRC emacs-lisp
@@ -534,6 +538,8 @@ Connection flycheck with eglot and the lsps
       (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
       (add-hook 'python-ts-mode-hook 'eglot-ensure)
       (add-hook 'rust-ts-mode-hook 'eglot-ensure)
+      (add-hook 'js-ts-mode-hook 'eglot-ensure)
+      (add-hook 'typescript-ts-mode-hook 'eglot-ensure)
       (add-hook 'php-mode-hook 'eglot-ensure)
       :custom
       (eglot-autoshutdown t)
@@ -544,14 +550,14 @@ Connection flycheck with eglot and the lsps
       (eglot-sync-connect nil)
       (eglot-extend-to-xref nil)
       :bind (:map eglot-mode-map
-        		  ("C-c l l" . eldoc-box-help-at-point)
-        		  ("C-c l d" . eglot-find-declaration)
-        		  ("C-c l i" . eglot-find-implementation)
-        		  ("C-c l t" . eglot-find-typeDefinition)
-        		  ("C-c l a" . eglot-code-actions)
-        		  ("C-c l I" . eglot-code-action-organize-imports)
-        		  ("C-c l f" . eglot-format-buffer)
-        		  ("C-c l r" . eglot-rename)))
+            	  ("C-c l l" . eldoc-box-help-at-point)
+            	  ("C-c l d" . eglot-find-declaration)
+            	  ("C-c l i" . eglot-find-implementation)
+            	  ("C-c l t" . eglot-find-typeDefinition)
+            	  ("C-c l a" . eglot-code-actions)
+            	  ("C-c l I" . eglot-code-action-organize-imports)
+            	  ("C-c l f" . eglot-format-buffer)
+            	  ("C-c l r" . eglot-rename)))
 
     (setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
 
@@ -559,7 +565,7 @@ Connection flycheck with eglot and the lsps
       (add-to-list 'eglot-server-programs
                    '(gdscript-mode . ("localhost:6005"))))
 
-              ;;; Mason from neovim is just a great way to manage lsps
+                  ;;; Mason from neovim is just a great way to manage lsps
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
                    '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
@@ -583,6 +589,14 @@ Connection flycheck with eglot and the lsps
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
                    '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(typescript-ts-mode . ("~/.local/share/nvim/mason/bin/typescript-language-server" "--stdio"))))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(js-ts-mode . ("~/.local/share/nvim/mason/bin/typescript-language-server" "--stdio"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
@@ -763,18 +777,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+END_SRC
 
 * File spezific Modes
-** Rust
-#+BEGIN_SRC emacs-lisp 
-    (use-package rust-mode
-      :init
-      (setq rust-mode-treesitter-derive t))
-
-    (setq rustic-lsp-client 'eglot)
-    (setq rustic-analyzer-command '("~/.local/share/nvim/mason/bin/rust-analyzer"))
-
-    (use-package rustic
-      :after (rust-mode))
-#+END_SRC
 ** Python
 #+begin_src emacs-lisp
     (use-package pet
@@ -1094,7 +1096,7 @@ Make compilation look better and therefore make it work with modern tools
     (global-set-key (kbd "C-c C r") 'recompile)
     (global-set-key (kbd "C-c C k") 'kill-compilation)
 
-    (global-set-key (kbd "C-c C e i") 'compilation-next-error)
+    (global-set-key (kbd "C-c C e j") 'compilation-next-error)
     (global-set-key (kbd "C-c C e k") 'compilation-previous-error)
     (global-set-key (kbd "C-c C e l") 'consult-compile-error)
 #+END_SRC
