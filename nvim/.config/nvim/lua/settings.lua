@@ -76,6 +76,9 @@ M.lsp_servers = {
 -- Non LSP Tools that should be installed by Mason
 M.tools = {
     "glow",
+
+    -- Formatters
+    "stylua"
 }
 
 -- enable greping in hidden files
@@ -141,6 +144,7 @@ M.icons = {
         Warning = " ",
         Warn = " ",
     },
+
     git = {
         Add = " ",
         Diff = " ",

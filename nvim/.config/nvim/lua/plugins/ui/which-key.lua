@@ -14,24 +14,24 @@ vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<cr><esc>", { desc = "Clear hlsea
 vim.keymap.set("x", "<leader>re", function() require("refactoring").refactor("Extract Function") end,
     { desc = "Extract Function" })
 vim.keymap.set("x", "<leader>rf", function() require("refactoring").refactor("Extract Function To File") end,
-    { desc = "Extract Function To File" })                                                                                                           -- Extract function supports only visual mode
+    { desc = "Extract Function To File" }) -- Extract function supports only visual mode
 vim.keymap.set("x", "<leader>rv", function() require("refactoring").refactor("Extract Variable") end,
-    { desc = "Extract Variable" })                                                                                                                   -- Extract variable supports only visual mode
+    { desc = "Extract Variable" })         -- Extract variable supports only visual mode
 vim.keymap.set("n", "<leader>rI", function() require("refactoring").refactor("Inline Function") end,
-    { desc = "Inline Function" })                                                                                                                    -- Inline func supports only normal
+    { desc = "Inline Function" })          -- Inline func supports only normal
 vim.keymap.set({ "n", "x" }, "<leader>ri", function() require("refactoring").refactor("Inline Variable") end,
-    { desc = "Inline Variable" })                                                                                                                    -- Inline var supports both normal and visual mode
+    { desc = "Inline Variable" })          -- Inline var supports both normal and visual mode
 vim.keymap.set("n", "<leader>rb", function() require("refactoring").refactor("Extract Block") end,
     { desc = "Extract Block" })
 vim.keymap.set("n", "<leader>rbf", function() require("refactoring").refactor("Extract Block To File") end,
-    { desc = "Extract Block to File" })                                                                                                              -- Extract block supports only normal mode
+    { desc = "Extract Block to File" }) -- Extract block supports only normal mode
 
 -- Quickfix List
 vim.keymap.set("n", "<leader>QC",
-  function()
-    vim.fn.setqflist({})
-  end,
-  { desc = "Clear Quickfix List" }
+    function()
+        vim.fn.setqflist({})
+    end,
+    { desc = "Clear Quickfix List" }
 )
 
 -- Terminal --
@@ -48,6 +48,9 @@ local M = {
     event = "VeryLazy",
     opts = {},
     keys = {
+        { "<leader>Q",   "",                                      desc = "+Quickfix" },
+        { "<leader>l",   "",                                      desc = "+LSP" },
+        { "<leader>e",   "",                                      desc = "+Errors" },
         { "<leader>m",   "",                                      desc = "+Misc" },
         { "<leader>b",   "",                                      desc = "+Buffer" },
 
@@ -69,13 +72,14 @@ local M = {
             desc = "Window Hydra Mode",
         },
 
+        { "<leader>mf",  "<cmd>Format<cr>",                        desc = "Format" },
 
-        { "<leader>mS",   "",                                       desc = "+Spell" },
-        { "<leader>mSN", "]s",                                      desc = "Next Spell" },
-        { "<leader>mSP", "[s",                                      desc = "Prev Spell" },
-        { "<leader>mSS", function() utils.switch_spell_lang() end,  desc = "Switch spell" },
-        { "<leader>mSA", "zg",                                      desc = "Add word" },
-        { "<leader>mSf", "1z=",                                     desc = "First suggestion" },
+        { "<leader>mS",  "",                                       desc = "+Spell" },
+        { "<leader>mSN", "]s",                                     desc = "Next Spell" },
+        { "<leader>mSP", "[s",                                     desc = "Prev Spell" },
+        { "<leader>mSS", function() utils.switch_spell_lang() end, desc = "Switch spell" },
+        { "<leader>mSA", "zg",                                     desc = "Add word" },
+        { "<leader>mSf", "1z=",                                    desc = "First suggestion" },
         {
             "<leader>mS<space>",
             function()
