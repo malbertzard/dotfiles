@@ -8,7 +8,7 @@ return {
 
         },
         sections = {
-            lualine_a = { project_name },
+            lualine_a = { "mode" },
             lualine_b = { "branch", "diff", "diagnostics" },
             lualine_c = {
                 {

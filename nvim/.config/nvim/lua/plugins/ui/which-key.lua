@@ -2,8 +2,6 @@
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 
-vim.keymap.set("n", "q:", "")
-
 -- Better paste
 vim.keymap.set("v", "p", '"_dP')
 
