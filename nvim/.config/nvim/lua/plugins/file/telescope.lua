@@ -6,7 +6,8 @@ local M = {
         "nvim-telescope/telescope-ui-select.nvim",
         "lpoto/telescope-docker.nvim",
         "tsakirist/telescope-lazy.nvim",
-        "debugloop/telescope-undo.nvim"
+        "debugloop/telescope-undo.nvim",
+        { 'nvim-telescope/telescope-fzf-native.nvim', build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release' }
     },
     keys = {
         { "<leader>s",   "",                                                       desc = "+Search" },
@@ -41,6 +42,13 @@ local M = {
                 ["ui-select"] = {
                     require("telescope.themes").get_dropdown({}),
                 },
+
+                fzf = {
+                    fuzzy = true,                   -- false will only do exact matching
+                    override_generic_sorter = true, -- override the generic sorter
+                    override_file_sorter = true,    -- override the file sorter
+                    case_mode = "smart_case",       -- or "ignore_case" or "respect_case"
+                }
             },
             pickers = {
                 find_files = {
@@ -125,6 +133,7 @@ local M = {
         telescope.load_extension("lazy")
         telescope.load_extension("ui-select")
         telescope.load_extension("undo")
+        telescope.load_extension("fzf")
     end,
 }
 

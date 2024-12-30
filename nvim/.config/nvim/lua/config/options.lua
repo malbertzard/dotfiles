@@ -3,7 +3,7 @@ vim.opt.cmdheight = 0
 vim.opt.conceallevel = 0     -- so that `` is visible in markdown files
 vim.opt.ignorecase = true    -- ignore case in search patterns
 vim.opt.pumheight = 10       -- pop up menu height
-vim.opt.showmode = false      -- we don't need to see things like -- INSERT -- anymore
+vim.opt.showmode = false     -- we don't need to see things like -- INSERT -- anymore
 
 vim.opt.smartcase = true     -- smart case
 vim.opt.splitbelow = true    -- force all horizontal splits to go below current window
