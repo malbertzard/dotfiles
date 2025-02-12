@@ -2,6 +2,8 @@
 vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 
+vim.keymap.set("v", "<leader>my", '"+y', {desc = "Yank into clipboard"})
+
 -- Better paste
 vim.keymap.set("v", "p", '"_dP')
 
