@@ -19,7 +19,7 @@ return {
                 hunk = { "", "" },
             },
             integrations = { diffview = true },
-            use_telescope = true,
+            use_telescope = false,
         },
         keys = {
             { "<leader>gg", '<cmd>Neogit<cr>', desc = "Neogit" },

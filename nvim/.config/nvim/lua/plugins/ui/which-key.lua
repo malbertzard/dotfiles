@@ -46,21 +46,20 @@ local M = {
     event = "VeryLazy",
     opts = {},
     keys = {
-        { "<leader>Q",   "",                                      desc = "+Quickfix" },
-        { "<leader>l",   "",                                      desc = "+LSP" },
-        { "<leader>e",   "",                                      desc = "+Errors" },
-        { "<leader>m",   "",                                      desc = "+Misc" },
-        { "<leader>b",   "",                                      desc = "+Buffer" },
+        { "<leader>Q",   "",                             desc = "+Quickfix" },
+        { "<leader>l",   "",                             desc = "+LSP" },
+        { "<leader>e",   "",                             desc = "+Errors" },
+        { "<leader>m",   "",                             desc = "+Misc" },
+        { "<leader>b",   "",                             desc = "+Buffer" },
 
-        { "<leader>t",   "",                                      desc = "+Term" },
-        { "<leader>tt",  function() Snacks.terminal.toggle() end, desc = "Toggle Terminal" },
+        { "<leader>T",   "",                             desc = "+Term" },
 
-        { "<leader>tn",  "",                                      desc = "+Tab" },
-        { "<leader>tnh", "<cmd>tabnew | term htop <cr>",          desc = "htop" },
-        { "<leader>tnt", "<cmd>tabnew | term<cr>",                desc = "Tab Term" },
+        { "<leader>Tn",  "",                             desc = "+Tab" },
+        { "<leader>Tnh", "<cmd>tabnew | term htop <cr>", desc = "htop" },
+        { "<leader>Tnt", "<cmd>tabnew | term<cr>",       desc = "Tab Term" },
 
-        { "<leader>ts",  "<cmd>split | term<cr>",                 desc = "sSplit Term" },
-        { "<leader>tv",  "<cmd>vsplit | term<cr>",                desc = "vSplit Term" },
+        { "<leader>Ts",  "<cmd>split | term<cr>",        desc = "sSplit Term" },
+        { "<leader>Tv",  "<cmd>vsplit | term<cr>",       desc = "vSplit Term" },
 
         {
             "<c-w><space>",

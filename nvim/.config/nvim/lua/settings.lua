@@ -54,6 +54,7 @@ M.lsp_servers = {
     "rust_analyzer",
     "gopls",
     "lua_ls",
+    "pyright",
 
     -- Work JS Stuff
     -- "tsserver",
