@@ -20,7 +20,6 @@
       git
       neovim
       screen
-      cowsay
     ]
     ++ mkLinuxOnly [
       parted

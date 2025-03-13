@@ -1,7 +1,7 @@
 #+Title: Emacs Config
 #+Author: Mathis Albertzard
 #+Description: My Config based on a starter config probably don't use this I have no clue
-#+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
 
 * Table Of Contents :toc_3:
 - [[#grunt-work-to-make-emacs-behave][Grunt work to make emacs behave]]
@@ -11,7 +11,6 @@
   - [[#performance-tweaks][Performance Tweaks]]
   - [[#start-emacs-server-on-startup][Start emacs server on startup]]
   - [[#save-changes-automaticly][Save changes automaticly]]
-  - [[#making-repetions-easier][Making repetions easier]]
 - [[#ui-stuff][UI Stuff]]
   - [[#line-numbers][Line Numbers]]
   - [[#scroll-margins][Scroll Margins]]
@@ -30,17 +29,15 @@
   - [[#syntax-hightlighting][Syntax Hightlighting]]
     - [[#folding][Folding]]
     - [[#treesitter-config][Treesitter Config]]
-    - [[#php-mode][PHP Mode]]
     - [[#lua-mode][Lua Mode]]
   - [[#lsp][LSP]]
     - [[#dape][Dape]]
     - [[#eglot][Eglot]]
-    - [[#eglot-booster][Eglot Booster]]
   - [[#terminal-emulation][Terminal Emulation]]
   - [[#docker][Docker]]
 - [[#project-managment][Project Managment]]
-  - [[#projectile][Projectile]]
-  - [[#perspective][Perspective]]
+  - [[#tab-groups-per-project][Tab Groups per project]]
+  - [[#projectel][Project.el]]
   - [[#editor-conf][Editor Conf]]
   - [[#git-stuff][Git Stuff]]
     - [[#magit][Magit]]
@@ -55,13 +52,11 @@
   - [[#better-undo-and-redo][Better undo and redo]]
   - [[#making-emacs-more-explorable][Making emacs more explorable]]
   - [[#manage-system-packages-from-inside-emacs][Manage System packages from inside Emacs]]
-  - [[#devdocs][DevDocs]]
   - [[#usefull-commands][Usefull commands]]
   - [[#collection-of-usefull-commands][Collection of usefull commands]]
 - [[#file-spezific-modes][File spezific Modes]]
   - [[#python][Python]]
   - [[#markdown][Markdown]]
-    - [[#obsidian][Obsidian]]
     - [[#markdown-mode][Markdown Mode]]
   - [[#org][Org]]
     - [[#org-mode][Org Mode]]
@@ -81,41 +76,20 @@
     - [[#error-1][Error]]
   - [[#replacing-stuff][Replacing stuff]]
   - [[#finding-stuff][Finding Stuff]]
-  - [[#other-stuff][Other Stuff]]
-    - [[#project-mangent][Project Mangent]]
 
 * Grunt work to make emacs behave
 ** Bootstrapping and installing packages
 
-straight.el: Bootstraps the straight.el package manager, ensuring it's installed and up-to-date.
-use-package: Configures use-package for package management, ensuring packages are installed via straight.el.
-
 #+begin_src emacs-lisp
-    (defvar bootstrap-version)
-    (let ((bootstrap-file
-           (expand-file-name
-            "straight/repos/straight.el/bootstrap.el"
-            (or (bound-and-true-p straight-base-dir)
-                user-emacs-directory)))
-          (bootstrap-version 7))
-      (unless (file-exists-p bootstrap-file)
-        (with-current-buffer
-            (url-retrieve-synchronously
-             "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-             'silent 'inhibit-cookies)
-          (goto-char (point-max))
-          (eval-print-last-sexp)))
-      (load bootstrap-file nil 'nomessage))
-
-    (straight-use-package 'use-package)
-    (straight-use-package 'org)
-
-    (setq straight-use-package-by-default t)
+    (setq package-enable-at-startup nil)
+    (setq use-package-ensure-function 'ignore)
+    (setq package-archives nil)
 #+end_src
 
 ** Keep folders clean
 #+begin_src emacs-lisp
     (use-package no-littering
+      :ensure t
       :config
       (no-littering-theme-backups))
 
@@ -125,6 +99,7 @@ use-package: Configures use-package for package management, ensuring packages ar
 ** Sensible Defaults
 #+BEGIN_SRC emacs-lisp
     (use-package emacs
+      :ensure nil
       :custom
       (menu-bar-mode nil)         
       (scroll-bar-mode nil)       
@@ -154,9 +129,7 @@ use-package: Configures use-package for package management, ensuring packages ar
 #+END_SRC
 ** Performance Tweaks
 #+begin_src emacs-lisp
-    ;; Make gc pauses faster by decreasing the threshold.
     (setq gc-cons-threshold (* 2 1000 1000))
-    ;; Increase the amount of data which Emacs reads from the process
     (setq read-process-output-max (* 1024 1024)) ;; 1mb
 #+END_SRC
 
@@ -175,14 +148,11 @@ Ensure the Emacs server is started if not already running
 
     (setq auto-save-visited-interval 2)
 #+END_SRC
-** Making repetions easier
-#+BEGIN_SRC emacs-lisp 
-    ;;;(repeat-mode)
-#+END_SRC
 * UI Stuff
 ** Line Numbers
 #+BEGIN_SRC emacs-lisp 
     (use-package emacs
+      :ensure nil
       :custom
       (display-line-numbers-type 'relative) 
       (global-display-line-numbers-mode t))
@@ -206,12 +176,14 @@ Ensure the Emacs server is started if not already running
 ** Modeline
 #+BEGIN_SRC emacs-lisp
     (use-package time
+      :ensure nil
       :config
       (setq display-time-24hr-format t)
       (setq display-time-default-load-average nil)
       (display-time-mode 1))
 
     (use-package battery
+      :ensure nil
       :config
       (setq battery-mode-line-format "[%b%p%%]")  ; Custom battery format to ensure the percentage sign is included
       (display-battery-mode 1))
@@ -228,6 +200,7 @@ Ensure the Emacs server is started if not already running
                 right)))
 
     (use-package minions
+      :ensure t
       :config (minions-mode 1)
       :init
       (setq-default
@@ -253,6 +226,7 @@ Ensure the Emacs server is started if not already running
 ** Theme
 #+BEGIN_SRC emacs-lisp
     (use-package doom-themes
+      :ensure t
       :config
       (setq doom-themes-enable-bold t
             doom-themes-enable-italic t)
@@ -271,6 +245,7 @@ Ensure the Emacs server is started if not already running
 ** Zoom
 #+BEGIN_SRC emacs-lisp
     (use-package emacs
+      :ensure nil
       :bind
       ("C-+" . text-scale-increase)
       ("C--" . text-scale-decrease)
@@ -280,7 +255,8 @@ Ensure the Emacs server is started if not already running
 
 ** Which Key
 #+BEGIN_SRC emacs-lisp
-    (use-package which-key)
+    (use-package which-key
+      :ensure nil)
     (setq which-key-popup-type 'minibuffer)
     (which-key-mode)
 #+END_SRC
@@ -289,11 +265,13 @@ Ensure the Emacs server is started if not already running
 #+BEGIN_SRC emacs-lisp
             ;;; Completions
     (use-package orderless
+      :ensure t
       :custom
       (completion-styles '(orderless basic))
       (completion-category-overrides '((file (styles basic partial-completion)))))
 
     (use-package corfu
+      :ensure t
       :after orderless
       :custom
       (corfu-cycle nil)
@@ -312,10 +290,12 @@ Ensure the Emacs server is started if not already running
       (global-corfu-mode))
 
     (use-package nerd-icons-corfu
+      :ensure t
       :after corfu
       :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
     (use-package kind-icon
+      :ensure t
       :after corfu
       :custom
       (kind-icon-use-icons t)
@@ -326,6 +306,7 @@ Ensure the Emacs server is started if not already running
       (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
     (use-package cape
+      :ensure t
       :after corfu
       :init
       (add-to-list 'completion-at-point-functions #'cape-dabbrev)
@@ -343,6 +324,7 @@ Ensure the Emacs server is started if not already running
 ** Vertical Completions
 #+BEGIN_SRC emacs-lisp
     (use-package vertico
+      :ensure t
       :bind (:map vertico-map
                   ("<tab>" . vertico-insert)
                   ("C-j" . vertico-next)
@@ -356,6 +338,7 @@ Ensure the Emacs server is started if not already running
       (vertico-mode))
 
     (use-package marginalia
+      :ensure t
       :after vertico
       :custom
       (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
@@ -363,6 +346,7 @@ Ensure the Emacs server is started if not already running
       (marginalia-mode))
 
     (use-package nerd-icons-completion
+      :ensure t
       :after marginalia
       :config
       (nerd-icons-completion-mode)
@@ -372,12 +356,14 @@ Ensure the Emacs server is started if not already running
 ** Actions on completions
 #+BEGIN_SRC emacs-lisp
     (use-package embark
+      :ensure t
       :bind (("C-." . embark-act)
              :map minibuffer-local-map
              ("C-c C-c" . embark-collect)
              ("C-c C-e" . embark-export)))
 
     (use-package embark-consult
+      :ensure t
       :hook
       (embark-collect-mode . consult-preview-at-point-mode))
 #+END_SRC
@@ -391,6 +377,7 @@ Ensure the Emacs server is started if not already running
     (setq eldoc-idle-delay 0.1)
 
     (use-package eldoc-box
+      :ensure t
       :after eglot      
       :config
       ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
@@ -400,16 +387,14 @@ Ensure the Emacs server is started if not already running
 ** Error 
 Lets use flycheck and not flymake
 #+BEGIN_SRC emacs-lisp
-    (use-package flycheck)
-#+end_src
-
-#+BEGIN_SRC emacs-lisp
-    (use-package flycheck-projectile)
+    (use-package flycheck
+      :ensure t)
 #+end_src
 
 Connection flycheck with eglot and the lsps
 #+BEGIN_SRC emacs-lisp
     (use-package flycheck-eglot
+      :ensure t
       :after (flycheck eglot)
       :config
       (global-flycheck-eglot-mode 1))
@@ -417,18 +402,20 @@ Connection flycheck with eglot and the lsps
 ** Syntax Hightlighting
 *** Folding
 #+BEGIN_SRC emacs-lisp 
-    (use-package ts-fold
-      :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
+    ;; (use-package ts-fold
+    ;;   :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
 #+END_SRC
 *** Treesitter Config
 #+begin_src emacs-lisp
     (use-package tree-sitter
+      :ensure nil
       :config(global-tree-sitter-mode
               (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
     (setq treesit-font-lock-level 4)
 
     (use-package treesit-auto
+      :ensure t 
       :config
       (setq treesit-auto-langs '(lua ruby zig python rust go toml yaml json php))
       (global-treesit-auto-mode))
@@ -442,11 +429,12 @@ Connection flycheck with eglot and the lsps
 #+end_src
 **** Treesitter Pre Compiles Langs
 #+BEGIN_SRC emacs-lisp
-    (use-package tree-sitter-langs)
+    (use-package tree-sitter-langs
+      :ensure t)
 
     (defun my/move-tree-sitter-grammar-files ()
       "Move all files from `tree-sitter-langs-grammar-dir/bin` to `~/.config/emacs/tree-sitter`,
-          appending 'libtree-sitter-' to the front of each filename."
+              appending 'libtree-sitter-' to the front of each filename."
       (interactive)
       (let* ((source-dir (expand-file-name "bin" tree-sitter-langs-grammar-dir))
              (target-dir (expand-file-name "~/.config/emacs/tree-sitter"))
@@ -494,19 +482,16 @@ Connection flycheck with eglot and the lsps
 
 #+END_SRC
 
-*** PHP Mode
-#+BEGIN_SRC emacs-lisp
-    (use-package php-mode)
-#+END_SRC
 *** Lua Mode
 #+BEGIN_SRC emacs-lisp
-    (use-package lua-mode)
+    (use-package lua-mode :ensure t)
 #+END_SRC
 
 ** LSP
 *** Dape
 #+BEGIN_SRC emacs-lisp
     (use-package dape
+      :ensure t
       :preface
       (setq dape-key-prefix "\C-c L")
       :config 
@@ -532,7 +517,7 @@ Connection flycheck with eglot and the lsps
 *** Eglot
 #+BEGIN_SRC emacs-lisp
     (use-package eglot
-      :straight nil ;; Don't install eglot because it's now built-in
+      :ensure nil ;; Don't install eglot because it's now built-in
       :config
       (add-hook 'go-ts-mode-hook 'eglot-ensure)
       (add-hook 'ruby-ts-mode-hook 'eglot-ensure)
@@ -573,81 +558,41 @@ Connection flycheck with eglot and the lsps
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
                    '(rust-ts-mode . ("~/.local/share/nvim/mason/bin/rust-analyzer"))))
-
-    ;; (with-eval-after-load 'eglot
-    ;;   (add-to-list 'eglot-server-programs
-    ;;                '(php-ts-mode . ("~/.local/share/nvim/mason/bin/phpactor" "language-server"))))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(php-mode . ("~/.local/share/nvim/mason/bin/intelephense" "--stdio"))))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(go-ts-mode . ("~/.local/share/nvim/mason/bin/gopls"))))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(ruby-ts-mode . ("~/.local/share/nvim/mason/bin/ruby-lsp"))))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(typescript-ts-mode . ("~/.local/share/nvim/mason/bin/typescript-language-server" "--stdio"))))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(js-ts-mode . ("~/.local/share/nvim/mason/bin/typescript-language-server" "--stdio"))))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
-
-#+END_SRC
-
-*** Eglot Booster
-I still need to install the rust binary and to make this work
-#+BEGIN_SRC emacs-lisp 
-    ;; (use-package eglot-booster
-    ;;   :straight (eglot-booster :type git :host github :repo "jdtsmith/eglot-booster")
-    ;; 	:after eglot
-    ;; 	:config	(eglot-booster-mode))
 #+END_SRC
 
 ** Terminal Emulation
 #+begin_src emacs-lisp
     (use-package eat
+      :ensure t
       :hook ('eshell-load-hook #'eat-eshell-mode))
 #+END_SRC
 
 ** Docker
 #+begin_src emacs-lisp
     (use-package docker
-      :straight t
+      :ensure t
       :bind ("C-c D" . docker))
 #+end_src
 * Project Managment
-** Projectile 
-Adds functions to work with projects
+** Tab Groups per project
 #+BEGIN_SRC emacs-lisp
-    (use-package projectile
-      :init
-      (projectile-mode)
-      :custom
-      (projectile-run-use-comint-mode t) ;; Interactive run dialog when running projects inside emacs (like giving input)
-      (projectile-switch-project-action #'projectile-dired) ;; Open dired when switching to a project
-      (projectile-project-search-path '("~/projects/" "~/work/" ("~/code" . 2)))) ;; . 1 means only search the first subdirectory level for projects
-    (setq persp-suppress-no-prefix-key-warning 't)
+    (setq tab-bar-show 'nil)
+
+    (setq tab-bar-format '(tab-bar-format-history tab-bar-format-tabs-groups tab-bar-separator tab-bar-format-add-tab))
+
+    (use-package project-tab-groups
+      :ensure
+      :config
+      (project-tab-groups-mode 1))
+
 #+END_SRC
 
-** Perspective 
-My replacement for tmux
+** Project.el
+We want to use the same Configurations as out teamsmates
 #+BEGIN_SRC emacs-lisp
-    (use-package perspective
-      :init
-      (persp-mode))
-
-    ;;; Each Project has its own perspective
-    (use-package persp-projectile)
+    ;; (use-package project
+    ;;   :ensure nil
+    ;;   :bind-keymap("C-c p" . project-prefix-map))
 #+END_SRC
 
 ** Editor Conf
@@ -662,9 +607,11 @@ We want to use the same Configurations as out teamsmates
 *** Magit
 #+BEGIN_SRC emacs-lisp
     (use-package magit
+      :ensure t
       :commands magit-status)
 
     (use-package magit-todos
+      :ensure t
       :after magit
       :config (magit-todos-mode 1))
 #+END_SRC
@@ -672,18 +619,19 @@ We want to use the same Configurations as out teamsmates
 *** Gutter
 #+begin_src emacs-lisp
     (use-package git-gutter
+      :ensure t
       :config(global-git-gutter-mode +1))
 #+end_src
 
 ** File Managment
 *** Wgrep
 #+begin_src emacs-lisp
-    (use-package wgrep)
+    (use-package wgrep :ensure t)
 #+END_SRC
 *** Dired Tweaks
 #+BEGIN_SRC emacs-lisp 
     (use-package dired
-      :straight nil ;; built-in
+      :ensure nil ;; built-in
       :hook
       (dired-mode . dired-hide-details-mode)
       :config
@@ -705,18 +653,18 @@ We want to use the same Configurations as out teamsmates
 
 *** Harpoon
 #+BEGIN_SRC  emacs-lisp
-    (use-package harpoon)
+    (use-package harpoon :ensure t)
 #+END_SRC
 
 * Helper packages
 ** Surround
 #+BEGIN_SRC emacs-lisp 
-    (use-package surround)
+    (use-package surround :ensure t)
 #+END_SRC
 
 ** Move Files
 #+BEGIN_SRC emacs-lisp 
-    (use-package move-text)
+    (use-package move-text :ensure t)
 
     (global-set-key (kbd "M-j") 'move-text-down)
     (global-set-key (kbd "M-k") 'move-text-up)
@@ -725,85 +673,56 @@ We want to use the same Configurations as out teamsmates
 ** Better undo and redo 
 #+BEGIN_SRC emacs-lisp
     (use-package undo-tree
+      :ensure t
       :config (global-undo-tree-mode))
 #+END_SRC
 
 ** Making emacs more explorable
 #+BEGIN_SRC emacs-lisp
-    (use-package helpful)
+    (use-package helpful :ensure t)
 #+END_SRC
 
 ** Manage System packages from inside Emacs
 #+BEGIN_SRC emacs-lisp
-    (use-package system-packages)
+    (use-package system-packages :ensure t)
 #+END_SRC
-
-** DevDocs
-#+begin_src emacs-lisp
-    (use-package devdocs)
-#+end_src
 
 ** Usefull commands
 Provides search and navigation commands based on the Emacs completion function.
 Check out their [[https://github.com/minad/consult][git repository]] for more awesome functions.
 #+begin_src emacs-lisp
     (use-package consult
-      ;; Enable automatic preview at point in the *Completions* buffer. This is
-      ;; relevant when you use the default completion UI.
+      :ensure t
       :hook (completion-list-mode . consult-preview-at-point-mode)
       :init
-      ;; Optionally configure the register formatting. This improves the register
-      ;; preview for `consult-register', `consult-register-load',
-      ;; `consult-register-store' and the Emacs built-ins.
       (setq register-preview-delay 0.5
             register-preview-function #'consult-register-format)
-
-      ;; Optionally tweak the register preview window.
-      ;; This adds thin lines, sorting and hides the mode line of the window.
       (advice-add #'register-preview :override #'consult-register-window)
-
-      ;; Use Consult to select xref locations with preview
       (setq xref-show-xrefs-function #'consult-xref
             xref-show-definitions-function #'consult-xref)
-      :config
-      (autoload 'projectile-project-root "projectile")
-      (setq consult-project-function (lambda (_) (projectile-project-root)))
       )
 #+end_src
 
 ** Collection of usefull commands
 #+BEGIN_SRC emacs-lisp
-    (use-package crux)
+    (use-package crux :ensure t)
 #+END_SRC
 
 * File spezific Modes
 ** Python
 #+begin_src emacs-lisp
     (use-package pet
+      :ensure t
       :config
       (add-hook 'python-base-mode-hook 'pet-mode -10))
 
-    (use-package pyvenv)
+    (use-package pyvenv :ensure t)
 #+END_SRC
 ** Markdown
-*** Obsidian
-#+begin_src emacs-lisp
-    (use-package obsidian
-      :demand t
-      :config
-      (obsidian-specify-path "~/code/Cadmus/")
-      (global-obsidian-mode t)
-      :custom
-      (obsidian-inbox-directory "Inbox")
-      (obsidian-daily-notes-directory "Daily Notes")
-      :bind (:map obsidian-mode-map
-    			  ("C-c C-o" . obsidian-follow-link-at-point)
-    			  ("C-c C-b" . obsidian-backlink-jump)
-    			  ("C-c C-l" . obsidian-insert-wikilink)))
-#+END_SRC
 *** Markdown Mode
 #+begin_src emacs-lisp
     (use-package markdown-mode
+      :ensure t
       :mode ("README\\.md\\'" . gfm-mode)
       :init (setq markdown-command "multimarkdown"))
 #+END_SRC
@@ -812,6 +731,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
 #+begin_src emacs-lisp
     (use-package org
+      :ensure t
       :custom
       (org-edit-src-content-indentation 4) ;; Set src block automatic indent to 4 instead of 2.
       (org-startup-indented t)
@@ -841,6 +761,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 *** Table of Contents
 #+begin_src emacs-lisp
     (use-package toc-org
+      :ensure t
       :after org
       :commands toc-org-enable
       :hook (org-mode . toc-org-mode))
@@ -848,6 +769,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 *** Org Modern
 #+BEGIN_SRC emacs-lisp
     (use-package org-modern
+      :ensure t
       :after  org
       :hook (org-mode . org-modern-mode))
 #+END_SRC
@@ -857,7 +779,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 *** Meow Basic Layout
 
 #+BEGIN_SRC emacs-lisp
-    (use-package meow)
+    (use-package meow :ensure t)
 
     (defun meow-setup ()
       (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -924,7 +846,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        '("K" . meow-prev-expand)
        '("l" . meow-right)
        '("L" . meow-right-expand)
-       '("m" . meow-join)
        '("n" . meow-search)
        '("o" . meow-block)
        '("O" . meow-to-block)
@@ -963,6 +884,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 *** Meow Things for semantic editing
 #+BEGIN_SRC emacs-lisp
     (use-package meow-tree-sitter
+      :ensure t
       :after (meow treesitter))
     (meow-tree-sitter-register-defaults)
 
@@ -1010,7 +932,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (defun my/find-buffer ()
       "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
       (interactive)
-      (if (projectile-project-p)
+      (if (vc-root-dir)
           (consult-project-buffer)
         (consult-buffer)))
 
@@ -1067,6 +989,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 Make compilation look better and therefore make it work with modern tools 
 #+begin_src emacs-lisp
     (use-package fancy-compilation
+      :ensure t
       :config 
       (setq fancy-compilation-override-colors nil)
       :commands (fancy-compilation-mode))
@@ -1110,10 +1033,10 @@ Make compilation look better and therefore make it work with modern tools
 ** Finding Stuff
 #+begin_src emacs-lisp
     (defun my/find-file ()
-      "Use `projectile-find-file` if in a project, otherwise `find-file`."
+      "Use `project-find-file` if in a project, otherwise `find-file`."
       (interactive)
-      (if (projectile-project-p)
-          (projectile-find-file)
+      (if (vc-root-dir)
+          (project-find-file)
         (find-file)))
 
     (global-set-key (kbd "C-c f f") 'my/find-file)
@@ -1137,9 +1060,3 @@ Make compilation look better and therefore make it work with modern tools
     (global-set-key (kbd "C-c H H") 'harpoon-quick-menu-hydra)
 #+END_SRC
 
-** Other Stuff
-*** Project Mangent
-#+BEGIN_SRC emacs-lisp 
-    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-    (define-key projectile-mode-map (kbd "C-c P") 'perspective-map)
-#+END_SRC
