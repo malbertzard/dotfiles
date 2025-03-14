@@ -38,6 +38,7 @@
   - [[#terminal-emulation][Terminal Emulation]]
   - [[#docker][Docker]]
 - [[#project-managment][Project Managment]]
+  - [[#desktop-mode][Desktop mode]]
   - [[#custom-project-functions][Custom Project Functions]]
   - [[#tab-groups-per-project][Tab Groups per project]]
   - [[#editor-conf][Editor Conf]]
@@ -49,6 +50,7 @@
     - [[#dired-tweaks][Dired Tweaks]]
     - [[#harpoon][Harpoon]]
 - [[#helper-packages][Helper packages]]
+  - [[#midnight-commander][Midnight commander]]
   - [[#surround][Surround]]
   - [[#move-files][Move Files]]
   - [[#better-undo-and-redo][Better undo and redo]]
@@ -58,6 +60,7 @@
   - [[#usefull-commands][Usefull commands]]
   - [[#collection-of-usefull-commands][Collection of usefull commands]]
 - [[#file-spezific-modes][File spezific Modes]]
+  - [[#pdf-tools][PDF Tools]]
   - [[#python][Python]]
   - [[#markdown][Markdown]]
     - [[#markdown-mode][Markdown Mode]]
@@ -615,42 +618,48 @@ Connection flycheck with eglot and the lsps
 #+end_src
 
 * Project Managment
+** Desktop mode 
+#+BEGIN_SRC emacs-lisp
+    (setq desktop-path '("~/")) 
+    (desktop-save-mode 1)
+#+END_SRC
+
 ** Custom Project Functions
 #+BEGIN_SRC emacs-lisp
-      (defun my/find-buffer ()
-        "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-        (interactive)
-        (if (vc-root-dir)
-            (consult-project-buffer)
-          (consult-buffer)))
+    (defun my/find-buffer ()
+      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
+      (interactive)
+      (if (vc-root-dir)
+          (consult-project-buffer)
+        (consult-buffer)))
 
-      (defun my/find-file ()
-        "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-        (interactive)
-        (if (vc-root-dir)
-            (project-find-file)
-          (find-file)))
+    (defun my/find-file ()
+      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
+      (interactive)
+      (if (vc-root-dir)
+          (project-find-file)
+        (find-file)))
 
-      (defun my/dired ()
-            "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-    (interactive)
-        (if (vc-root-dir)
-            (project-dired)
-          (dired)))
+    (defun my/dired ()
+      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
+      (interactive)
+      (if (vc-root-dir)
+          (project-dired)
+        (dired)))
 
-      (defun my/eat ()
-        "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-        (interactive)
-        (if (vc-root-dir)
-            (eat-project)
-          (eat)))
+    (defun my/eat ()
+      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
+      (interactive)
+      (if (vc-root-dir)
+          (eat-project)
+        (eat)))
 
-        (defun my/eat-other-window ()
-        "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-      	(interactive)
-      	(if (vc-root-dir)
-      		(eat-project-other-window)
-            (eat-other-window)))
+    (defun my/eat-other-window ()
+      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
+      (interactive)
+      (if (vc-root-dir)
+      	  (eat-project-other-window)
+        (eat-other-window)))
 #+END_SRC
 
 ** Tab Groups per project
@@ -663,7 +672,6 @@ Connection flycheck with eglot and the lsps
       :ensure
       :config
       (project-tab-groups-mode 1))
-
 #+END_SRC
 
 ** Editor Conf
@@ -716,6 +724,8 @@ We want to use the same Configurations as out teamsmates
       (setq dired-use-ls-dired t
             dired-listing-switches "-aBhl  --group-directories-first"))
 
+    (put 'dired-find-alternate-file 'disabled nil)
+
     (use-package nerd-icons-dired
       :after dired
       :hook
@@ -728,7 +738,15 @@ We want to use the same Configurations as out teamsmates
 #+END_SRC
 
 * Helper packages
+** Midnight commander
+Runns clean buffer list at midnight to keep performance up
+#+BEGIN_SRC emacs-lisp
+    (setq midnight-mode t :ensure nil)
+#+END_SRC
+
 ** Surround
+Interact with surrounds remove add them change them
+
 #+BEGIN_SRC emacs-lisp
     (use-package surround :ensure t)
 #+END_SRC
@@ -798,6 +816,12 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+END_SRC
 
 * File spezific Modes
+** PDF Tools
+#+begin_src emacs-lisp
+    (use-package pdf-tools
+      :ensure t)
+#+END_SRC
+
 ** Python
 #+begin_src emacs-lisp
     (use-package pet
@@ -843,7 +867,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
      '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
      '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
 
-    (add-hook 'org-mode-hook 'visual-line-mode)
+    ;; (add-hook 'org-mode-hook 'visual-line-mode)
 
     (setq org-startup-folded 'fold)
 #+end_src
