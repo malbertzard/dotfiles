@@ -1,8 +1,6 @@
 { pkgs, lib, ... }:
 {
   imports = [
-    ../../../features/cli/podman.nix
-
     ../../../features/development/build.nix
 
     ../../../features/development/lua.nix
@@ -11,8 +9,6 @@
     ../../../features/development/go.nix
     ../../../features/development/rust.nix
     ../../../features/development/devops.nix
-
-    ../../../features/application/vscode.nix
   ];
   home.packages =
     with pkgs;

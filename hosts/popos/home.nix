@@ -4,11 +4,7 @@ let
 in
 {
   imports = [
-    ../../overlays/emacs.nix
-    ../../home/features/application/emacs.nix
-
     ../../home/flavors/desktop/minimal
-    ../../home/features/application/emacs.nix
     ../../home/flavors/application/development
     ../../home/flavors/application/workstation
   ];

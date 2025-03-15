@@ -22,6 +22,8 @@ let
         epkgs.transient
         epkgs.compat
         epkgs.seq
+        epkgs.popup
+        epkgs.shrink-path
       ];
   };
 in

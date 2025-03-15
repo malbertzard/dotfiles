@@ -5,16 +5,17 @@
 
 * Table Of Contents :toc_3:
 - [[#early-init][Early init]]
-- [[#grunt-work-to-make-emacs-behave][Grunt work to make emacs behave]]
+- [[#grunt-work-to-make-emacs-behave][Grunt work to make Emacs behave]]
   - [[#bootstrapping-and-installing-packages][Bootstrapping and installing packages]]
   - [[#increase-performance][Increase performance]]
   - [[#keep-folders-clean][Keep folders clean]]
   - [[#sensible-defaults][Sensible Defaults]]
   - [[#performance-tweaks][Performance Tweaks]]
-  - [[#start-emacs-server-on-startup][Start emacs server on startup]]
+  - [[#start-emacs-server-on-startup][Start Emacs server on startup]]
   - [[#save-changes-automaticly][Save changes automaticly]]
 - [[#ui-stuff][UI Stuff]]
   - [[#line-numbers][Line Numbers]]
+  - [[#hyperbole][Hyperbole]]
   - [[#scroll-margins][Scroll Margins]]
   - [[#modeline][Modeline]]
   - [[#theme][Theme]]
@@ -25,19 +26,20 @@
   - [[#completions-at-point][Completions at point]]
   - [[#vertical-completions][Vertical Completions]]
   - [[#actions-on-completions][Actions on completions]]
+  - [[#spelling][Spelling]]
 - [[#development][Development]]
-  - [[#infos][Infos]]
+  - [[#infos][Info's]]
   - [[#error][Error]]
-  - [[#syntax-hightlighting][Syntax Hightlighting]]
+  - [[#syntax-highlighting][Syntax Highlighting]]
     - [[#folding][Folding]]
-    - [[#treesitter-config][Treesitter Config]]
+    - [[#tree-sitter-config][Tree-sitter Config]]
     - [[#lua-mode][Lua Mode]]
   - [[#lsp][LSP]]
     - [[#dape][Dape]]
     - [[#eglot][Eglot]]
   - [[#terminal-emulation][Terminal Emulation]]
   - [[#docker][Docker]]
-- [[#project-managment][Project Managment]]
+- [[#project-management][Project Management]]
   - [[#desktop-mode][Desktop mode]]
   - [[#custom-project-functions][Custom Project Functions]]
   - [[#tab-groups-per-project][Tab Groups per project]]
@@ -45,7 +47,7 @@
   - [[#git-stuff][Git Stuff]]
     - [[#magit][Magit]]
     - [[#gutter][Gutter]]
-  - [[#file-managment][File Managment]]
+  - [[#file-management][File Management]]
     - [[#wgrep][Wgrep]]
     - [[#dired-tweaks][Dired Tweaks]]
     - [[#harpoon][Harpoon]]
@@ -57,9 +59,9 @@
   - [[#making-emacs-more-explorable][Making Emacs more explorable]]
   - [[#manage-system-packages-from-inside-emacs][Manage System packages from inside Emacs]]
   - [[#manage-system-processes-from-inside-emacs][Manage System processes from inside Emacs]]
-  - [[#usefull-commands][Usefull commands]]
-  - [[#collection-of-usefull-commands][Collection of usefull commands]]
-- [[#file-spezific-modes][File spezific Modes]]
+  - [[#useful-commands][Useful commands]]
+  - [[#collection-of-useful-commands][Collection of useful commands]]
+- [[#file-specific-modes][File specific Modes]]
   - [[#pdf-tools][PDF Tools]]
   - [[#python][Python]]
   - [[#markdown][Markdown]]
@@ -76,7 +78,7 @@
     - [[#mark-ring-nav][Mark Ring Nav]]
     - [[#buffer][Buffer]]
     - [[#switching-windows][Switching Windows]]
-  - [[#developent][Developent]]
+  - [[#development-1][Development]]
     - [[#git][Git]]
     - [[#terminal][Terminal]]
     - [[#error-1][Error]]
@@ -112,7 +114,7 @@
     (setq package-enable-at-startup nil)
 #+end_src
 
-* Grunt work to make emacs behave
+* Grunt work to make Emacs behave
 ** Bootstrapping and installing packages
 
 #+begin_src emacs-lisp
@@ -183,7 +185,7 @@
     (setq read-process-output-max (* 1024 1024)) ;; 1mb
 #+END_SRC
 
-** Start emacs server on startup
+** Start Emacs server on startup
 Ensure the Emacs server is started if not already running
 #+begin_src emacs-lisp
     (require 'server)
@@ -216,9 +218,17 @@ Ensure the Emacs server is started if not already running
     (add-hook 'org-mode-hook 'disable-line-numbers)
     (add-hook 'compilation-mode-hook 'disable-line-numbers)
 #+end_src
+** Hyperbole
+#+BEGIN_SRC emacs-lisp
+    (use-package hyperbole
+      :ensure t
+      :config (hyperbole-mode t))
+#+END_SRC
+
 ** Scroll Margins
 #+BEGIN_SRC emacs-lisp
     (use-package emacs
+      :ensure nil
       :custom
       (scroll-conservatively 10)
       (scroll-margin 10))
@@ -238,16 +248,9 @@ Ensure the Emacs server is started if not already running
       (setq battery-mode-line-format "[%b%p%%]")  ; Custom battery format to ensure the percentage sign is included
       (display-battery-mode 1))
 
-    (defun simple-mode-line-render (left right)
-      "Return a string of `window-width' length.
-            Containing LEFT, and RIGHT aligned respectively."
-      (let ((available-width
-             (- (window-total-width)
-                (+ (length (format-mode-line left))
-                   (length (format-mode-line right))))))
-        (append left
-                (list (format (format "%%%ds" available-width) ""))
-                right)))
+    (use-package doom-modeline
+      :ensure t
+      :init (doom-modeline-mode 1))
 
     (use-package minions
       :ensure t
@@ -259,17 +262,17 @@ Ensure the Emacs server is started if not already running
           (simple-mode-line-render
            ;; Left.
            (quote ("%e "
-    			   mode-line-remote
-    			   ":"
+        		   mode-line-remote
+        		   ":"
                    mode-line-buffer-identification
                    "%l:%c"
-        		   " - %p"))
+            	   " - %p"))
            ;; Right.
            (quote (""
                    mode-line-frame-identification
                    mode-line-modes
                    mode-line-misc-info
-    			   " ")))))))
+        		   " ")))))))
 
 #+END_SRC
 
@@ -306,9 +309,11 @@ Ensure the Emacs server is started if not already running
 ** Which Key
 #+BEGIN_SRC emacs-lisp
     (use-package which-key
-      :ensure nil)
-    (setq which-key-popup-type 'minibuffer)
-    (which-key-mode)
+      :ensure nil
+      :config
+      (setq which-key-popup-type 'minibuffer)
+      (which-key-mode))
+
 #+END_SRC
 * Completions
 ** Completions at point
@@ -405,8 +410,17 @@ Ensure the Emacs server is started if not already running
       :hook
       (embark-collect-mode . consult-preview-at-point-mode))
 #+END_SRC
+** Spelling
+#+BEGIN_SRC emacs-lisp
+    (use-package jinx
+      :ensure t
+      :hook (emacs-startup . global-jinx-mode)
+      :bind (("M-$" . jinx-correct)
+             ("C-M-$" . jinx-languages)))
+#+END_SRC
+
 * Development
-** Infos
+** Info's
 #+BEGIN_SRC emacs-lisp
     (setq eldoc-echo-area-use-multiline-p nil)
 
@@ -437,13 +451,13 @@ Connection flycheck with eglot and the lsps
       :config
       (global-flycheck-eglot-mode 1))
 #+end_src
-** Syntax Hightlighting
+** Syntax Highlighting
 *** Folding
 #+BEGIN_SRC emacs-lisp
     ;; (use-package ts-fold
     ;;   :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
 #+END_SRC
-*** Treesitter Config
+*** Tree-sitter Config
 #+begin_src emacs-lisp
     (use-package tree-sitter
       :ensure nil
@@ -466,7 +480,7 @@ Connection flycheck with eglot and the lsps
     (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
 #+end_src
-**** Treesitter Pre Compiles Langs
+**** Tree-sitter Pre Compiles Langs
 #+BEGIN_SRC emacs-lisp
     (use-package tree-sitter-langs
       :after (tree-sitter)
@@ -486,7 +500,7 @@ Connection flycheck with eglot and the lsps
                 (new-filename (concat "libtree-sitter-" (file-name-nondirectory file))))
             (rename-file file (expand-file-name new-filename target-dir) t)))))
 #+END_SRC
-**** Treesitter source List
+**** Tree-sitter source List
 #+BEGIN_SRC emacs-lisp
     (setq treesit-language-source-alist
           '((bash "https://github.com/tree-sitter/tree-sitter-bash")
@@ -617,7 +631,7 @@ Connection flycheck with eglot and the lsps
       :bind ("C-c D" . docker))
 #+end_src
 
-* Project Managment
+* Project Management
 ** Desktop mode 
 #+BEGIN_SRC emacs-lisp
     (setq desktop-path '("~/")) 
@@ -669,13 +683,13 @@ Connection flycheck with eglot and the lsps
     (setq tab-bar-format '(tab-bar-format-history tab-bar-format-tabs-groups tab-bar-separator tab-bar-format-add-tab))
 
     (use-package project-tab-groups
-      :ensure
+      :ensure t
       :config
       (project-tab-groups-mode 1))
 #+END_SRC
 
 ** Editor Conf
-We want to use the same Configurations as out teamsmates
+We want to use the same Configurations as out teammates
 #+BEGIN_SRC emacs-lisp
     (use-package editorconfig
       :config
@@ -702,7 +716,7 @@ We want to use the same Configurations as out teamsmates
       :config(global-git-gutter-mode +1))
 #+end_src
 
-** File Managment
+** File Management
 *** Wgrep
 #+begin_src emacs-lisp
     (use-package wgrep :ensure t)
@@ -739,9 +753,9 @@ We want to use the same Configurations as out teamsmates
 
 * Helper packages
 ** Midnight commander
-Runns clean buffer list at midnight to keep performance up
+Runs clean buffer list at midnight to keep performance up
 #+BEGIN_SRC emacs-lisp
-    (setq midnight-mode t :ensure nil)
+    (setq midnight-mode t)
 #+END_SRC
 
 ** Surround
@@ -794,7 +808,7 @@ Interact with surrounds remove add them change them
        '(custom user pid ppid sess tree pcpu pmem rss start time state (args comm))))
 #+END_SRC
 
-** Usefull commands
+** Useful commands
 Provides search and navigation commands based on the Emacs completion function.
 Check out their [[https://github.com/minad/consult][git repository]] for more awesome functions.
 #+begin_src emacs-lisp
@@ -806,16 +820,15 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
             register-preview-function #'consult-register-format)
       (advice-add #'register-preview :override #'consult-register-window)
       (setq xref-show-xrefs-function #'consult-xref
-            xref-show-definitions-function #'consult-xref)
-      )
+            xref-show-definitions-function #'consult-xref))
 #+end_src
 
-** Collection of usefull commands
+** Collection of useful commands
 #+BEGIN_SRC emacs-lisp
     (use-package crux :ensure t)
 #+END_SRC
 
-* File spezific Modes
+* File specific Modes
 ** PDF Tools
 #+begin_src emacs-lisp
     (use-package pdf-tools
@@ -1064,7 +1077,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (global-set-key (kbd "C-c w d") 'delete-window)
     (global-set-key (kbd "C-c w o") 'delete-other-windows)
 #+END_SRC
-** Developent
+** Development
 *** Git
 #+BEGIN_SRC emacs-lisp
     (global-set-key (kbd "C-c G G") 'magit-status)
@@ -1074,8 +1087,8 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+END_SRC
 *** Terminal
 #+BEGIN_SRC emacs-lisp
-    (global-set-key (kbd "C-c t P") 'my/eat)
-    (global-set-key (kbd "C-c t p") 'my/eat-other-window)
+    (global-set-key (kbd "C-c t T") 'my/eat)
+    (global-set-key (kbd "C-c t t") 'my/eat-other-window)
 #+END_SRC
 
 *** Error
