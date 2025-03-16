@@ -34,6 +34,7 @@
     - [[#folding][Folding]]
     - [[#tree-sitter-config][Tree-sitter Config]]
     - [[#lua-mode][Lua Mode]]
+  - [[#dumb-jump][Dumb Jump]]
   - [[#lsp][LSP]]
     - [[#dape][Dape]]
     - [[#eglot][Eglot]]
@@ -66,6 +67,7 @@
   - [[#python][Python]]
   - [[#markdown][Markdown]]
     - [[#markdown-mode][Markdown Mode]]
+  - [[#nix][Nix]]
   - [[#org][Org]]
     - [[#org-mode][Org Mode]]
     - [[#table-of-contents][Table of Contents]]
@@ -79,7 +81,6 @@
     - [[#buffer][Buffer]]
     - [[#switching-windows][Switching Windows]]
   - [[#development-1][Development]]
-    - [[#git][Git]]
     - [[#terminal][Terminal]]
     - [[#error-1][Error]]
   - [[#replacing-stuff][Replacing stuff]]
@@ -181,8 +182,14 @@
 #+END_SRC
 ** Performance Tweaks
 #+begin_src emacs-lisp
-    (setq gc-cons-threshold (* 2 1000 1000))
-    (setq read-process-output-max (* 1024 1024)) ;; 1mb
+    (use-package gcmh
+      :ensure t
+      :init (setq gc-cons-threshold most-positive-fixnum)
+      :hook (emacs-startup . gcmh-mode)
+      :custom
+      (gcmh-idle-delay 'auto)
+      (gcmh-auto-idle-delay-factor 10)
+      (gcmh-high-cons-threshold (* 16 1024 1024)))
 #+END_SRC
 
 ** Start Emacs server on startup
@@ -244,35 +251,15 @@ Ensure the Emacs server is started if not already running
 
     (use-package battery
       :ensure nil
-      :config
-      (setq battery-mode-line-format "[%b%p%%]")  ; Custom battery format to ensure the percentage sign is included
       (display-battery-mode 1))
 
     (use-package doom-modeline
       :ensure t
-      :init (doom-modeline-mode 1))
+      :hook (after-init . doom-modeline-mode))
 
     (use-package minions
       :ensure t
-      :config (minions-mode 1)
-      :init
-      (setq-default
-       mode-line-format
-       '((:eval
-          (simple-mode-line-render
-           ;; Left.
-           (quote ("%e "
-        		   mode-line-remote
-        		   ":"
-                   mode-line-buffer-identification
-                   "%l:%c"
-            	   " - %p"))
-           ;; Right.
-           (quote (""
-                   mode-line-frame-identification
-                   mode-line-modes
-                   mode-line-misc-info
-        		   " ")))))))
+      :config (minions-mode 1))
 
 #+END_SRC
 
@@ -372,13 +359,18 @@ Ensure the Emacs server is started if not already running
                   ("<tab>" . vertico-insert)
                   ("C-j" . vertico-next)
                   ("C-k" . vertico-previous)
-    			  ("C-l" . vertico-exit))
+        		  ("C-l" . vertico-exit))
       :custom
       (vertico-cycle t)
       (vertico-count 13)
       (vertico-resize t)
       :init
       (vertico-mode))
+
+    (use-package xref
+      :custom
+      (xref-show-definitions-function #'xref-show-definitions-completing-read))
+
 
     (use-package marginalia
       :ensure t
@@ -414,7 +406,6 @@ Ensure the Emacs server is started if not already running
 #+BEGIN_SRC emacs-lisp
     (use-package jinx
       :ensure t
-      :hook (emacs-startup . global-jinx-mode)
       :bind (("M-$" . jinx-correct)
              ("C-M-$" . jinx-languages)))
 #+END_SRC
@@ -440,7 +431,15 @@ Ensure the Emacs server is started if not already running
 Lets use flycheck and not flymake
 #+BEGIN_SRC emacs-lisp
     (use-package flycheck
-      :ensure t)
+      :ensure t
+      :bind (
+    		 ("C-c e k" . flycheck-previous-error)
+    		 ("C-c e j" . flycheck-next-error)
+    		 ("C-c e l" . flycheck-list-errors)
+    		 ("C-c e e" . flycheck-explain-error-at-point)
+    		 ("C-c e d" . flycheck-display-error-at-point)
+    		 )
+      )
 #+end_src
 
 Connection flycheck with eglot and the lsps
@@ -537,6 +536,16 @@ Connection flycheck with eglot and the lsps
 *** Lua Mode
 #+BEGIN_SRC emacs-lisp
     (use-package lua-mode :ensure t)
+#+END_SRC
+
+** Dumb Jump
+#+BEGIN_SRC emacs-lisp
+    (use-package dumb-jump
+      :ensure t
+      :config
+      (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+      :custom
+      (dumb-jump-force-searcher 'rg))
 #+END_SRC
 
 ** LSP
@@ -701,6 +710,7 @@ We want to use the same Configurations as out teammates
 #+BEGIN_SRC emacs-lisp
     (use-package magit
       :ensure t
+      :bind (("C-c G G" . magit-status))
       :commands magit-status)
 
     (use-package magit-todos
@@ -713,6 +723,9 @@ We want to use the same Configurations as out teammates
 #+begin_src emacs-lisp
     (use-package git-gutter
       :ensure t
+      :bind (("C-c G s" . git-gutter:stage-hunk)
+    		 ("C-c G k" . git-gutter:previous-hunk)
+    		 ("C-c G j" . git-gutter:next-hunk))
       :config(global-git-gutter-mode +1))
 #+end_src
 
@@ -748,7 +761,18 @@ We want to use the same Configurations as out teammates
 
 *** Harpoon
 #+BEGIN_SRC  emacs-lisp
-    (use-package harpoon :ensure t)
+    (use-package harpoon 
+      :bind (("C-c 1" . harpoon-go-to-1)
+    		 ("C-c 2" . harpoon-go-to-2)
+    		 ("C-c 3" . harpoon-go-to-3)
+    		 ("C-c 4" . harpoon-go-to-4)
+    		 ("C-c 5" . harpoon-go-to-5)
+
+    		 ("C-c H a" . harpoon-add-file)
+    		 ("C-c H l" . harpoon-toggle-quick-menu)
+    		 ("C-c H f" . harpoon-toggle-file)
+    		 ("C-c H H" . harpoon-quick-menu-hydra))
+      :ensure t)
 #+END_SRC
 
 * Helper packages
@@ -767,10 +791,13 @@ Interact with surrounds remove add them change them
 
 ** Move Files
 #+BEGIN_SRC emacs-lisp
-    (use-package move-text :ensure t)
+    (use-package move-text 
+      :bind(
+    		("M-j" . move-text-down)
+    		("M-k" . move-text-up))
+      :ensure t)
 
-    (global-set-key (kbd "M-j") 'move-text-down)
-    (global-set-key (kbd "M-k") 'move-text-up)
+
 #+end_src
 
 ** Better undo and redo
@@ -852,6 +879,12 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       :mode ("README\\.md\\'" . gfm-mode)
       :init (setq markdown-command "multimarkdown"))
 #+END_SRC
+** Nix
+#+begin_src emacs-lisp
+    (use-package nix-mode
+      :ensure t)
+#+END_SRC
+
 ** Org
 *** Org Mode
 
@@ -908,7 +941,8 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (use-package meow :ensure t)
 
     (defun meow-setup ()
-      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+      (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
+      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
       (meow-motion-overwrite-define-key
        '("j" . meow-next)
        '("k" . meow-prev)
@@ -928,7 +962,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        '("8" . meow-digit-argument)
        '("9" . meow-digit-argument)
        '("0" . meow-digit-argument)
-       '("/" . meow-keypad-describe-key)
+       
        '("?" . meow-cheatsheet))
 
       (meow-normal-define-key
@@ -944,44 +978,56 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        '("1" . meow-expand-1)
 
        '("-" . negative-argument)
-       '(";" . meow-reverse)
+
        '("/" . comment-or-uncomment-region)
+
        '("," . meow-inner-of-thing)
        '("." . meow-bounds-of-thing)
-       '("[" . meow-beginning-of-thing)
-       '("]" . meow-end-of-thing)
-       '("a" . meow-append)
+       '(";" . meow-beginning-of-thing)
+       '(":" . meow-end-of-thing)
+
+       '("a" . weow-append)
        '("A" . meow-open-below)
+
        '("b" . meow-back-word)
        '("B" . meow-back-symbol)
        '("c" . meow-change)
+       
        '("d" . meow-delete)
        '("D" . meow-backward-delete)
+
        '("e" . meow-next-word)
        '("E" . meow-next-symbol)
        '("f" . meow-find)
+       
        '("g" . meow-cancel-selection)
+       
+       '("R" . meow-swap-grab)
+       '("Y" . meow-sync-grab)
        '("G" . meow-grab)
+
        '("h" . meow-left)
-       '("H" . meow-left-expand)
        '("i" . meow-insert)
-       '("I" . meow-open-above)
        '("j" . meow-next)
-       '("J" . meow-next-expand)
        '("k" . meow-prev)
-       '("K" . meow-prev-expand)
        '("l" . meow-right)
-       '("L" . meow-right-expand)
        '("n" . meow-search)
        '("o" . meow-block)
        '("O" . meow-to-block)
+       
        '("p" . meow-yank)
+       '("P" . clipboard-yank)
 
-       '("q" . meow-start-kmacro-or-insert-counter)
+       '("H" . meow-left-expand)
+       '("I" . meow-open-above)
+       '("J" . meow-next-expand)
+       '("K" . meow-prev-expand)
+       '("L" . meow-right-expand)
+
+       '("q" . kmacro-start-macro-or-insert-counter)
        '("Q" . meow-end-or-call-kmacro)
 
        '("r" . meow-replace)
-       '("R" . meow-swap-grab)
        '("s" . meow-kill)
        '("t" . meow-till)
 
@@ -996,7 +1042,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        '("x" . meow-line)
        '("X" . meow-goto-line)
        '("y" . meow-save)
-       '("Y" . meow-sync-grab)
        '("z" . meow-pop-selection)
        '("'" . repeat)
        '("<escape>" . ignore)))
@@ -1004,7 +1049,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (meow-setup)
     (setq meow-keypad-leader-dispatch "C-c")
     (meow-global-mode 1)
-
 #+END_SRC
 
 *** Meow Things for semantic editing
@@ -1078,13 +1122,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (global-set-key (kbd "C-c w o") 'delete-other-windows)
 #+END_SRC
 ** Development
-*** Git
-#+BEGIN_SRC emacs-lisp
-    (global-set-key (kbd "C-c G G") 'magit-status)
-    (global-set-key (kbd "C-c G s") 'git-gutter:stage-hunk)
-    (global-set-key (kbd "C-c G i") 'git-gutter:previous-hunk)
-    (global-set-key (kbd "C-c G k") 'git-gutter:next-hunk)
-#+END_SRC
 *** Terminal
 #+BEGIN_SRC emacs-lisp
     (global-set-key (kbd "C-c t T") 'my/eat)
@@ -1092,15 +1129,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+END_SRC
 
 *** Error
-**** Errors in Code
-#+BEGIN_SRC emacs-lisp
-    (global-set-key (kbd "C-c e k") 'flycheck-previous-error)
-    (global-set-key (kbd "C-c e j") 'flycheck-next-error)
-    (global-set-key (kbd "C-c e l") 'flycheck-list-errors)
-    (global-set-key (kbd "C-c e L") 'flycheck-projectile-list-errors)
-    (global-set-key (kbd "C-c e e") 'flycheck-explain-error-at-point)
-    (global-set-key (kbd "C-c e d") 'flycheck-display-error-at-point)
-#+END_SRC
 **** Errors in Compilation
 
 Make compilation look better and therefore make it work with modern tools
@@ -1160,19 +1188,5 @@ Make compilation look better and therefore make it work with modern tools
     (global-set-key (kbd "C-c s s") 'occur)
     (global-set-key (kbd "C-c s o") 'consult-outline)
     (global-set-key (kbd "C-c s l") 'consult-line)
-#+END_SRC
-
-**** Harpoon
-#+BEGIN_SRC emacs-lisp
-    (global-set-key (kbd "C-c 1") 'harpoon-go-to-1)
-    (global-set-key (kbd "C-c 2") 'harpoon-go-to-2)
-    (global-set-key (kbd "C-c 3") 'harpoon-go-to-3)
-    (global-set-key (kbd "C-c 4") 'harpoon-go-to-4)
-    (global-set-key (kbd "C-c 5") 'harpoon-go-to-5)
-
-    (global-set-key (kbd "C-c H a") 'harpoon-add-file)
-    (global-set-key (kbd "C-c H l") 'harpoon-toggle-quick-menu)
-    (global-set-key (kbd "C-c H f") 'harpoon-toggle-file)
-    (global-set-key (kbd "C-c H H") 'harpoon-quick-menu-hydra)
 #+END_SRC
 
