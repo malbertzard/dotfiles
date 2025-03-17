@@ -13,7 +13,6 @@ in
     username = users.default;
     homeDirectory = "/home/${users.default}";
     stateVersion = "24.11";
-    packages = with pkgs; [
-    ];
+    packages = with pkgs; [];
   };
 }

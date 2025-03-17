@@ -24,6 +24,7 @@ let
         epkgs.seq
         epkgs.popup
         epkgs.shrink-path
+        epkgs.emacsql
       ];
   };
 in
