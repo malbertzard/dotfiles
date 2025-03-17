@@ -224,6 +224,7 @@ Ensure the Emacs server is started if not already running
       (display-line-numbers-mode 0))
 
     (add-hook 'dired-mode-hook 'disable-line-numbers)
+    (add-hook 'pdf-view-mode-hook 'disable-line-numbers)
     (add-hook 'eat-mode-hook 'disable-line-numbers)
     (add-hook 'org-mode-hook 'disable-line-numbers)
     (add-hook 'compilation-mode-hook 'disable-line-numbers)
@@ -289,20 +290,20 @@ Ensure the Emacs server is started if not already running
 ** Font
 #+BEGIN_SRC emacs-lisp
     (set-face-attribute 'default nil
-                        :height 120
+                        :height 110
                         :weight 'medium)
     (setq-default line-spacing 0.15)
 #+END_SRC
 
 ** Zoom
 #+BEGIN_SRC emacs-lisp
-    (use-package emacs
-      :ensure nil
-      :bind
-      ("C-+" . text-scale-increase)
-      ("C--" . text-scale-decrease)
-      ("<C-wheel-up>" . text-scale-increase)
-      ("<C-wheel-down>" . text-scale-decrease))
+  (use-package emacs
+    :ensure nil
+    :bind
+    ("C-+" . text-scale-increase)
+    ("C--" . text-scale-decrease)
+    ("<C-wheel-up>" . text-scale-increase)
+    ("<C-wheel-down>" . text-scale-decrease))
 #+END_SRC
 
 ** Which Key
@@ -754,12 +755,9 @@ We want to use the same Configurations as out teammates
 
 *** Gutter
 #+begin_src emacs-lisp
-    (use-package git-gutter
+    (use-package diff-hl
       :ensure t
-      :bind (("C-c G s" . git-gutter:stage-hunk)
-    		 ("C-c G k" . git-gutter:previous-hunk)
-    		 ("C-c G j" . git-gutter:next-hunk))
-      :config(global-git-gutter-mode +1))
+      :config(global-diff-hl-mode ))
 #+end_src
 
 ** File Management
