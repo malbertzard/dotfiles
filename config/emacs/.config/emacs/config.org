@@ -7,10 +7,12 @@
 - [[#early-init][Early init]]
 - [[#grunt-work-to-make-emacs-behave][Grunt work to make Emacs behave]]
   - [[#bootstrapping-and-installing-packages][Bootstrapping and installing packages]]
+    - [[#use-package][Use Package]]
   - [[#increase-performance][Increase performance]]
   - [[#keep-folders-clean][Keep folders clean]]
   - [[#sensible-defaults][Sensible Defaults]]
-  - [[#performance-tweaks][Performance Tweaks]]
+  - [[#better-gc][Better GC]]
+  - [[#faster-tramp][Faster TRAMP]]
   - [[#start-emacs-server-on-startup][Start Emacs server on startup]]
   - [[#save-changes-automaticly][Save changes automaticly]]
 - [[#ui-stuff][UI Stuff]]
@@ -21,6 +23,7 @@
   - [[#modeline][Modeline]]
   - [[#theme][Theme]]
   - [[#font][Font]]
+  - [[#icons][Icons]]
   - [[#zoom][Zoom]]
   - [[#which-key][Which Key]]
 - [[#completions][Completions]]
@@ -66,6 +69,7 @@
   - [[#collection-of-useful-commands][Collection of useful commands]]
 - [[#file-specific-modes][File specific Modes]]
   - [[#pdf-tools][PDF Tools]]
+  - [[#perl][Perl]]
   - [[#python][Python]]
   - [[#markdown][Markdown]]
     - [[#markdown-mode][Markdown Mode]]
@@ -102,18 +106,18 @@
 
     ;; Default frame configuration: full screen, good-looking title bar on macOS
     (setq frame-resize-pixelwise t)
-    (tool-bar-mode -1)                      ; All these tools are in the menu-bar anyway
+    (tool-bar-mode -1)			    ; All these tools are in the menu-bar anyway
     (setq default-frame-alist '((fullscreen . maximized)
-                                (vertical-scroll-bars . nil)
-                                (horizontal-scroll-bars . nil)
-                                (ns-transparent-titlebar . t)))
+				(vertical-scroll-bars . nil)
+				(horizontal-scroll-bars . nil)
+				(ns-transparent-titlebar . t)))
 
     (when (and (fboundp 'startup-redirect-eln-cache)
-               (fboundp 'native-comp-available-p)
-               (native-comp-available-p))
+	       (fboundp 'native-comp-available-p)
+	       (native-comp-available-p))
       (startup-redirect-eln-cache
        (convert-standard-filename
-        (expand-file-name  "var/eln-cache/" user-emacs-directory))))
+	(expand-file-name  "var/eln-cache/" user-emacs-directory))))
 
     (setq package-enable-at-startup nil)
 #+end_src
@@ -124,11 +128,29 @@
 #+begin_src emacs-lisp
     (setq lexical-binding t)
     ;;; -*- lexical-binding: t -*-
-
-    (setq package-enable-at-startup nil)
-    ;;(setq use-package-ensure-function 'ignore)
-    ;;(setq package-archives nil)
 #+end_src
+
+*** Use Package
+#+begin_src emacs-lisp
+    (setq package-enable-at-startup nil)
+    (setq use-package-ensure-function 'ignore)
+    (setq package-archives nil)
+#+end_src
+
+#+begin_src emacs-lisp :tangle no 
+    (require 'package)
+    (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
+    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+    (package-initialize)
+
+    (unless (package-installed-p 'use-package)
+      (package-refresh-contents)
+      (package-install 'use-package))
+
+    (eval-and-compile
+      (setq use-package-expand-minimally t))
+#+end_src
+
 ** Increase performance
 #+begin_src emacs-lisp
     (use-package compile-angel
@@ -178,12 +200,12 @@
       (auto-save-default nil)
       :config
       :bind (
-    		 ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
-    		 )
+	     ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
+	     )
       :hook
       (prog-mode . (lambda () (hs-minor-mode t))))
 #+END_SRC
-** Performance Tweaks
+** Better GC
 #+begin_src emacs-lisp
     (use-package gcmh
       :ensure t
@@ -193,6 +215,13 @@
       (gcmh-idle-delay 'auto)
       (gcmh-auto-idle-delay-factor 10)
       (gcmh-high-cons-threshold (* 16 1024 1024)))
+#+END_SRC
+** Faster TRAMP
+#+begin_src emacs-lisp
+(setq vc-ignore-dir-regexp
+      (format "\\(%s\\)\\|\\(%s\\)"
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
 #+END_SRC
 
 ** Start Emacs server on startup
@@ -246,12 +275,17 @@ Ensure the Emacs server is started if not already running
 #+END_SRC
 ** Indent Bars
 #+begin_src emacs-lisp
+    ;; (use-package indent-bars
+    ;;	 :ensure t
+    ;;	 :custom
+    ;;	 (indent-bars-no-descend-lists t)
+    ;;	 (indent-bars-treesit-support t)
+    ;;	 :hook (prog-mode . indent-bars-mode))
+
     (use-package indent-bars
       :ensure t
-      :custom
-      (indent-bars-no-descend-lists t)
-      (indent-bars-treesit-support t)
       :hook (prog-mode . indent-bars-mode))
+
 #+end_src
 ** Modeline
 #+BEGIN_SRC emacs-lisp
@@ -264,6 +298,7 @@ Ensure the Emacs server is started if not already running
 
     (use-package battery
       :ensure nil
+      :config
       (display-battery-mode 1))
 
     (use-package doom-modeline
@@ -282,7 +317,7 @@ Ensure the Emacs server is started if not already running
       :ensure t
       :config
       (setq doom-themes-enable-bold t
-            doom-themes-enable-italic t)
+	    doom-themes-enable-italic t)
       (load-theme 'doom-gruvbox t)
       (doom-themes-org-config))
 #+END_SRC
@@ -290,20 +325,25 @@ Ensure the Emacs server is started if not already running
 ** Font
 #+BEGIN_SRC emacs-lisp
     (set-face-attribute 'default nil
-                        :height 110
-                        :weight 'medium)
+			:height 110
+			:weight 'medium)
     (setq-default line-spacing 0.15)
 #+END_SRC
 
+** Icons
+#+BEGIN_SRC emacs-lisp
+    (use-package nerd-icons
+      :ensure t)
+#+END_SRC
 ** Zoom
 #+BEGIN_SRC emacs-lisp
-  (use-package emacs
-    :ensure nil
-    :bind
-    ("C-+" . text-scale-increase)
-    ("C--" . text-scale-decrease)
-    ("<C-wheel-up>" . text-scale-increase)
-    ("<C-wheel-down>" . text-scale-decrease))
+    (use-package emacs
+      :ensure nil
+      :bind
+      ("C-+" . text-scale-increase)
+      ("C--" . text-scale-decrease)
+      ("<C-wheel-up>" . text-scale-increase)
+      ("<C-wheel-down>" . text-scale-decrease))
 #+END_SRC
 
 ** Which Key
@@ -362,17 +402,17 @@ Ensure the Emacs server is started if not already running
 
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
     (setq completion-category-overrides '((eglot (styles orderless))
-                                          (eglot-capf (styles orderless))))
+					  (eglot-capf (styles orderless))))
 #+END_SRC
 ** Vertical Completions
 #+BEGIN_SRC emacs-lisp
     (use-package vertico
       :ensure t
       :bind (:map vertico-map
-                  ("<tab>" . vertico-insert)
-                  ("C-j" . vertico-next)
-                  ("C-k" . vertico-previous)
-        		  ("C-l" . vertico-exit))
+		  ("<tab>" . vertico-insert)
+		  ("C-j" . vertico-next)
+		  ("C-k" . vertico-previous)
+			  ("C-l" . vertico-exit))
       :custom
       (vertico-cycle t)
       (vertico-count 13)
@@ -406,9 +446,9 @@ Ensure the Emacs server is started if not already running
     (use-package embark
       :ensure t
       :bind (("C-." . embark-act)
-             :map minibuffer-local-map
-             ("C-c C-c" . embark-collect)
-             ("C-c C-e" . embark-export)))
+	     :map minibuffer-local-map
+	     ("C-c C-c" . embark-collect)
+	     ("C-c C-e" . embark-export)))
 
     (use-package embark-consult
       :ensure t
@@ -423,9 +463,9 @@ Ensure the Emacs server is started if not already running
       (tempel-trigger-prefix "<")
       :init
       (defun tempel-setup-capf ()
-        (setq-local completion-at-point-functions
-                    (cons #'tempel-complete
-                          completion-at-point-functions)))
+	(setq-local completion-at-point-functions
+		    (cons #'tempel-complete
+			  completion-at-point-functions)))
 
       (add-hook 'conf-mode-hook 'tempel-setup-capf)
       (add-hook 'prog-mode-hook 'tempel-setup-capf)
@@ -441,7 +481,7 @@ Ensure the Emacs server is started if not already running
     (use-package jinx
       :ensure t
       :bind (("M-$" . jinx-correct)
-             ("C-M-$" . jinx-languages)))
+	     ("C-M-$" . jinx-languages)))
 #+END_SRC
 
 * Development
@@ -467,12 +507,12 @@ Lets use flycheck and not flymake
     (use-package flycheck
       :ensure t
       :bind (
-    		 ("C-c e k" . flycheck-previous-error)
-    		 ("C-c e j" . flycheck-next-error)
-    		 ("C-c e l" . flycheck-list-errors)
-    		 ("C-c e e" . flycheck-explain-error-at-point)
-    		 ("C-c e d" . flycheck-display-error-at-point)
-    		 )
+	     ("C-c e k" . flycheck-previous-error)
+	     ("C-c e j" . flycheck-next-error)
+	     ("C-c e l" . flycheck-list-errors)
+	     ("C-c e e" . flycheck-explain-error-at-point)
+	     ("C-c e d" . flycheck-display-error-at-point)
+	     )
       )
 #+end_src
 
@@ -488,14 +528,14 @@ Connection flycheck with eglot and the lsps
 *** Folding
 #+BEGIN_SRC emacs-lisp
     ;; (use-package ts-fold
-    ;;   :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
+    ;;	 :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
 #+END_SRC
 *** Tree-sitter Config
 #+begin_src emacs-lisp
     (use-package tree-sitter
       :ensure nil
       :config(global-tree-sitter-mode
-              (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
+	      (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
     (setq treesit-font-lock-level 4)
 
@@ -521,44 +561,44 @@ Connection flycheck with eglot and the lsps
 
     (defun my/move-tree-sitter-grammar-files ()
       "Move all files from `tree-sitter-langs-grammar-dir/bin` to `~/.config/emacs/tree-sitter`,
-              appending 'libtree-sitter-' to the front of each filename."
+	      appending 'libtree-sitter-' to the front of each filename."
       (interactive)
       (let* ((source-dir (expand-file-name "bin" tree-sitter-langs-grammar-dir))
-             (target-dir (expand-file-name "~/.config/emacs/tree-sitter"))
-             (files (directory-files source-dir t "^[^.].*"))) ; Get all files, excluding hidden files
-        (unless (file-exists-p target-dir)
-          (make-directory target-dir t)) ; Create target directory if it doesn't exist
-        (dolist (file files)
-          (let ((filename (file-name-nondirectory file))
-                (new-filename (concat "libtree-sitter-" (file-name-nondirectory file))))
-            (rename-file file (expand-file-name new-filename target-dir) t)))))
+	     (target-dir (expand-file-name "~/.config/emacs/tree-sitter"))
+	     (files (directory-files source-dir t "^[^.].*"))) ; Get all files, excluding hidden files
+	(unless (file-exists-p target-dir)
+	  (make-directory target-dir t)) ; Create target directory if it doesn't exist
+	(dolist (file files)
+	  (let ((filename (file-name-nondirectory file))
+		(new-filename (concat "libtree-sitter-" (file-name-nondirectory file))))
+	    (rename-file file (expand-file-name new-filename target-dir) t)))))
 #+END_SRC
 **** Tree-sitter source List
 #+BEGIN_SRC emacs-lisp
     (setq treesit-language-source-alist
-          '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-            (cmake "https://github.com/uyha/tree-sitter-cmake")
-            (css "https://github.com/tree-sitter/tree-sitter-css")
-            (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-            (html "https://github.com/tree-sitter/tree-sitter-html")
-            (zig "https://github.com/GrayJack/tree-sitter-zig")
-            (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.1" "src")
-            (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-            (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
-            (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-            (json "https://github.com/tree-sitter/tree-sitter-json")
-            (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-            (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-            (make "https://github.com/alemuller/tree-sitter-make")
-            (rust "https://github.com/tree-sitter/tree-sitter-rust")
-            (php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
-            (phpdoc "https://github.com/claytonrcarter/tree-sitter-phpdoc" "master" "src")
-            (twig "https://github.com/kaermorchen/tree-sitter-twig")
-            (python "https://github.com/tree-sitter/tree-sitter-python")
-            (toml "https://github.com/tree-sitter/tree-sitter-toml")
-            (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-            (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-            (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+	    (cmake "https://github.com/uyha/tree-sitter-cmake")
+	    (css "https://github.com/tree-sitter/tree-sitter-css")
+	    (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+	    (html "https://github.com/tree-sitter/tree-sitter-html")
+	    (zig "https://github.com/GrayJack/tree-sitter-zig")
+	    (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.1" "src")
+	    (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+	    (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
+	    (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+	    (json "https://github.com/tree-sitter/tree-sitter-json")
+	    (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+	    (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+	    (make "https://github.com/alemuller/tree-sitter-make")
+	    (rust "https://github.com/tree-sitter/tree-sitter-rust")
+	    (php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
+	    (phpdoc "https://github.com/claytonrcarter/tree-sitter-phpdoc" "master" "src")
+	    (twig "https://github.com/kaermorchen/tree-sitter-twig")
+	    (python "https://github.com/tree-sitter/tree-sitter-python")
+	    (toml "https://github.com/tree-sitter/tree-sitter-toml")
+	    (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+	    (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+	    (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
     ;; Install all langs
     (defun my/treesitter-install-alist ()
@@ -593,21 +633,21 @@ Connection flycheck with eglot and the lsps
       (setq dape-cwd-fn 'projectile-project-root)
       (setq dape-buffer-window-arrangement 'right)
       (add-to-list 'dape-configs
-    			   `(debugpy-flask
-    				 modes (python-mode jinja2-mode)
-    				 command "python"
-    				 command-args ["-m" "debugpy.adapter" "--host" "0.0.0.0" "--port" :autoport]
-    				 port :autoport
-    				 :type "python"
-    				 :request "launch"
-    				 :module "flask"
-    				 :args ["--app" "src" "run" "--no-debugger" "--no-reload"]
-    				 :console "integratedTerminal"
-    				 :showReturnValue t
-    				 :justMyCode nil
-    				 :jinja t
-    				 :cwd dape-cwd-fn)
-    			   ))
+			   `(debugpy-flask
+				 modes (python-mode jinja2-mode)
+				 command "python"
+				 command-args ["-m" "debugpy.adapter" "--host" "0.0.0.0" "--port" :autoport]
+				 port :autoport
+				 :type "python"
+				 :request "launch"
+				 :module "flask"
+				 :args ["--app" "src" "run" "--no-debugger" "--no-reload"]
+				 :console "integratedTerminal"
+				 :showReturnValue t
+				 :justMyCode nil
+				 :jinja t
+				 :cwd dape-cwd-fn)
+			   ))
 #+END_SRC
 *** Eglot
 #+BEGIN_SRC emacs-lisp
@@ -630,33 +670,33 @@ Connection flycheck with eglot and the lsps
       (eglot-sync-connect nil)
       (eglot-extend-to-xref nil)
       :bind (:map eglot-mode-map
-            	  ("C-c l l" . eldoc-box-help-at-point)
-            	  ("C-c l d" . eglot-find-declaration)
-            	  ("C-c l i" . eglot-find-implementation)
-            	  ("C-c l t" . eglot-find-typeDefinition)
-            	  ("C-c l a" . eglot-code-actions)
-            	  ("C-c l I" . eglot-code-action-organize-imports)
-            	  ("C-c l f" . eglot-format-buffer)
-            	  ("C-c l r" . eglot-rename)))
+		  ("C-c l l" . eldoc-box-help-at-point)
+		  ("C-c l d" . eglot-find-declaration)
+		  ("C-c l i" . eglot-find-implementation)
+		  ("C-c l t" . eglot-find-typeDefinition)
+		  ("C-c l a" . eglot-code-actions)
+		  ("C-c l I" . eglot-code-action-organize-imports)
+		  ("C-c l f" . eglot-format-buffer)
+		  ("C-c l r" . eglot-rename)))
 
     (setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                   '(gdscript-mode . ("localhost:6005"))))
+		   '(gdscript-mode . ("localhost:6005"))))
 
-                  ;;; Mason from neovim is just a great way to manage lsps
+		  ;;; Mason from neovim is just a great way to manage lsps
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                   '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
-
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(go-ts-mode . ("gopls"))))
+		   '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                   '(rust-ts-mode . ("rust-analyzer"))))
+		   '(go-ts-mode . ("gopls"))))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+		   '(rust-ts-mode . ("rust-analyzer"))))
 #+END_SRC
 
 ** Terminal Emulation
@@ -687,36 +727,38 @@ Connection flycheck with eglot and the lsps
       "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
       (interactive)
       (if (vc-root-dir)
-          (consult-project-buffer)
-        (consult-buffer)))
+	  (consult-project-buffer)
+	(consult-buffer)))
 
     (defun my/find-file ()
       "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
       (interactive)
       (if (vc-root-dir)
-          (project-find-file)
-        (find-file)))
+	  (project-find-file)
+	(let ((file (read-file-name "Find file: ")))
+	  (find-file file))))
 
     (defun my/dired ()
       "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
       (interactive)
       (if (vc-root-dir)
-          (project-dired)
-        (dired)))
+	  (project-dired)
+	(let ((file (read-file-name "Dired: ")))
+	  (dired file))))
 
     (defun my/eat ()
       "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
       (interactive)
       (if (vc-root-dir)
-          (eat-project)
-        (eat)))
+	  (eat-project)
+	(eat)))
 
     (defun my/eat-other-window ()
       "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
       (interactive)
       (if (vc-root-dir)
-      	  (eat-project-other-window)
-        (eat-other-window)))
+	  (eat-project-other-window)
+	(eat-other-window)))
 #+END_SRC
 
 ** Tab Groups per project
@@ -772,15 +814,15 @@ We want to use the same Configurations as out teammates
       :hook
       (dired-mode . dired-hide-details-mode)
       :config
-      (setq dired-dwim-target t)                  ;; do what I mean
-      (setq dired-recursive-copies 'always)       ;; don't ask when copying directories
+      (setq dired-dwim-target t)		  ;; do what I mean
+      (setq dired-recursive-copies 'always)	  ;; don't ask when copying directories
       (setq dired-create-destination-dirs 'ask)
       (setq dired-clean-confirm-killing-deleted-buffers nil)
       (setq dired-make-directory-clickable t)
       (setq dired-mouse-drag-files t)
-      (setq dired-kill-when-opening-new-dired-buffer t)   ;; Tidy up open buffers by default
+      (setq dired-kill-when-opening-new-dired-buffer t)	  ;; Tidy up open buffers by default
       (setq dired-use-ls-dired t
-            dired-listing-switches "-aBhl  --group-directories-first"))
+	    dired-listing-switches "-aBhl  --group-directories-first"))
 
     (put 'dired-find-alternate-file 'disabled nil)
 
@@ -794,15 +836,15 @@ We want to use the same Configurations as out teammates
 #+BEGIN_SRC  emacs-lisp
     (use-package harpoon 
       :bind (("C-c H 1" . harpoon-go-to-1)
-    		 ("C-c H 2" . harpoon-go-to-2)
-    		 ("C-c H 3" . harpoon-go-to-3)
-    		 ("C-c H 4" . harpoon-go-to-4)
-    		 ("C-c H 5" . harpoon-go-to-5)
+	     ("C-c H 2" . harpoon-go-to-2)
+	     ("C-c H 3" . harpoon-go-to-3)
+	     ("C-c H 4" . harpoon-go-to-4)
+	     ("C-c H 5" . harpoon-go-to-5)
 
-    		 ("C-c H a" . harpoon-add-file)
-    		 ("C-c H l" . harpoon-toggle-quick-menu)
-    		 ("C-c H f" . harpoon-toggle-file)
-    		 ("C-c H H" . harpoon-quick-menu-hydra))
+	     ("C-c H a" . harpoon-add-file)
+	     ("C-c H l" . harpoon-toggle-quick-menu)
+	     ("C-c H f" . harpoon-toggle-file)
+	     ("C-c H H" . harpoon-quick-menu-hydra))
       :ensure t)
 #+END_SRC
 
@@ -824,8 +866,8 @@ Interact with surrounds remove add them change them
 #+BEGIN_SRC emacs-lisp
     (use-package move-text 
       :bind(
-    		("M-j" . move-text-down)
-    		("M-k" . move-text-up))
+	    ("M-j" . move-text-down)
+	    ("M-k" . move-text-up))
       :ensure t)
 
 
@@ -875,10 +917,10 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       :hook (completion-list-mode . consult-preview-at-point-mode)
       :init
       (setq register-preview-delay 0.5
-            register-preview-function #'consult-register-format)
+	    register-preview-function #'consult-register-format)
       (advice-add #'register-preview :override #'consult-register-window)
       (setq xref-show-xrefs-function #'consult-xref
-            xref-show-definitions-function #'consult-xref))
+	    xref-show-definitions-function #'consult-xref))
 #+end_src
 
 ** Collection of useful commands
@@ -891,6 +933,15 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+begin_src emacs-lisp
     (use-package pdf-tools
       :ensure t)
+#+END_SRC
+
+** Perl
+#+begin_src emacs-lisp
+    (fset 'perl-mode 'cperl-mode)
+    (setq cperl-invalid-face nil)
+    
+    ;; (setq cperl-indent-parens-as-block t)
+    ;; (setq cperl-close-paren-offset (- cperl-indent-level))
 #+END_SRC
 
 ** Python
@@ -965,18 +1016,18 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+END_SRC
 
 *** Org Roam
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
     (use-package org-roam
       :ensure t
       :custom
       (org-roam-directory (file-truename "/path/to/org-files/"))
       :bind (("C-c n l" . org-roam-buffer-toggle)
-             ("C-c n f" . org-roam-node-find)
-             ("C-c n g" . org-roam-graph)
-             ("C-c n i" . org-roam-node-insert)
-             ("C-c n c" . org-roam-capture)
-             ;; Dailies
-             ("C-c n j" . org-roam-dailies-capture-today))
+	     ("C-c n f" . org-roam-node-find)
+	     ("C-c n g" . org-roam-graph)
+	     ("C-c n i" . org-roam-node-insert)
+	     ("C-c n c" . org-roam-capture)
+	     ;; Dailies
+	     ("C-c n j" . org-roam-dailies-capture-today))
       :config
       (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
       (org-roam-db-autosync-mode)
@@ -988,12 +1039,12 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       :init
       (setq org-roam-v2-ack t)
       :bind (("C-c n l" . org-roam-buffer-toggle)
-             ("C-c n f" . org-roam-node-find)
-             ("C-c n g" . org-roam-graph)
-             ("C-c n i" . org-roam-node-insert)
-             ("C-c n c" . org-roam-capture)
-             ;; Dailies
-             ("C-c n j" . org-roam-dailies-capture-today))
+	     ("C-c n f" . org-roam-node-find)
+	     ("C-c n g" . org-roam-graph)
+	     ("C-c n i" . org-roam-node-insert)
+	     ("C-c n c" . org-roam-capture)
+	     ;; Dailies
+	     ("C-c n j" . org-roam-dailies-capture-today))
       :config
       (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
       (org-roam-db-autosync-mode)
@@ -1004,30 +1055,30 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       (org-roam-completion-everywhere t)
       (org-roam-capture-templates
        '(("p" "Project" plain "%?" :if-new (file+head "projects/${slug}.org" "#+title: ${title}\n"))
-         ("a" "Area" plain "%?" :if-new (file+head "areas/${slug}.org" "#+title: ${title}\n"))
-         ("r" "Resource" plain "%?" :if-new (file+head "resources/${slug}.org" "#+title: ${title}\n"))
-         ("P" "Archive" plain "%?" :if-new (file+head "archives/${slug}.org" "#+title: ${title}\n")))))
+	 ("a" "Area" plain "%?" :if-new (file+head "areas/${slug}.org" "#+title: ${title}\n"))
+	 ("r" "Resource" plain "%?" :if-new (file+head "resources/${slug}.org" "#+title: ${title}\n"))
+	 ("P" "Archive" plain "%?" :if-new (file+head "archives/${slug}.org" "#+title: ${title}\n")))))
 
     (defun my/org-roam-index ()
       "Generate an index of all notes in the org-roam directory with tags."
       (interactive)
       (let ((index-file (expand-file-name "index.org" org-roam-directory)))
-        (with-temp-buffer
-          (insert "#+TITLE: Org Roam Index\n\n")
-          (insert "** Projects\n")
-          (dolist (file (directory-files (expand-file-name "projects" org-roam-directory) t "\\.org$"))
-            (insert (format "- [[file:projects/%s][%s]]\n" (file-name-nondirectory file) (file-name-base file))))
-          (insert "\n** Areas\n")
-          (dolist (file (directory-files (expand-file-name "areas" org-roam-directory) t "\\.org$"))
-            (insert (format "- [[file:areas/%s][%s]]\n" (file-name-nondirectory file) (file-name-base file))))
-          (insert "\n** Resources\n")
-          (dolist (file (directory-files (expand-file-name "resources" org-roam-directory) t "\\.org$"))
-            (insert (format "- [[file:resources/%s][%s]]\n" (file-name-nondirectory file) (file-name-base file))))
-          (insert "\n** Archives\n")
-          (dolist (file (directory-files (expand-file-name "archives" org-roam-directory) t "\\.org$"))
-            (insert (format "- [[file:archives/%s][%s]]\n" (file-name-nondirectory file) (file-name-base file))))
-          (write-file index-file)
-          (message "Org-roam index file updated."))))
+	(with-temp-buffer
+	  (insert "#+TITLE: Org Roam Index\n\n")
+	  (insert "** Projects\n")
+	  (dolist (file (directory-files (expand-file-name "projects" org-roam-directory) t "\\.org$"))
+	    (insert (format "- [[file:projects/%s][%s]]\n" (file-name-nondirectory file) (file-name-base file))))
+	  (insert "\n** Areas\n")
+	  (dolist (file (directory-files (expand-file-name "areas" org-roam-directory) t "\\.org$"))
+	    (insert (format "- [[file:areas/%s][%s]]\n" (file-name-nondirectory file) (file-name-base file))))
+	  (insert "\n** Resources\n")
+	  (dolist (file (directory-files (expand-file-name "resources" org-roam-directory) t "\\.org$"))
+	    (insert (format "- [[file:resources/%s][%s]]\n" (file-name-nondirectory file) (file-name-base file))))
+	  (insert "\n** Archives\n")
+	  (dolist (file (directory-files (expand-file-name "archives" org-roam-directory) t "\\.org$"))
+	    (insert (format "- [[file:archives/%s][%s]]\n" (file-name-nondirectory file) (file-name-base file))))
+	  (write-file index-file)
+	  (message "Org-roam index file updated."))))
 #+END_SRC
 
 * Keymaps
@@ -1162,14 +1213,14 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (defun marker-is-point-p (marker)
       "test if marker is current point"
       (and (eq (marker-buffer marker) (current-buffer))
-           (= (marker-position marker) (point))))
+	   (= (marker-position marker) (point))))
 
     (defun push-mark-maybe ()
       "push mark onto `global-mark-ring' if mark head or tail is not current location"
       (if (not global-mark-ring) (error "global-mark-ring empty")
-        (unless (or (marker-is-point-p (car global-mark-ring))
-                    (marker-is-point-p (car (reverse global-mark-ring))))
-          (push-mark))))
+	(unless (or (marker-is-point-p (car global-mark-ring))
+		    (marker-is-point-p (car (reverse global-mark-ring))))
+	  (push-mark))))
 
 
     (defun backward-global-mark ()
@@ -1177,7 +1228,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       (interactive)
       (push-mark-maybe)
       (when (marker-is-point-p (car global-mark-ring))
-        (call-interactively 'pop-global-mark))
+	(call-interactively 'pop-global-mark))
       (call-interactively 'pop-global-mark))
 
     (defun forward-global-mark ()
@@ -1186,7 +1237,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       (push-mark-maybe)
       (setq global-mark-ring (nreverse global-mark-ring))
       (when (marker-is-point-p (car global-mark-ring))
-        (call-interactively 'pop-global-mark))
+	(call-interactively 'pop-global-mark))
       (call-interactively 'pop-global-mark)
       (setq global-mark-ring (nreverse global-mark-ring)))
 
@@ -1247,14 +1298,14 @@ Make compilation look better and therefore make it work with modern tools
       "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
       (interactive)
       (let ((compilation-buffer (get-buffer "*compilation*")))
-        (if compilation-buffer
-            (progn
-              (unless (get-buffer-window compilation-buffer)
-                (save-selected-window
-                  (select-window (split-window-below -15))
-                  (switch-to-buffer compilation-buffer)
-                  (shrink-window-if-larger-than-buffer))))
-          (call-interactively 'compile))))
+	(if compilation-buffer
+	    (progn
+	      (unless (get-buffer-window compilation-buffer)
+		(save-selected-window
+		  (select-window (split-window-below -15))
+		  (switch-to-buffer compilation-buffer)
+		  (shrink-window-if-larger-than-buffer))))
+	  (call-interactively 'compile))))
 
     (global-set-key (kbd "C-c C o") 'compile-or-open)
     (global-set-key (kbd "C-c C c") 'projectile-compile-project)
@@ -1281,6 +1332,7 @@ Make compilation look better and therefore make it work with modern tools
 
 ** Search Stuff
 #+begin_src emacs-lisp
+    (global-set-key (kbd "C-c s g") 'consult-grep)
     (global-set-key (kbd "C-c s g") 'consult-ripgrep)
     (global-set-key (kbd "C-c s s") 'occur)
     (global-set-key (kbd "C-c s o") 'consult-outline)
