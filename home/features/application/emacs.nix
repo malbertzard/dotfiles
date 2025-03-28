@@ -29,6 +29,13 @@ let
   };
 in
 {
+  home.packages =
+    with pkgs;
+    []
+    ++ mkLinuxOnly [
+      emacs-lsp-booster
+    ];
+
     programs.emacs = {
         enable = true;
         package = my_emacs;

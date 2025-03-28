@@ -1,9 +1,6 @@
 { pkgs, lib, ... }:
 {
-  imports = [
-    ../../../../overlays/emacs.nix
-    ../../../../home/features/application/emacs.nix
-  ];
+  imports = [];
 
   home.packages =
     with pkgs;
