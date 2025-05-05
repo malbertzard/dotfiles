@@ -1,12 +1,14 @@
 { pkgs, ... }:
 {
   home.packages = [
-    pkgs.poetry
     pkgs.pyenv
+    pkgs.pdm
     (pkgs.python3.withPackages (
       ps: with ps; [
         pyyaml
         requests
+        tkinter
+        virtualenv
       ]
     ))
   ];

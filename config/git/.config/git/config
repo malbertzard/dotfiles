@@ -1,7 +1,7 @@
 [user]
     email = malbertzard@gmail.com
     name = Mathis Albertzard
-    signingKey = "~/.ssh/githubDeb"
+    signingKey = "~/.ssh/id_ed25519"
 
 [alias]
     ;
@@ -96,7 +96,7 @@
     # Removes all local branches that doen't have a remote anymore
     pl = !git remote prune origin && git branch -vv | grep ': entfernt]' | awk '{print $1}' | xargs -r git branch -D
 
-[init]
+[init] 
     defaultBranch = main
 
 [rebase]
@@ -116,11 +116,12 @@
     gpgsign = true
 
 [credential "https://github.com"]
-	helper =
-	helper = !/usr/bin/gh auth git-credential
+	helper = 
+	helper = !/home/malbertzard/.nix-profile/bin/gh auth git-credential
 
 [credential "https://gist.github.com"]
-	helper =
-	helper = !/usr/bin/gh auth git-credential
+	helper = 
+	helper = !/home/malbertzard/.nix-profile/bin/gh auth git-credential
+
 [http]
 	postBuffer = 157286400

@@ -4,7 +4,11 @@
 
   home.packages =
     with pkgs;
-    [spotify]
+    [
+      spotify
+      zotero
+      dbeaver-bin
+    ]
     ++ mkLinuxOnly [
     ];
 }

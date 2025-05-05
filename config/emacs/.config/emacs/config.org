@@ -3,7 +3,7 @@
 #+Description: My Config based on a starter config probably don't use this I have no clue
 #+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
 
-* Table Of Contents :toc_3:
+* Table of contents                                      
 - [[#early-init][Early init]]
 - [[#grunt-work-to-make-emacs-behave][Grunt work to make Emacs behave]]
   - [[#bootstrapping-and-installing-packages][Bootstrapping and installing packages]]
@@ -94,8 +94,7 @@
   - [[#replacing-stuff][Replacing stuff]]
   - [[#file-stuff][File Stuff]]
   - [[#search-stuff][Search Stuff]]
-
-* Early init
+  * Early init
 #+begin_src emacs-lisp :tangle early-init.el
     (setq gc-cons-threshold 10000000)
     (setq byte-compile-warnings '(not obsolete))
@@ -122,7 +121,6 @@
 
     (setq package-enable-at-startup nil)
 #+end_src
-
 * Grunt work to make Emacs behave
 ** Bootstrapping and installing packages
 
@@ -324,7 +322,10 @@ Ensure the Emacs server is started if not already running
 ** Center Content
 #+BEGIN_SRC emacs-lisp
     (use-package olivetti
-      :ensure t)
+      :ensure t
+      :hook
+      (markdown-mode . olivetti-mode) 
+      (org-mode . olivetti-mode))
 #+END_SRC
 
 ** Font
@@ -358,7 +359,6 @@ Ensure the Emacs server is started if not already running
       :config
       (setq which-key-popup-type 'minibuffer)
       (which-key-mode))
-
 #+END_SRC
 * Completions
 ** Completions at point
@@ -530,9 +530,9 @@ Connection flycheck with eglot and the lsps
 #+end_src
 ** Syntax Highlighting
 *** Folding
-#+BEGIN_SRC emacs-lisp
-    ;; (use-package ts-fold
-    ;;	 :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
+#+BEGIN_SRC emacs-lisp :tangle no
+    (use-package treesit-fold
+      :ensure t)
 #+END_SRC
 *** Tree-sitter Config
 #+begin_src emacs-lisp
@@ -551,6 +551,7 @@ Connection flycheck with eglot and the lsps
       (global-treesit-auto-mode))
 
     (add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-ts-mode))
+    (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.ruby\\'" . ruby-ts-mode))
@@ -594,7 +595,7 @@ Connection flycheck with eglot and the lsps
     		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
     		(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
     		(make "https://github.com/alemuller/tree-sitter-make")
-    		(rust "https://github.com/tree-sitter/tree-sitter-rust")
+    		(rust "https://github.com/tree-sitter/tree-sitter-rust" "v0.23.0" "master")
     		(php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
     		(phpdoc "https://github.com/claytonrcarter/tree-sitter-phpdoc" "master" "src")
     		(twig "https://github.com/kaermorchen/tree-sitter-twig")
@@ -723,6 +724,22 @@ Connection flycheck with eglot and the lsps
     (desktop-save-mode 1)
 #+END_SRC
 
+** TGE.el 
+#+BEGIN_SRC emacs-lisp
+    (load "~/code/TGE.el/main")
+
+    (defvar tab-bar-extensions-map (make-sparse-keymap)
+      "Keymap for tab-bar-extensions commands.")
+
+    (define-key tab-bar-extensions-map (kbd "n") #'tab-bar-extensions-switch-to-next-tab)
+    (define-key tab-bar-extensions-map (kbd "p") #'tab-bar-extensions-switch-to-previous-tab)
+    (define-key tab-bar-extensions-map (kbd "s") #'tab-bar-extensions-select-tab)
+    (define-key tab-bar-extensions-map (kbd "S") #'tab-bar-extensions-select-group-and-tab)
+    (define-key tab-bar-extensions-map (kbd "d") #'tab-bar-extensions-delete-group-tabs)
+
+    (define-key global-map (kbd "C-c W") tab-bar-extensions-map)
+#+END_SRC
+
 ** Custom Project Functions
 #+BEGIN_SRC emacs-lisp
     (defun my/find-buffer ()
@@ -748,6 +765,13 @@ Connection flycheck with eglot and the lsps
     	(let ((file (read-file-name "Dired: ")))
     	  (dired file))))
 
+    (defun my/compile ()
+      "Use `project-compile` if in a project, otherwise `compile`."
+      (interactive)
+      (if (vc-root-dir)
+    	  (project-compile)
+    	(compile)))
+
     (defun my/eat ()
       "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
       (interactive)
@@ -765,7 +789,7 @@ Connection flycheck with eglot and the lsps
 
 ** Tab Groups per project
 #+BEGIN_SRC emacs-lisp
-    (setq tab-bar-show t)
+    (setq tab-bar-show 'nil)
 
     (setq tab-bar-format '(tab-bar-format-history tab-bar-format-tabs-groups tab-bar-separator tab-bar-format-add-tab))
 
@@ -801,7 +825,14 @@ We want to use the same Configurations as out teammates
 #+begin_src emacs-lisp
     (use-package diff-hl
       :ensure t
-      :config(global-diff-hl-mode))
+      :after magit
+      :init (global-diff-hl-mode)
+      :custom
+      (diff-hl-disable-on-remote t)
+      :hook
+      ((magit-pre-refresh . diff-hl-magit-pre-refresh)
+       (magit-post-refresh . diff-hl-magit-post-refresh))
+      (vc-checkin . diff-hl-update))
 #+end_src
 
 ** File Management
@@ -838,11 +869,11 @@ We want to use the same Configurations as out teammates
 *** Harpoon
 #+BEGIN_SRC  emacs-lisp
     (use-package harpoon 
-      :bind (("C-c 1" . harpoon-go-to-1)
-    		 ("C-c 2" . harpoon-go-to-2)
-    		 ("C-c 3" . harpoon-go-to-3)
-    		 ("C-c 4" . harpoon-go-to-4)
-    		 ("C-c 5" . harpoon-go-to-5)
+      :bind (("C-c H 1" . harpoon-go-to-1)
+    		 ("C-c H 2" . harpoon-go-to-2)
+    		 ("C-c H 3" . harpoon-go-to-3)
+    		 ("C-c H 4" . harpoon-go-to-4)
+    		 ("C-c H 5" . harpoon-go-to-5)
 
     		 ("C-c H a" . harpoon-add-file)
     		 ("C-c H c" . harpoon-clear)
@@ -980,17 +1011,16 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       (global-obsidian-mode t)
       (obsidian-backlinks-mode t)
       :custom
-      (obsidian-directory "~/Documents/Cadmus/")
-      (obsidian-inbox-directory "Inbox")
-      ;; Useful if you're going to be using wiki links
+      (obsidian-directory "~/Documents/Cadmus")
       (markdown-enable-wiki-links t)
-
       :bind (:map obsidian-mode-map
-                  ("C-c N n" . obsidian-capture)
-                  ("C-c N l" . obsidian-insert-link)
-                  ("C-c N o" . obsidian-follow-link-at-point)
-                  ("C-c N p" . obsidian-jump)
-                  ("C-c N b" . obsidian-backlink-jump)))
+                  ("n" . obsidian-capture)
+                  ("l" . obsidian-insert-link)
+                  ("o" . obsidian-follow-link-at-point)
+                  ("p" . obsidian-jump)
+                  ("b" . obsidian-backlink-jump)))
+    (define-key global-map (kbd "C-c N") obsidian-mode-map)
+
 #+end_src
 ** Org
 *** Org Mode
@@ -1020,7 +1050,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
      '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
      '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
 
-    ;; (add-hook 'org-mode-hook 'visual-line-mode)
+    (add-hook 'org-mode-hook 'visual-line-mode)
 
     (setq org-startup-folded 'fold)
 #+end_src
@@ -1109,7 +1139,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        '("g" . meow-cancel-selection)
        
        '("R" . meow-swap-grab)
-       '("Y" . meow-sync-grab)
        '("G" . meow-grab)
 
        '("h" . meow-left)
@@ -1123,13 +1152,16 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        
        '("p" . meow-yank)
        '("P" . clipboard-yank)
+       
+       '("y" . meow-save)
+       '("Y" . ~meow-clipboard-save)
 
        '("H" . meow-left-expand)
        '("I" . meow-open-above)
        '("J" . meow-next-expand)
        '("K" . meow-prev-expand)
        '("L" . meow-right-expand)
-
+       
        '("q" . kmacro-start-macro-or-insert-counter)
        '("Q" . meow-end-or-call-kmacro)
 
@@ -1147,7 +1179,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        '("W" . meow-mark-symbol)
        '("x" . meow-line)
        '("X" . meow-goto-line)
-       '("y" . meow-save)
        '("z" . meow-pop-selection)
        '("#" . meow-reverse)
        '("'" . repeat)
@@ -1156,7 +1187,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (meow-setup)
     (setq meow-keypad-leader-dispatch "C-c")
     (meow-global-mode 1)
-    
+
     (add-hook 'eat-mode-hook 'meow-temp-normal)
 
     (define-key minibuffer-local-map (kbd "C-v") 'meow-yank)
@@ -1272,7 +1303,7 @@ Make compilation look better and therefore make it work with modern tools
     	  (call-interactively 'compile))))
 
     (global-set-key (kbd "C-c C o") 'compile-or-open)
-    (global-set-key (kbd "C-c C c") 'projectile-compile-project)
+    (global-set-key (kbd "C-c C c") 'my/compile)
     (global-set-key (kbd "C-c C r") 'recompile)
     (global-set-key (kbd "C-c C k") 'kill-compilation)
 
