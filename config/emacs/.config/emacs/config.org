@@ -626,23 +626,7 @@ Connection flycheck with eglot and the lsps
       (setq dape-key-prefix "\C-c L")
       :config
       (setq dape-cwd-fn 'projectile-project-root)
-      (setq dape-buffer-window-arrangement 'right)
-      (add-to-list 'dape-configs
-    			   `(debugpy-flask
-    				 modes (python-mode jinja2-mode)
-    				 command "python"
-    				 command-args ["-m" "debugpy.adapter" "--host" "0.0.0.0" "--port" :autoport]
-    				 port :autoport
-    				 :type "python"
-    				 :request "launch"
-    				 :module "flask"
-    				 :args ["--app" "src" "run" "--no-debugger" "--no-reload"]
-    				 :console "integratedTerminal"
-    				 :showReturnValue t
-    				 :justMyCode nil
-    				 :jinja t
-    				 :cwd dape-cwd-fn)
-    			   ))
+      (setq dape-buffer-window-arrangement 'right))
 #+END_SRC
 *** Eglot
 #+BEGIN_SRC emacs-lisp
@@ -726,7 +710,7 @@ Connection flycheck with eglot and the lsps
 
 ** TGE.el 
 #+BEGIN_SRC emacs-lisp
-    (load "~/code/TGE.el/main")
+    (load "~/code/projects/TGE.el/main")
 
     (defvar tab-bar-extensions-map (make-sparse-keymap)
       "Keymap for tab-bar-extensions commands.")
@@ -1154,7 +1138,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        '("P" . clipboard-yank)
        
        '("y" . meow-save)
-       '("Y" . ~meow-clipboard-save)
+       '("Y" . meow-clipboard-save)
 
        '("H" . meow-left-expand)
        '("I" . meow-open-above)
@@ -1318,6 +1302,55 @@ Make compilation look better and therefore make it work with modern tools
     (global-set-key (kbd "C-c r r") 'query-replace)
 #+END_SRC
 
+** Hydra
+*** GUD Perl
+#+begin_src emacs-lisp
+(defun my-cperl-db-hydra-setup ()
+  (defhydra hydra-cperl-db (:hint nil)
+    "
+GUD cperl-db
+--------------------------------
+_n_: next     _s_: step
+_c_: cont     _f_: finish
+_b_: break    _d_: delete
+_u_: up       _D_: down
+_r_: rerun    _q_: quit
+"
+    ("n" gud-next)
+    ("s" gud-step)
+    ("c" gud-cont)
+    ("f" gud-finish)
+    ("b" gud-break)
+    ("d" gud-remove)
+    ("u" gud-up)
+    ("D" gud-down)
+    ("r" gud-run)
+    ("q" nil "quit"))
+
+  (local-set-key (kbd "C-c d") 'hydra-cperl-db/body))
+
+(add-hook 'cperl-mode-hook #'my-cperl-db-hydra-setup)
+#+end_src
+
+*** Resizing Windows
+#+begin_src emacs-lisp
+(defhydra hydra-window (:hint nil)
+  "
+^Resize^
+--------------------------------
+_H_ shrink horiz
+_J_ shrink vert
+_K_ enlarge vert
+_L_ enlarge horiz
+"
+  ("H" shrink-window-horizontally)
+  ("L" enlarge-window-horizontally)
+  ("J" shrink-window)
+  ("K" enlarge-window)
+  ("q" nil "quit"))
+
+(global-set-key (kbd "C-c w W") 'hydra-window/body)
+#+end_src>
 ** File Stuff
 #+BEGIN_SRC emacs-lisp
     (global-set-key (kbd "C-c f f") 'my/find-file)
