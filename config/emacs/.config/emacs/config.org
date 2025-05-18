@@ -710,7 +710,7 @@ Connection flycheck with eglot and the lsps
 
 ** TGE.el 
 #+BEGIN_SRC emacs-lisp
-    (load "~/code/projects/TGE.el/main")
+    ;; (load "~/code/projects/TGE.el/main")
 
     (defvar tab-bar-extensions-map (make-sparse-keymap)
       "Keymap for tab-bar-extensions commands.")
