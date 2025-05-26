@@ -69,8 +69,8 @@
     in
 
     {
-      homeConfigurations."${hosts.popos.user}@${hosts.popos.hostname}" = mkHomeConfigurations {
-        host = hosts.popos;
+      homeConfigurations."${hosts.debian.user}@${hosts.debian.hostname}" = mkHomeConfigurations {
+        host = hosts.debian;
         nixpkgs = inputs.nixpkgs;
         home-manager = inputs.home-manager;
       };

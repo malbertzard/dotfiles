@@ -7,6 +7,7 @@ let
       alwaysEnsure = true;
       package = pkgs.emacs;
       extraEmacsPackages = epkgs: [
+        epkgs.treesit-grammars.with-all-grammars
         epkgs.f
         epkgs.s
         epkgs.lv

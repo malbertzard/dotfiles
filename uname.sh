@@ -24,6 +24,7 @@ then
         NixOS*)     linux_os=nixos;;
         Ubuntu*)    linux_os=ubuntu;;
         Pop!_OS*)   linux_os=pop_os;;
+        Debian*)    linux_os=debian;;
         *)          linux_os=UNKNOWN
     esac
     if [ "$linux_os" = "UNKNOWN" ]

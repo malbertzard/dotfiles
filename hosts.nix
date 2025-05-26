@@ -8,4 +8,11 @@ in
     arch = "x86_64-linux";
     user = users.default;
   };
+
+  debian = {
+    hostname = "debian";
+    dir = "debian";
+    arch = "x86_64-linux";
+    user = users.default;
+  };
 }
