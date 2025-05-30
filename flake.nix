@@ -41,6 +41,7 @@
           modules = [
             ./hosts/${host.dir}/home.nix
             ./overlays
+            ./overlays/emacs.nix
           ] ++ modules;
         };
 
@@ -56,8 +57,11 @@
           system = host.arch;
           modules = [
             ./hosts/${host.dir}/configuration.nix
-            ./overlays
+
             { nixpkgs.overlays = overlays; }
+            ./overlays
+            ./overlays/emacs.nix
+
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
@@ -71,6 +75,13 @@
     {
       homeConfigurations."${hosts.debian.user}@${hosts.debian.hostname}" = mkHomeConfigurations {
         host = hosts.debian;
+        nixpkgs = inputs.nixpkgs;
+        home-manager = inputs.home-manager;
+      };
+
+
+      nixosConfigurations."${hosts.nixos.hostname}" = mkNixOSConfigurations {
+        host = hosts.nixos;
         nixpkgs = inputs.nixpkgs;
         home-manager = inputs.home-manager;
       };

@@ -323,7 +323,7 @@ Ensure the Emacs server is started if not already running
 ** Font
 #+BEGIN_SRC emacs-lisp
     (set-face-attribute 'default nil
-                                        :height 150
+                                        :height 120
                                         :weight 'medium)
     (setq-default line-spacing 0.15)
 #+END_SRC
@@ -701,19 +701,19 @@ Connection flycheck with eglot and the lsps
 #+END_SRC
 
 ** TGE.el
-#+BEGIN_SRC emacs-lisp
-    ;; (load "~/code/projects/TGE.el/main")
+#+BEGIN_SRC emacs-lisp 
+    (load "~/code/proj/TGE.el/main")
 
-    (defvar tab-bar-extensions-map (make-sparse-keymap)
-      "Keymap for tab-bar-extensions commands.")
+    (defvar tab-group-extensions-map (make-sparse-keymap)
+      "Keymap for tab-group-extensions commands.")
 
-    (define-key tab-bar-extensions-map (kbd "n") #'tab-bar-extensions-switch-to-next-tab)
-    (define-key tab-bar-extensions-map (kbd "p") #'tab-bar-extensions-switch-to-previous-tab)
-    (define-key tab-bar-extensions-map (kbd "s") #'tab-bar-extensions-select-tab)
-    (define-key tab-bar-extensions-map (kbd "S") #'tab-bar-extensions-select-group-and-tab)
-    (define-key tab-bar-extensions-map (kbd "d") #'tab-bar-extensions-delete-group-tabs)
+    (define-key tab-group-extensions-map (kbd "n") #'tab-group-extensions-switch-to-next-tab)
+    (define-key tab-group-extensions-map (kbd "p") #'tab-group-extensions-switch-to-previous-tab)
+    (define-key tab-group-extensions-map (kbd "s") #'tab-group-extensions-select-tab)
+    (define-key tab-group-extensions-map (kbd "S") #'tab-group-extensions-select-group-and-tab)
+    (define-key tab-group-extensions-map (kbd "d") #'tab-group-extensions-delete-group-tabs)
 
-    (define-key global-map (kbd "C-c W") tab-bar-extensions-map)
+    (define-key global-map (kbd "C-c W") tab-group-extensions-map)
 #+END_SRC
 
 ** Custom Project Functions

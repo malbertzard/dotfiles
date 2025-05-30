@@ -2,7 +2,7 @@
 
 source "uname.sh"
 
-src="$HOME/code/projects/dotfiles"
+src="$HOME/code/proj/dotfiles"
 if [ "$linux_os" = "nixos" ]
 then
     dst="/etc/nixos"
