@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
   home.packages = [
+    pkgs.pyright
     pkgs.pyenv
     pkgs.pdm
     (pkgs.python3.withPackages (

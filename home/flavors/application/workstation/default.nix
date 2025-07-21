@@ -12,6 +12,10 @@
       obsidian
       dbeaver-bin
       insomnia
+      firefox-bin
+      blender
+      orca-slicer
+      signal-desktop
     ]
     ++ mkLinuxOnly [
     ];

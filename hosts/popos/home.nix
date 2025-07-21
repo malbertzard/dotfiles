@@ -7,7 +7,7 @@ in
     ../../home/flavors/desktop/minimal
     ../../home/flavors/application/development
     ../../home/flavors/application/workstation
-
+    ../../home/flavors/application/gaming.nix
 
     ../../overlays/emacs.nix
     ../../home/features/application/emacs.nix

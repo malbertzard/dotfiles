@@ -8,6 +8,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
     home-manager-stable = {
       url = "github:nix-community/home-manager/release-24.11";
@@ -49,6 +51,7 @@
         {
           host,
           nixpkgs,
+          nixos-hardware,
           home-manager,
           modules ? [ ],
           overlays ? [ ],
@@ -57,7 +60,7 @@
           system = host.arch;
           modules = [
             ./hosts/${host.dir}/configuration.nix
-
+            nixos-hardware.nixosModules.framework-13-7040-amd
             { nixpkgs.overlays = overlays; }
             ./overlays
             ./overlays/emacs.nix
@@ -83,6 +86,7 @@
       nixosConfigurations."${hosts.nixos.hostname}" = mkNixOSConfigurations {
         host = hosts.nixos;
         nixpkgs = inputs.nixpkgs;
+        nixos-hardware = inputs.nixos-hardware;
         home-manager = inputs.home-manager;
       };
 

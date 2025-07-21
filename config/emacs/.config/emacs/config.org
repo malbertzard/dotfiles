@@ -609,6 +609,22 @@ Connection flycheck with eglot and the lsps
     (use-package lua-mode :ensure t)
 #+END_SRC
 
+** Xref
+#+begin_src emacs-lisp :tangle no
+(define-prefix-command 'my-xref-map)
+(global-set-key (kbd "C-c x") 'my-xref-map)
+
+(define-key my-xref-map (kbd "d") #'xref-find-definitions)
+(define-key my-xref-map (kbd "D") #'xref-find-definitions-other-window)
+(define-key my-xref-map (kbd "r") #'xref-find-references)
+(define-key my-xref-map (kbd "a") #'xref-find-apropos)
+(define-key my-xref-map (kbd "b") #'xref-pop-marker-stack)
+(define-key my-xref-map (kbd "n") #'xref-next-line)
+(define-key my-xref-map (kbd "p") #'xref-prev-line)
+(define-key my-xref-map (kbd "q") #'xref-quit-and-pop-marker-stack)
+(define-key my-xref-map (kbd "l") #'xref-list-definitions)
+#+END_SRC
+
 ** LSP
 *** Dape
 #+BEGIN_SRC emacs-lisp
@@ -665,11 +681,11 @@ Connection flycheck with eglot and the lsps
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                           '(cperl-mode . ("~/.local/share/nvim/mason/bin/perlnavigator"))))
+                           '(cperl-mode . ("perlnavigator"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                           '(python-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
+                           '(python-mode . ("pyright-langserver" "--stdio"))))
 #+END_SRC
 *** LSP Booster
 #+begin_src emacs-lisp :tangle no
@@ -1306,34 +1322,6 @@ Make compilation look better and therefore make it work with modern tools
 #+END_SRC
 
 ** Hydra
-*** GUD Perl
-#+begin_src emacs-lisp
-(defun my-cperl-db-hydra-setup ()
-  (defhydra hydra-cperl-db (:hint nil)
-    "
-GUD cperl-db
---------------------------------
-_n_: next     _s_: step
-_c_: cont     _f_: finish
-_b_: break    _d_: delete
-_u_: up       _D_: down
-_r_: rerun    _q_: quit
-"
-    ("n" gud-next)
-    ("s" gud-step)
-    ("c" gud-cont)
-    ("f" gud-finish)
-    ("b" gud-break)
-    ("d" gud-remove)
-    ("u" gud-up)
-    ("D" gud-down)
-    ("r" gud-run)
-    ("q" nil "quit"))
-
-  (local-set-key (kbd "C-c d") 'hydra-cperl-db/body))
-
-(add-hook 'cperl-mode-hook #'my-cperl-db-hydra-setup)
-#+end_src
 
 *** Resizing Windows
 #+begin_src emacs-lisp
