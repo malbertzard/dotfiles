@@ -7,5 +7,6 @@
 {
   nixpkgs.overlays = [
     (import ./pkgs.nix)
+    (import ./emacs.nix)
   ];
 }

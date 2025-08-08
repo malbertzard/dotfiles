@@ -43,7 +43,6 @@
           modules = [
             ./hosts/${host.dir}/home.nix
             ./overlays
-            ./overlays/emacs.nix
           ] ++ modules;
         };
 
@@ -60,11 +59,8 @@
           system = host.arch;
           modules = [
             ./hosts/${host.dir}/configuration.nix
-            nixos-hardware.nixosModules.framework-13-7040-amd
             { nixpkgs.overlays = overlays; }
             ./overlays
-            ./overlays/emacs.nix
-
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
@@ -82,13 +78,11 @@
         home-manager = inputs.home-manager;
       };
 
-
       nixosConfigurations."${hosts.nixos.hostname}" = mkNixOSConfigurations {
         host = hosts.nixos;
         nixpkgs = inputs.nixpkgs;
-        nixos-hardware = inputs.nixos-hardware;
+        nixos-hardware = inputs.nixos-hardware.nixosModules."${hosts.nixos.hardware}";
         home-manager = inputs.home-manager;
       };
-
     };
 }

@@ -14,6 +14,8 @@ in
     dir = "nixos";
     arch = "x86_64-linux";
     user = users.default;
+    hardware = "framework-13-7040-amd";
+
   };
 
   debian = {

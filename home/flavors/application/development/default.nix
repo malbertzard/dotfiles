@@ -9,7 +9,6 @@
     ../../../features/development/go.nix
     ../../../features/development/rust.nix
     ../../../features/development/devops.nix
-    ../../../features/development/android.nix
   ];
   home.packages =
     with pkgs;
