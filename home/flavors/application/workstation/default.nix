@@ -2,6 +2,8 @@
 {
   imports = [
     ../../../features/application/emacs.nix
+    ../../../features/application/vscode.nix
+    ../../../features/application/wezterm.nix
   ];
 
   home.packages =

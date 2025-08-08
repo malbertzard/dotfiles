@@ -9,8 +9,4 @@
     enable = true;
     ibus.engines = with pkgs.ibus-engines; [ libpinyin ];
   };
-
-  environment.systemPackages = with pkgs; [
-    firefox
-  ];
 }
