@@ -136,7 +136,7 @@
     (setq package-archives nil)
 #+end_src
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp  :tangle no
     (require 'package)
     (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
@@ -158,7 +158,6 @@
       :init
       :config
       (setq compile-angel-verbose t)
-      ;; Compiles .el files before they are loaded.
       (compile-angel-on-load-mode))
 #+end_src
 
@@ -286,11 +285,6 @@ Ensure the Emacs server is started if not already running
       (setq display-time-default-load-average nil)
       (display-time-mode 1))
 
-    (use-package battery
-      :ensure nil
-      :config
-      (display-battery-mode 1))
-
     (use-package doom-modeline
       :ensure t
       :hook (after-init . doom-modeline-mode))
@@ -315,6 +309,8 @@ Ensure the Emacs server is started if not already running
 #+BEGIN_SRC emacs-lisp
     (use-package olivetti
       :ensure t
+      :config
+      (setq olivetti-body-width 180)
       :hook
       (markdown-mode . olivetti-mode)
       (org-mode . olivetti-mode))
@@ -542,6 +538,7 @@ Connection flycheck with eglot and the lsps
       (setq treesit-auto-langs '(lua ruby zig python rust go toml yaml json php))
       (global-treesit-auto-mode))
 
+    (add-to-list 'auto-mode-alist '("Dockerfile'" . dockerfile-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
@@ -609,22 +606,6 @@ Connection flycheck with eglot and the lsps
     (use-package lua-mode :ensure t)
 #+END_SRC
 
-** Xref
-#+begin_src emacs-lisp :tangle no
-(define-prefix-command 'my-xref-map)
-(global-set-key (kbd "C-c x") 'my-xref-map)
-
-(define-key my-xref-map (kbd "d") #'xref-find-definitions)
-(define-key my-xref-map (kbd "D") #'xref-find-definitions-other-window)
-(define-key my-xref-map (kbd "r") #'xref-find-references)
-(define-key my-xref-map (kbd "a") #'xref-find-apropos)
-(define-key my-xref-map (kbd "b") #'xref-pop-marker-stack)
-(define-key my-xref-map (kbd "n") #'xref-next-line)
-(define-key my-xref-map (kbd "p") #'xref-prev-line)
-(define-key my-xref-map (kbd "q") #'xref-quit-and-pop-marker-stack)
-(define-key my-xref-map (kbd "l") #'xref-list-definitions)
-#+END_SRC
-
 ** LSP
 *** Dape
 #+BEGIN_SRC emacs-lisp
@@ -649,43 +630,47 @@ Connection flycheck with eglot and the lsps
       (eglot-report-progress nil)
       (eglot-events-buffer-size 0)
       (eglot-sync-connect nil)
-      (eglot-extend-to-xref nil)
-      :bind (:map eglot-mode-map
-                          ("C-c l l" . eldoc-box-help-at-point)
-                          ("C-c l d" . eglot-find-declaration)
-                          ("C-c l i" . eglot-find-implementation)
-                          ("C-c l t" . eglot-find-typeDefinition)
-                          ("C-c l a" . eglot-code-actions)
-                          ("C-c l I" . eglot-code-action-organize-imports)
-                          ("C-c l f" . eglot-format-buffer)
-                          ("C-c l r" . eglot-rename)))
+      (eglot-extend-to-xref nil))
 
     (setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
 
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                           '(gdscript-mode . ("localhost:6005"))))
+    (setq-default eglot-workspace-configuration
+                  '((:perlnavigator .
+            			
+    								(:perlPath
+    								 "/usr/bin/perl"
+    								 :includePaths
+    								 ["/DATA/ds/DatenService/SCRIPT/lib/"
+    								  "/DATA/ds/win32/perl/site/lib/"
+    								  "/DATA/ds/DatenService/SCRIPT/lib/local/util/"
+    								  "/DATA/ds/DatenService/SCRIPT/lib/local/ds1/"
+    								  "/DATA/ds/DatenService/SCRIPT/lib/local/SDS/"]
+    								 :enableWarnings t))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                           '(go-ts-mode . ("gopls"))))
+                   '(gdscript-mode . ("localhost:6005"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                           '(rust-ts-mode . ("rust-analyzer"))))
-
-    ;;; Mason from neovim is just a great way to manage lsps outside of nix
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                           '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
+                   '(go-ts-mode . ("gopls"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                           '(cperl-mode . ("perlnavigator"))))
+                   '(rust-ts-mode . ("rust-analyzer"))))
+
+            ;;; Mason from neovim is just a great way to manage lsps outside of nix
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                           '(python-mode . ("pyright-langserver" "--stdio"))))
+                   '(cperl-mode . ("perlnavigator" "--stdio"))))
+
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(python-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 #+END_SRC
 *** LSP Booster
 #+begin_src emacs-lisp :tangle no
@@ -701,6 +686,21 @@ Connection flycheck with eglot and the lsps
       :ensure t
       :hook ('eshell-load-hook #'eat-eshell-mode))
 #+END_SRC
+
+** Formatter
+#+begin_src emacs-lisp
+    (use-package apheleia
+      :ensure t
+      :config
+      (setf (alist-get 'perltidy apheleia-formatters)
+            '("perltidy" "-q" "-st"))
+      (setf (alist-get 'perl-mode apheleia-mode-alist)
+            'perltidy)
+      (setf (alist-get 'cperl-mode apheleia-mode-alist)
+            'perltidy)
+
+      (apheleia-global-mode t))
+#+end_src
 
 ** Docker
 #+begin_src emacs-lisp
@@ -877,9 +877,17 @@ We want to use the same Configurations as out teammates
 
 * Helper packages
 ** Midnight commander
-Runs clean buffer list at midnight to keep performance up
 #+BEGIN_SRC emacs-lisp
-    (setq midnight-mode t)
+    (use-package midnight
+      :ensure nil
+      :hook (after-init . midnight-mode)
+      :custom
+      (midnight-delay "12:15")
+      :config
+      (add-hook 'midnight-hook
+                (lambda ()
+                  (message "[midnight-mode] Aktualisiere die Paketliste...")
+                  (package-refresh-contents))))
 #+END_SRC
 
 ** Surround
@@ -967,8 +975,14 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (fset 'perl-mode 'cperl-mode)
     (setq cperl-invalid-face nil)
 
-    ;; (setq cperl-indent-parens-as-block t)
-    ;; (setq cperl-close-paren-offset (- cperl-indent-level))
+    (add-hook 'cperl-mode-hook
+              (lambda ()
+                (setq cperl-indent-level 8)      ; Indentation level for blocks
+                (setq tab-width 8)              ; Display width of a tab character
+                (setq indent-tabs-mode t)))     ; Use tabs instead of spaces
+
+        ;; (setq cperl-indent-parens-as-block t)
+        ;; (setq cperl-close-paren-offset (- cperl-indent-level))
 #+END_SRC
 
 ** Python
@@ -1268,6 +1282,39 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (global-set-key (kbd "C-c w o") 'delete-other-windows)
 #+END_SRC
 ** Development
+*** Language Bindings
+#+BEGIN_SRC emacs-lisp
+    ;; Define main language keymap under "C-c l"
+    (define-prefix-command 'my/lang-map)
+    (global-set-key (kbd "C-c l") 'my/lang-map)
+
+    ;; Define sub-prefix for server commands under "C-c l S"
+    (define-prefix-command 'my/lang-server-map)
+    (define-key my/lang-map (kbd "S") 'my/lang-server-map)
+
+    ;; Xref bindings
+    (define-key my/lang-map (kbd "d") #'xref-find-definitions)
+    (define-key my/lang-map (kbd "r") #'xref-find-references)
+    (define-key my/lang-map (kbd "a") #'xref-find-apropos)
+
+    ;; Eldoc (doc at point)
+    (define-key my/lang-map (kbd "h") #'eldoc-box-help-at-point)
+
+    ;; Eglot-specific bindings (only when eglot is loaded)
+    (with-eval-after-load 'eglot
+      (define-key my/lang-map (kbd "f") #'eglot-format)
+      (define-key my/lang-map (kbd "F") #'eglot-format-buffer)
+      (define-key my/lang-map (kbd "I") #'eglot-code-action-organize-imports)
+      (define-key my/lang-map (kbd "a") #'eglot-code-actions)
+      (define-key my/lang-map (kbd "R") #'eglot-rename)
+      (define-key my/lang-map (kbd "i") #'eglot-find-implementation)
+      (define-key my/lang-map (kbd "t") #'eglot-find-typeDefinition)
+
+      ;; Server-related bindings under "C-c l S"
+      (define-key my/lang-server-map (kbd "r") #'eglot-reconnect)
+      (define-key my/lang-server-map (kbd "q") #'eglot-shutdown))
+#+END_SRC
+
 *** Terminal
 #+BEGIN_SRC emacs-lisp
     (global-set-key (kbd "C-c t T") 'my/eat)
@@ -1322,6 +1369,34 @@ Make compilation look better and therefore make it work with modern tools
 #+END_SRC
 
 ** Hydra
+*** GUD Perl
+#+begin_src emacs-lisp
+(defun my-cperl-db-hydra-setup ()
+  (defhydra hydra-cperl-db (:hint nil)
+    "
+GUD cperl-db
+--------------------------------
+_n_: next     _s_: step
+_c_: cont     _f_: finish
+_b_: break    _d_: delete
+_u_: up       _D_: down
+_r_: rerun    _q_: quit
+"
+    ("n" gud-next)
+    ("s" gud-step)
+    ("c" gud-cont)
+    ("f" gud-finish)
+    ("b" gud-break)
+    ("d" gud-remove)
+    ("u" gud-up)
+    ("D" gud-down)
+    ("r" gud-run)
+    ("q" nil "quit"))
+
+  (local-set-key (kbd "C-c d") 'hydra-cperl-db/body))
+
+(add-hook 'cperl-mode-hook #'my-cperl-db-hydra-setup)
+#+end_src
 
 *** Resizing Windows
 #+begin_src emacs-lisp

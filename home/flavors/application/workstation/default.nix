@@ -17,6 +17,7 @@
       firefox-bin
       blender
       orca-slicer
+      audacity
       signal-desktop
     ]
     ++ mkLinuxOnly [
