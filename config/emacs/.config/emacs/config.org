@@ -970,6 +970,11 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       :ensure t)
 #+END_SRC
 
+** Godot
+#+begin_src emacs-lisp
+        (use-package gdscript-mode
+    	  :ensure t)
+#+end_src
 ** Perl
 #+begin_src emacs-lisp
     (fset 'perl-mode 'cperl-mode)

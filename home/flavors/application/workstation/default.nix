@@ -10,6 +10,7 @@
     with pkgs;
     [
       spotify
+      krita
       zotero
       obsidian
       dbeaver-bin

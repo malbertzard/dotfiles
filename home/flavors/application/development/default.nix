@@ -9,6 +9,7 @@
     ../../../features/development/python.nix
     ../../../features/development/go.nix
     ../../../features/development/rust.nix
+    ../../../features/development/godot.nix
   ];
   home.packages =
     with pkgs;
