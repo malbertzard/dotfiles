@@ -108,13 +108,13 @@
     (setq frame-resize-pixelwise t)
     (tool-bar-mode -1)			    ; All these tools are in the menu-bar anyway
     (setq default-frame-alist '((fullscreen . maximized)
-                                                        (vertical-scroll-bars . nil)
-                                                        (horizontal-scroll-bars . nil)
-                                                        (ns-transparent-titlebar . t)))
+                                (vertical-scroll-bars . nil)
+                                (horizontal-scroll-bars . nil)
+                                (ns-transparent-titlebar . t)))
 
     (when (and (fboundp 'startup-redirect-eln-cache)
-                   (fboundp 'native-comp-available-p)
-                   (native-comp-available-p))
+               (fboundp 'native-comp-available-p)
+               (native-comp-available-p))
       (startup-redirect-eln-cache
        (convert-standard-filename
         (expand-file-name  "var/eln-cache/" user-emacs-directory))))
@@ -136,7 +136,7 @@
     (setq package-archives nil)
 #+end_src
 
-#+begin_src emacs-lisp  :tangle no
+#+begin_src emacs-lisp :tangle no
     (require 'package)
     (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
@@ -148,6 +148,23 @@
 
     (eval-and-compile
       (setq use-package-expand-minimally t))
+
+
+    (defvar bootstrap-version)
+    (let ((bootstrap-file
+           (expand-file-name
+            "straight/repos/straight.el/bootstrap.el"
+            (or (bound-and-true-p straight-base-dir)
+                user-emacs-directory)))
+          (bootstrap-version 7))
+      (unless (file-exists-p bootstrap-file)
+        (with-current-buffer
+            (url-retrieve-synchronously
+             "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+             'silent 'inhibit-cookies)
+          (goto-char (point-max))
+          (eval-print-last-sexp)))
+      (load bootstrap-file nil 'nomessage))
 #+end_src
 
 ** Increase performance
@@ -196,8 +213,8 @@
       (auto-save-default nil)
       :config
       :bind (
-                 ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
-                 )
+             ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
+             )
       :hook
       (prog-mode . (lambda () (hs-minor-mode t))))
 #+END_SRC
@@ -216,8 +233,8 @@
 #+begin_src emacs-lisp
     (setq vc-ignore-dir-regexp
           (format "\\(%s\\)\\|\\(%s\\)"
-                          vc-ignore-dir-regexp
-                          tramp-file-name-regexp))
+                  vc-ignore-dir-regexp
+                  tramp-file-name-regexp))
 #+END_SRC
 
 ** Start Emacs server on startup
@@ -301,7 +318,7 @@ Ensure the Emacs server is started if not already running
       :ensure t
       :config
       (setq doom-themes-enable-bold t
-                doom-themes-enable-italic t)
+            doom-themes-enable-italic t)
       (load-theme 'doom-gruvbox t)
       (doom-themes-org-config))
 #+END_SRC
@@ -318,9 +335,10 @@ Ensure the Emacs server is started if not already running
 
 ** Font
 #+BEGIN_SRC emacs-lisp
+    (set-face-attribute 'default nil :family "Iosevka")
     (set-face-attribute 'default nil
-                                        :height 120
-                                        :weight 'medium)
+                        :height 120
+                        :weight 'medium)
     (setq-default line-spacing 0.15)
 #+END_SRC
 
@@ -395,17 +413,17 @@ Ensure the Emacs server is started if not already running
 
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
     (setq completion-category-overrides '((eglot (styles orderless))
-                                                                          (eglot-capf (styles orderless))))
+                                          (eglot-capf (styles orderless))))
 #+END_SRC
 ** Vertical Completions
 #+BEGIN_SRC emacs-lisp
     (use-package vertico
       :ensure t
       :bind (:map vertico-map
-                          ("<tab>" . vertico-insert)
-                          ("C-j" . vertico-next)
-                          ("C-k" . vertico-previous)
-                          ("C-l" . vertico-exit))
+                  ("<tab>" . vertico-insert)
+                  ("C-j" . vertico-next)
+                  ("C-k" . vertico-previous)
+                  ("C-l" . vertico-exit))
       :custom
       (vertico-cycle t)
       (vertico-count 13)
@@ -439,9 +457,9 @@ Ensure the Emacs server is started if not already running
     (use-package embark
       :ensure t
       :bind (("C-." . embark-act)
-                 :map minibuffer-local-map
-                 ("C-c C-c" . embark-collect)
-                 ("C-c C-e" . embark-export)))
+             :map minibuffer-local-map
+             ("C-c C-c" . embark-collect)
+             ("C-c C-e" . embark-export)))
 
     (use-package embark-consult
       :ensure t
@@ -457,8 +475,8 @@ Ensure the Emacs server is started if not already running
       :init
       (defun tempel-setup-capf ()
         (setq-local completion-at-point-functions
-                                (cons #'tempel-complete
-                                          completion-at-point-functions)))
+                    (cons #'tempel-complete
+                          completion-at-point-functions)))
 
       (add-hook 'conf-mode-hook 'tempel-setup-capf)
       (add-hook 'prog-mode-hook 'tempel-setup-capf)
@@ -473,7 +491,7 @@ Ensure the Emacs server is started if not already running
     (use-package jinx
       :ensure t
       :bind (("M-$" . jinx-correct)
-                 ("C-M-$" . jinx-languages)))
+             ("C-M-$" . jinx-languages)))
 #+END_SRC
 
 * Development
@@ -499,12 +517,12 @@ Lets use flycheck and not flymake
     (use-package flycheck
       :ensure t
       :bind (
-                 ("C-c e k" . flycheck-previous-error)
-                 ("C-c e j" . flycheck-next-error)
-                 ("C-c e l" . flycheck-list-errors)
-                 ("C-c e e" . flycheck-explain-error-at-point)
-                 ("C-c e d" . flycheck-display-error-at-point)
-                 )
+             ("C-c e k" . flycheck-previous-error)
+             ("C-c e j" . flycheck-next-error)
+             ("C-c e l" . flycheck-list-errors)
+             ("C-c e e" . flycheck-explain-error-at-point)
+             ("C-c e d" . flycheck-display-error-at-point)
+             )
       )
 #+end_src
 
@@ -525,9 +543,9 @@ Connection flycheck with eglot and the lsps
 *** Tree-sitter Config
 #+begin_src emacs-lisp
     (use-package tree-sitter
-      :ensure nil
+      :ensure t
       :config(global-tree-sitter-mode
-                  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
+              (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
     (setq treesit-font-lock-level 4)
 
@@ -558,52 +576,49 @@ Connection flycheck with eglot and the lsps
       appending 'libtree-sitter-' to the front of each filename."
       (interactive)
       (let* ((source-dir (expand-file-name "bin" tree-sitter-langs-grammar-dir))
-                 (target-dir (expand-file-name "~/.config/emacs/tree-sitter"))
-                 (files (directory-files source-dir t "^[^.].*"))) ; Get all files, excluding hidden files
+             (target-dir (expand-file-name "~/.config/emacs/tree-sitter"))
+             (files (directory-files source-dir t "^[^.].*"))) ; Get all files, excluding hidden files
         (unless (file-exists-p target-dir)
           (make-directory target-dir t)) ; Create target directory if it doesn't exist
         (dolist (file files)
           (let ((filename (file-name-nondirectory file))
-                        (new-filename (concat "libtree-sitter-" (file-name-nondirectory file))))
-                (rename-file file (expand-file-name new-filename target-dir) t)))))
+                (new-filename (concat "libtree-sitter-" (file-name-nondirectory file))))
+            (rename-file file (expand-file-name new-filename target-dir) t)))))
 #+END_SRC
 **** Tree-sitter source List
 #+BEGIN_SRC emacs-lisp
     (setq treesit-language-source-alist
           '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-                (cmake "https://github.com/uyha/tree-sitter-cmake")
-                (css "https://github.com/tree-sitter/tree-sitter-css")
-                (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-                (html "https://github.com/tree-sitter/tree-sitter-html")
-                (zig "https://github.com/GrayJack/tree-sitter-zig")
-                (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.1" "src")
-                (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-                (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
-                (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-                (json "https://github.com/tree-sitter/tree-sitter-json")
-                (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-                (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-                (make "https://github.com/alemuller/tree-sitter-make")
-                (rust "https://github.com/tree-sitter/tree-sitter-rust" "v0.23.0" "master")
-                (php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
-                (phpdoc "https://github.com/claytonrcarter/tree-sitter-phpdoc" "master" "src")
-                (twig "https://github.com/kaermorchen/tree-sitter-twig")
-                (python "https://github.com/tree-sitter/tree-sitter-python")
-                (toml "https://github.com/tree-sitter/tree-sitter-toml")
-                (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-                (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-                (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+            (cmake "https://github.com/uyha/tree-sitter-cmake")
+            (css "https://github.com/tree-sitter/tree-sitter-css")
+            (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+            (html "https://github.com/tree-sitter/tree-sitter-html")
+            (zig "https://github.com/GrayJack/tree-sitter-zig")
+            (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.1" "src")
+            (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+            (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
+            (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+            (json "https://github.com/tree-sitter/tree-sitter-json")
+            (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+            (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+            (make "https://github.com/alemuller/tree-sitter-make")
+            (perl "https://github.com/tree-sitter-perl/tree-sitter-perl" "release")
+            (pod "https://github.com/tree-sitter-perl/tree-sitter-pod" "release")
+            (rust "https://github.com/tree-sitter/tree-sitter-rust" "v0.23.0" "master")
+            (php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
+            (phpdoc "https://github.com/claytonrcarter/tree-sitter-phpdoc" "master" "src")
+            (twig "https://github.com/kaermorchen/tree-sitter-twig")
+            (python "https://github.com/tree-sitter/tree-sitter-python")
+            (toml "https://github.com/tree-sitter/tree-sitter-toml")
+            (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+            (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+            (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
     ;; Install all langs
     (defun my/treesitter-install-alist ()
       "Install all ts parsers from treesitter alist"
       (interactive)
       (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist)))
-#+END_SRC
-
-*** Lua Mode
-#+BEGIN_SRC emacs-lisp
-    (use-package lua-mode :ensure t)
 #+END_SRC
 
 ** LSP
@@ -636,16 +651,14 @@ Connection flycheck with eglot and the lsps
 
     (setq-default eglot-workspace-configuration
                   '((:perlnavigator .
-            			
-    								(:perlPath
-    								 "/usr/bin/perl"
-    								 :includePaths
-    								 ["/DATA/ds/DatenService/SCRIPT/lib/"
-    								  "/DATA/ds/win32/perl/site/lib/"
-    								  "/DATA/ds/DatenService/SCRIPT/lib/local/util/"
-    								  "/DATA/ds/DatenService/SCRIPT/lib/local/ds1/"
-    								  "/DATA/ds/DatenService/SCRIPT/lib/local/SDS/"]
-    								 :enableWarnings t))))
+                                    (:perlPath
+                                     "/usr/bin/perl"
+                                     :includePaths
+                                     ["/DATA/ds/win32/perl/site/lib/"
+                                      "/DATA/ds/DatenService/SCRIPT/lib/local/util/"
+                                      "/DATA/ds/DatenService/SCRIPT/lib/local/ds1/"
+                                      "/DATA/ds/DatenService/SCRIPT/lib/local/SDS/"]
+                                     :enableWarnings t))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
@@ -658,11 +671,6 @@ Connection flycheck with eglot and the lsps
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
                    '(rust-ts-mode . ("rust-analyzer"))))
-
-            ;;; Mason from neovim is just a great way to manage lsps outside of nix
-    (with-eval-after-load 'eglot
-      (add-to-list 'eglot-server-programs
-                   '(bash-ts-mode . ("~/.local/share/nvim/mason/bin/bash-language-server"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
@@ -684,6 +692,8 @@ Connection flycheck with eglot and the lsps
 #+begin_src emacs-lisp
     (use-package eat
       :ensure t
+      :config
+      (setq eat-term-name "xterm-color")
       :hook ('eshell-load-hook #'eat-eshell-mode))
 #+END_SRC
 
@@ -699,7 +709,7 @@ Connection flycheck with eglot and the lsps
       (setf (alist-get 'cperl-mode apheleia-mode-alist)
             'perltidy)
 
-      (apheleia-global-mode t))
+      (apheleia-global-mode nil))
 #+end_src
 
 ** Docker
@@ -710,28 +720,6 @@ Connection flycheck with eglot and the lsps
 #+end_src
 
 * Project Management
-** Desktop mode
-#+BEGIN_SRC emacs-lisp
-    (setq desktop-path '("~/"))
-    (desktop-save-mode 1)
-#+END_SRC
-
-** TGE.el
-#+BEGIN_SRC emacs-lisp 
-    (load "~/code/proj/TGE.el/main")
-
-    (defvar tab-group-extensions-map (make-sparse-keymap)
-      "Keymap for tab-group-extensions commands.")
-
-    (define-key tab-group-extensions-map (kbd "n") #'tab-group-extensions-switch-to-next-tab)
-    (define-key tab-group-extensions-map (kbd "p") #'tab-group-extensions-switch-to-previous-tab)
-    (define-key tab-group-extensions-map (kbd "s") #'tab-group-extensions-select-tab)
-    (define-key tab-group-extensions-map (kbd "S") #'tab-group-extensions-select-group-and-tab)
-    (define-key tab-group-extensions-map (kbd "d") #'tab-group-extensions-delete-group-tabs)
-
-    (define-key global-map (kbd "C-c W") tab-group-extensions-map)
-#+END_SRC
-
 ** Custom Project Functions
 #+BEGIN_SRC emacs-lisp
     (defun my/find-buffer ()
@@ -778,19 +766,28 @@ Connection flycheck with eglot and the lsps
           (eat-project-other-window)
         (eat-other-window)))
 #+END_SRC
-
-** Tab Groups per project
-#+BEGIN_SRC emacs-lisp
-    (setq tab-bar-show 'nil)
-
-    (setq tab-bar-format '(tab-bar-format-history tab-bar-format-tabs-groups tab-bar-separator tab-bar-format-add-tab))
-
-    (use-package project-tab-groups
+** Activities
+#+begin_src emacs-lisp
+    (use-package activities
       :ensure t
-      :config
-      (project-tab-groups-mode 1))
-#+END_SRC
-
+      :init
+      (activities-mode)
+      (activities-tabs-mode)
+      ;; Prevent `edebug' default bindings from interfering.
+      (setq edebug-inhibit-emacs-lisp-mode-bindings t)
+      (setq tab-bar-show nil)
+      :bind
+      (("C-c b b" . activities-switch-buffer)
+       ("C-x C-a C-d" . activities-define)
+       ("C-x C-a C-d" . activities-define)
+       ("C-x C-a C-a" . activities-resume)
+       ("C-x C-a C-s" . activities-suspend)
+       ("C-x C-a C-k" . activities-kill)
+       ("C-x C-a RET" . activities-switch)
+       ("C-x C-a b" . activities-switch-buffer)
+       ("C-x C-a g" . activities-revert)
+       ("C-x C-a l" . activities-list)))
+#+end_src
 ** Editor Conf
 We want to use the same Configurations as out teammates
 #+BEGIN_SRC emacs-lisp
@@ -847,7 +844,7 @@ We want to use the same Configurations as out teammates
       (setq dired-mouse-drag-files t)
       (setq dired-kill-when-opening-new-dired-buffer t)	  ;; Tidy up open buffers by default
       (setq dired-use-ls-dired t
-                dired-listing-switches "-aBhl  --group-directories-first"))
+            dired-listing-switches "-aBhl  --group-directories-first"))
 
     (put 'dired-find-alternate-file 'disabled nil)
 
@@ -860,59 +857,88 @@ We want to use the same Configurations as out teammates
 
 *** Harpoon
 #+BEGIN_SRC  emacs-lisp
+    (defun my-harpoon-tab-name ()
+      "Use the current tab-bar tab name as project name fallback."
+      (let ((tab-name (alist-get 'name (tab-bar--current-tab))))
+        (or tab-name "default")))
+
     (use-package harpoon
       :bind (("C-c H 1" . harpoon-go-to-1)
-                 ("C-c H 2" . harpoon-go-to-2)
-                 ("C-c H 3" . harpoon-go-to-3)
-                 ("C-c H 4" . harpoon-go-to-4)
-                 ("C-c H 5" . harpoon-go-to-5)
+             ("C-c H 2" . harpoon-go-to-2)
+             ("C-c H 3" . harpoon-go-to-3)
+             ("C-c H 4" . harpoon-go-to-4)
+             ("C-c H 5" . harpoon-go-to-5)
 
-                 ("C-c H a" . harpoon-add-file)
-                 ("C-c H c" . harpoon-clear)
-                 ("C-c H l" . harpoon-toggle-quick-menu)
-                 ("C-c H f" . harpoon-toggle-file)
-                 ("C-c H H" . harpoon-quick-menu-hydra))
+             ("C-c H a" . harpoon-add-file)
+             ("C-c H c" . harpoon-clear)
+             ("C-c H l" . harpoon-toggle-quick-menu)
+             ("C-c H f" . harpoon-toggle-file)
+             ("C-c H H" . harpoon-quick-menu-hydra))
+      :config
+      (setq harpoon-without-project-function #'my-harpoon-tab-name)
       :ensure t)
 #+END_SRC
 
 * Helper packages
-** Midnight commander
+** Midnight commander / cleanup
 #+BEGIN_SRC emacs-lisp
+    (defun my/clear-minibuffer-histories ()
+      "Clear common minibuffer and command history variables."
+      (interactive)
+      (setq command-history nil
+            extended-command-history nil
+            minibuffer-history nil
+            file-name-history nil
+            search-ring nil
+            regexp-search-ring nil
+            read-expression-history nil)
+      (message "Minibuffer and command histories cleared."))
+
     (use-package midnight
       :ensure nil
       :hook (after-init . midnight-mode)
       :custom
-      (midnight-delay "12:15")
+      (midnight-delay "00:00")
       :config
+      (add-hook 'midnight-hook #'clean-buffer-list)
+      (add-hook 'midnight-hook #'tramp-cleanup-all-buffers)
+      (add-hook 'midnight-hook #'tramp-cleanup-all-connections)
+      (add-hook 'midnight-hook #'package-refresh-contents)
+      (add-hook 'midnight-hook #'my/clear-minibuffer-histories)
       (add-hook 'midnight-hook
                 (lambda ()
-                  (message "[midnight-mode] Aktualisiere die Paketliste...")
-                  (package-refresh-contents))))
+                  (message "[midnight-mode] Cleanup..."))))
 #+END_SRC
 
 ** Surround
 Interact with surrounds remove add them change them
 
 #+BEGIN_SRC emacs-lisp
-    (use-package surround :ensure t)
+    (use-package surround
+      :ensure t)
+#+END_SRC
+** View large files(VFL)
+
+#+BEGIN_SRC emacs-lisp
+    (use-package vlf
+      :config (require 'vlf-setup)
+      :ensure t)
 #+END_SRC
 
-** Move Files
+** Move lines
 #+BEGIN_SRC emacs-lisp
     (use-package move-text
       :bind(
-                ("M-j" . move-text-down)
-                ("M-k" . move-text-up))
+            ("M-j" . move-text-down)
+            ("M-k" . move-text-up))
       :ensure t)
-
-
 #+end_src
 
 ** Better undo and redo
 #+BEGIN_SRC emacs-lisp
-    (use-package undo-tree
-      :ensure t
-      :config (global-undo-tree-mode))
+    (use-package vundo
+      :bind (("C-c u" . vundo))
+      :ensure t)
 #+END_SRC
 
 ** Making Emacs more explorable
@@ -952,10 +978,10 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       :hook (completion-list-mode . consult-preview-at-point-mode)
       :init
       (setq register-preview-delay 0.5
-                register-preview-function #'consult-register-format)
+            register-preview-function #'consult-register-format)
       (advice-add #'register-preview :override #'consult-register-window)
       (setq xref-show-xrefs-function #'consult-xref
-                xref-show-definitions-function #'consult-xref))
+            xref-show-definitions-function #'consult-xref))
 #+end_src
 
 ** Collection of useful commands
@@ -970,11 +996,10 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       :ensure t)
 #+END_SRC
 
-** Godot
-#+begin_src emacs-lisp
-        (use-package gdscript-mode
-    	  :ensure t)
-#+end_src
+** Lua Mode
+#+BEGIN_SRC emacs-lisp
+    (use-package lua-mode :ensure t)
+#+END_SRC
 ** Perl
 #+begin_src emacs-lisp
     (fset 'perl-mode 'cperl-mode)
@@ -986,8 +1011,8 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
                 (setq tab-width 8)              ; Display width of a tab character
                 (setq indent-tabs-mode t)))     ; Use tabs instead of spaces
 
-        ;; (setq cperl-indent-parens-as-block t)
-        ;; (setq cperl-close-paren-offset (- cperl-indent-level))
+    ;; (setq cperl-indent-parens-as-block t)
+    ;; (setq cperl-close-paren-offset (- cperl-indent-level))
 #+END_SRC
 
 ** Python
@@ -1007,7 +1032,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
 ** CSV Mode
 #+begin_src emacs-lisp
-
     (use-package csv-mode
       :ensure t
       :config
@@ -1193,14 +1217,14 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
        (cons "S" surround-keymap)
 
-       '("u" . undo-tree-undo)
-       '("U" . undo-tree-redo)
+       '("u" . undo)
+       '("U" . undo-redo)
 
        '("v" . meow-visit)
        '("w" . meow-mark-word)
        '("W" . meow-mark-symbol)
        '("x" . meow-line)
-       '("X" . meow-goto-line)
+       '("X" . consult-goto-line)
        '("z" . meow-pop-selection)
        '("#" . meow-reverse)
        '("'" . repeat)
@@ -1236,7 +1260,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       "push mark onto `global-mark-ring' if mark head or tail is not current location"
       (if (not global-mark-ring) (error "global-mark-ring empty")
         (unless (or (marker-is-point-p (car global-mark-ring))
-                                (marker-is-point-p (car (reverse global-mark-ring))))
+                    (marker-is-point-p (car (reverse global-mark-ring))))
           (push-mark))))
 
 
@@ -1269,7 +1293,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (global-set-key (kbd "C-c b K") 'kill-some-buffers)
     (global-set-key (kbd "C-c b O") 'crux-kill-other-buffers)
     (global-set-key (kbd "C-c b r") 'revert-buffer)
-    (global-set-key (kbd "C-c b b") 'my/find-buffer)
+    (global-set-key (kbd "C-c b B") 'my/find-buffer)
     (global-set-key (kbd "C-c b i") 'ibuffer)
 #+END_SRC
 
@@ -1299,6 +1323,8 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
     ;; Xref bindings
     (define-key my/lang-map (kbd "d") #'xref-find-definitions)
+    (define-key my/lang-map (kbd "b") #'xref-go-back)
+    (define-key my/lang-map (kbd "B") #'xref-go-forward)
     (define-key my/lang-map (kbd "r") #'xref-find-references)
     (define-key my/lang-map (kbd "a") #'xref-find-apropos)
 
@@ -1317,13 +1343,26 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
       ;; Server-related bindings under "C-c l S"
       (define-key my/lang-server-map (kbd "r") #'eglot-reconnect)
+      (define-key my/lang-server-map (kbd "Q") #'eglot-shutdown-all)
       (define-key my/lang-server-map (kbd "q") #'eglot-shutdown))
 #+END_SRC
 
 *** Terminal
 #+BEGIN_SRC emacs-lisp
-    (global-set-key (kbd "C-c t T") 'my/eat)
-    (global-set-key (kbd "C-c t t") 'my/eat-other-window)
+    (defun eat-with-prefix ()
+      "Run `eat` with a universal- argument (C-u)."
+      (interactive)
+      (let ((current-prefix-arg '(4))) ; C-u
+        (call-interactively 'eat)))
+
+    (defun eat-other-window-with-prefix ()
+      "Run `eat` with a universal- argument (C-u)."
+      (interactive)
+      (let ((current-prefix-arg '(4))) ; C-u
+        (call-interactively 'eat-other-window)))
+
+    (global-set-key (kbd "C-c t T") 'eat-with-prefix)
+    (global-set-key (kbd "C-c t t") 'eat-other-window-with-prefix)
 #+END_SRC
 
 *** Error
@@ -1349,12 +1388,12 @@ Make compilation look better and therefore make it work with modern tools
       (interactive)
       (let ((compilation-buffer (get-buffer "*compilation*")))
         (if compilation-buffer
-                (progn
-                  (unless (get-buffer-window compilation-buffer)
-                        (save-selected-window
-                          (select-window (split-window-below -15))
-                          (switch-to-buffer compilation-buffer)
-                          (shrink-window-if-larger-than-buffer))))
+            (progn
+              (unless (get-buffer-window compilation-buffer)
+                (save-selected-window
+                  (select-window (split-window-below -15))
+                  (switch-to-buffer compilation-buffer)
+                  (shrink-window-if-larger-than-buffer))))
           (call-interactively 'compile))))
 
     (global-set-key (kbd "C-c C o") 'compile-or-open)
@@ -1374,54 +1413,26 @@ Make compilation look better and therefore make it work with modern tools
 #+END_SRC
 
 ** Hydra
-*** GUD Perl
-#+begin_src emacs-lisp
-(defun my-cperl-db-hydra-setup ()
-  (defhydra hydra-cperl-db (:hint nil)
-    "
-GUD cperl-db
---------------------------------
-_n_: next     _s_: step
-_c_: cont     _f_: finish
-_b_: break    _d_: delete
-_u_: up       _D_: down
-_r_: rerun    _q_: quit
-"
-    ("n" gud-next)
-    ("s" gud-step)
-    ("c" gud-cont)
-    ("f" gud-finish)
-    ("b" gud-break)
-    ("d" gud-remove)
-    ("u" gud-up)
-    ("D" gud-down)
-    ("r" gud-run)
-    ("q" nil "quit"))
-
-  (local-set-key (kbd "C-c d") 'hydra-cperl-db/body))
-
-(add-hook 'cperl-mode-hook #'my-cperl-db-hydra-setup)
-#+end_src
-
 *** Resizing Windows
 #+begin_src emacs-lisp
-(defhydra hydra-window (:hint nil)
-  "
-^Resize^
---------------------------------
-_H_ shrink horiz
-_J_ shrink vert
-_K_ enlarge vert
-_L_ enlarge horiz
-"
-  ("H" shrink-window-horizontally)
-  ("L" enlarge-window-horizontally)
-  ("J" shrink-window)
-  ("K" enlarge-window)
-  ("q" nil "quit"))
+    (defhydra hydra-window (:hint nil)
+      "
+        ^Resize^
+        --------------------------------
+        _H_ shrink horiz
+        _J_ shrink vert
+        _K_ enlarge vert
+        _L_ enlarge horiz
+        "
+      ("H" shrink-window-horizontally)
+      ("L" enlarge-window-horizontally)
+      ("J" shrink-window)
+      ("K" enlarge-window)
+      ("q" nil "quit"))
 
-(global-set-key (kbd "C-c w W") 'hydra-window/body)
-#+end_src>
+    (with-eval-after-load 'hydra
+      (global-set-key (kbd "C-c w W") 'hydra-window/body))
+#+end_src
 ** File Stuff
 #+BEGIN_SRC emacs-lisp
     (global-set-key (kbd "C-c f f") 'my/find-file)
@@ -1431,6 +1442,7 @@ _L_ enlarge horiz
 
 ** Search Stuff
 #+begin_src emacs-lisp
+    (global-set-key (kbd "C-c B")   'consult-bookmark)
     (global-set-key (kbd "C-c s G") 'consult-grep)
     (global-set-key (kbd "C-c s g") 'consult-ripgrep)
     (global-set-key (kbd "C-c s s") 'occur)
