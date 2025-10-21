@@ -768,6 +768,13 @@ Connection flycheck with eglot and the lsps
 #+END_SRC
 ** Activities
 #+begin_src emacs-lisp
+    (use-package tab-bar
+      :ensure nil
+      :init
+      (setq tab-bar-show nil)
+      (tab-bar-mode 1))
+
+
     (use-package activities
       :ensure t
       :init
@@ -775,7 +782,6 @@ Connection flycheck with eglot and the lsps
       (activities-tabs-mode)
       ;; Prevent `edebug' default bindings from interfering.
       (setq edebug-inhibit-emacs-lisp-mode-bindings t)
-      (setq tab-bar-show nil)
       :bind
       (("C-c b b" . activities-switch-buffer)
        ("C-x C-a C-d" . activities-define)
@@ -1415,23 +1421,26 @@ Make compilation look better and therefore make it work with modern tools
 ** Hydra
 *** Resizing Windows
 #+begin_src emacs-lisp
-    (defhydra hydra-window (:hint nil)
-      "
-        ^Resize^
-        --------------------------------
-        _H_ shrink horiz
-        _J_ shrink vert
-        _K_ enlarge vert
-        _L_ enlarge horiz
+    (use-package hydra 
+      :config
+      (defhydra hydra-window (:hint nil)
         "
-      ("H" shrink-window-horizontally)
-      ("L" enlarge-window-horizontally)
-      ("J" shrink-window)
-      ("K" enlarge-window)
-      ("q" nil "quit"))
+            ^Resize^
+            --------------------------------
+            _H_ shrink horiz
+            _J_ shrink vert
+            _K_ enlarge vert
+            _L_ enlarge horiz
+            "
+        ("H" shrink-window-horizontally)
+        ("L" enlarge-window-horizontally)
+        ("J" shrink-window)
+        ("K" enlarge-window)
+        ("q" nil "quit"))
 
-    (with-eval-after-load 'hydra
-      (global-set-key (kbd "C-c w W") 'hydra-window/body))
+      (with-eval-after-load 'hydra
+        (global-set-key (kbd "C-c w W") 'hydra-window/body))
+      :ensure t)
 #+end_src
 ** File Stuff
 #+BEGIN_SRC emacs-lisp
