@@ -26,6 +26,9 @@ let
         epkgs.popup
         epkgs.shrink-path
         epkgs.emacsql
+        epkgs.ht
+        epkgs.elgrep
+        epkgs.yaml
       ];
   };
 in

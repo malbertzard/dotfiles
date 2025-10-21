@@ -1056,22 +1056,20 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+END_SRC
 
 *** Obsidian
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
     (use-package obsidian
       :ensure t
       :config
       (global-obsidian-mode t)
       (obsidian-backlinks-mode t)
       :custom
-      (obsidian-directory "~/Documents/Cadmus")
+      (obsidian-directory "~/Dokumente/Cadmus")
       (markdown-enable-wiki-links t)
-      :bind (:map obsidian-mode-map
-                  ("n" . obsidian-capture)
-                  ("l" . obsidian-insert-link)
-                  ("o" . obsidian-follow-link-at-point)
-                  ("p" . obsidian-jump)
-                  ("b" . obsidian-backlink-jump)))
-    (define-key global-map (kbd "C-c N") obsidian-mode-map)
+      :bind (("C-c N n" . obsidian-capture)
+             ("C-c N l" . obsidian-insert-link)
+             ("C-c N o" . obsidian-follow-link-at-point)
+             ("C-c N p" . obsidian-jump)
+             ("C-c N b" . obsidian-backlink-jump)))
 
 #+end_src
 ** Org
