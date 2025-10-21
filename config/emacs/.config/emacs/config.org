@@ -824,10 +824,10 @@ We want to use the same Configurations as out teammates
       :init (global-diff-hl-mode)
       :custom
       (diff-hl-disable-on-remote t)
-      :hook
-      ((magit-pre-refresh . diff-hl-magit-pre-refresh)
-       (magit-post-refresh . diff-hl-magit-post-refresh))
-      (vc-checkin . diff-hl-update))
+      :config
+      (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
+      (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+      (add-hook 'vc-checkin 'diff-hl-update))
 #+end_src
 
 ** File Management
