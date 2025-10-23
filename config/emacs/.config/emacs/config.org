@@ -796,52 +796,6 @@ Interact with surrounds remove add them change them
 #+end_src
 
 ** Project Management
-*** Custom Project Functions
-#+BEGIN_SRC emacs-lisp
-    (defun my/find-buffer ()
-      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-      (interactive)
-      (if (vc-root-dir)
-          (consult-project-buffer)
-        (consult-buffer)))
-
-    (defun my/find-file ()
-      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-      (interactive)
-      (if (vc-root-dir)
-          (project-find-file)
-        (let ((file (read-file-name "Find file: ")))
-          (find-file file))))
-
-    (defun my/dired ()
-      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-      (interactive)
-      (if (vc-root-dir)
-          (project-dired)
-        (let ((file (read-file-name "Dired: ")))
-          (dired file))))
-
-    (defun my/compile ()
-      "Use `project-compile` if in a project, otherwise `compile`."
-      (interactive)
-      (if (vc-root-dir)
-          (project-compile)
-        (compile)))
-
-    (defun my/eat ()
-      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-      (interactive)
-      (if (vc-root-dir)
-          (eat-project)
-        (eat)))
-
-    (defun my/eat-other-window ()
-      "Use `consult-project-buffer` if in a project, otherwise `consult-buffer`."
-      (interactive)
-      (if (vc-root-dir)
-          (eat-project-other-window)
-        (eat-other-window)))
-#+END_SRC
 *** Activities
 #+begin_src emacs-lisp
     (use-package tab-bar
@@ -946,7 +900,8 @@ Interact with surrounds remove add them change them
 #+END_SRC
 ** Nix
 #+begin_src emacs-lisp
-    (use-package nix-mode
+    (use-package nix-ts-mode
+      :mode "\\.nix\\'"
       :ensure t)
 #+END_SRC
 
@@ -1289,7 +1244,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (global-set-key (kbd "C-c b K") 'kill-some-buffers)
     (global-set-key (kbd "C-c b O") 'crux-kill-other-buffers)
     (global-set-key (kbd "C-c b r") 'revert-buffer)
-    (global-set-key (kbd "C-c b B") 'my/find-buffer)
+    (global-set-key (kbd "C-c b B") 'consult-buffer)
     (global-set-key (kbd "C-c b i") 'ibuffer)
 #+END_SRC
 
@@ -1373,7 +1328,7 @@ Make compilation look better and therefore make it work with modern tools
           (call-interactively 'compile))))
 
     (global-set-key (kbd "C-c C o") 'compile-or-open)
-    (global-set-key (kbd "C-c C c") 'my/compile)
+    (global-set-key (kbd "C-c C c") 'compile)
     (global-set-key (kbd "C-c C r") 'recompile)
     (global-set-key (kbd "C-c C k") 'kill-compilation)
 
