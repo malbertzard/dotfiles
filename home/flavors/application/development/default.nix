@@ -1,6 +1,10 @@
 { pkgs, lib, ... }:
 {
   imports = [
+    ../../../features/application/emacs.nix
+    ../../../features/application/vscode.nix
+    ../../../features/application/wezterm.nix
+
     ../../../features/development/build.nix
     ../../../features/development/devops.nix
 
@@ -14,7 +18,10 @@
   ];
   home.packages =
     with pkgs;
-    []
+    [
+      dbeaver-bin
+      insomnia
+    ]
     ++ mkLinuxOnly [
     ];
 }

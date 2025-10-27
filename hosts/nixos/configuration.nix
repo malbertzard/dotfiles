@@ -1,112 +1,22 @@
-{ config, pkgs, ... }:
+{ config, pkgs, host, ... }:
 {
   imports =
     [
       ./hardware-configuration.nix
+
+      ../../nixos/features/hardware/bluetooth.nix
+      ../../nixos/features/hardware/fprintd.nix
+      ../../nixos/features/hardware/cups.nix
+      ../../nixos/features/hardware/audio.nix
+
+      ../../nixos/flavors/minimal
+      ../../nixos/flavors/desktop/kde/default.nix
+      ../../nixos/flavors/gaming/default.nix
+      ../../nixos/flavors/virtualisation/default.nix
     ];
   
-  # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
 
-  services.fwupd.enable = true;
-
-  services.fprintd.enable = true;
-  services.fprintd.tod.enable = true;
-  services.fprintd.tod.driver = pkgs.libfprint-2-tod1-goodix;
-
-  networking.hostName = "nixos"; # Define your hostname.
-
-  # Enable networking
-  networking.networkmanager.enable = true;
-
-  # Set your time zone.
-  time.timeZone = "Europe/Berlin";
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "de_DE.UTF-8";
-
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "de_DE.UTF-8";
-    LC_IDENTIFICATION = "de_DE.UTF-8";
-    LC_MEASUREMENT = "de_DE.UTF-8";
-    LC_MONETARY = "de_DE.UTF-8";
-    LC_NAME = "de_DE.UTF-8";
-    LC_NUMERIC = "de_DE.UTF-8";
-    LC_PAPER = "de_DE.UTF-8";
-    LC_TELEPHONE = "de_DE.UTF-8";
-    LC_TIME = "de_DE.UTF-8";
-  };
-
-  users.users.malbertzard = {
-    isNormalUser = true;
-    description = "Mathis Albertzard";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-      kdePackages.kdeconnect-kde
-    ];
-  };
-  
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-    localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
-  };
-
-  virtualisation.docker.enable = true;
-
-  # Enable the X11 windowing system.
-  # You can disable this if you're only using the Wayland session.
-  services.xserver.enable = true;
-
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
-
-  # Bluetooth
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
-
-  hardware.bluetooth.settings = {
-	  General = {
-		  Experimental = true;
-	  };
-  };
-
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "de";
-    variant = "";
-  };
-
-  # Configure console keymap
-  console.keyMap = "de";
-
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
-
-  # Enable sound with pipewire.
-  services.pulseaudio.enable = false;
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-  ];
+  networking.hostName = host.hostname; # Define your hostname.
 
   system.stateVersion = "24.11"; # Did you read the comment?
-
 }

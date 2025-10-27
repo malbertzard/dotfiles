@@ -40,6 +40,11 @@
               allowUnfree = true;
             };
           };
+
+          extraSpecialArgs = {
+            inherit host;
+          };
+
           modules = [
             ./hosts/${host.dir}/home.nix
             ./overlays
@@ -57,12 +62,18 @@
         }:
         nixpkgs.lib.nixosSystem {
           system = host.arch;
+          specialArgs = {
+            inherit host;
+          };
           modules = [
             ./hosts/${host.dir}/configuration.nix
             { nixpkgs.overlays = overlays; }
             ./overlays
             home-manager.nixosModules.home-manager
             {
+              home-manager.extraSpecialArgs = {
+                inherit host;
+              };
               home-manager.useGlobalPkgs = true;
               home-manager.users."${host.user}" = import ./hosts/${host.dir}/home.nix;
             }

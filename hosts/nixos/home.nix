@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, host, ... }:
 let
   users = import ../../users.nix;
 in
@@ -10,8 +10,8 @@ in
   ];
 
   home = {
-    username = users.default;
-    homeDirectory = "/home/${users.default}";
+    username = host.user;
+    homeDirectory = "/home/${users.user}";
     stateVersion = "24.11";
     packages = with pkgs; [];
   };

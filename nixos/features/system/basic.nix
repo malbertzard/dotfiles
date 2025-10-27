@@ -2,19 +2,27 @@
 
 {
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  time.timeZone = "Asia/Shanghai";
+  # Set your time zone.
+  time.timeZone = "Europe/Berlin";
 
-  i18n.defaultLocale = "en_US.utf8";
+  # Configure keymap in X11
+  services.xserver.xkb = {
+    layout = "de";
+    variant = "";
+  };
+
+  networking.networkmanager.enable = true;
+
   i18n.extraLocaleSettings = {
-    LC_ADDRESS = "zh_CN.utf8";
-    LC_IDENTIFICATION = "zh_CN.utf8";
-    LC_MEASUREMENT = "zh_CN.utf8";
-    LC_MONETARY = "zh_CN.utf8";
-    LC_NAME = "zh_CN.utf8";
-    LC_NUMERIC = "zh_CN.utf8";
-    LC_PAPER = "zh_CN.utf8";
-    LC_TELEPHONE = "zh_CN.utf8";
-    LC_TIME = "zh_CN.utf8";
+    LC_ADDRESS = "de_DE.UTF-8";
+    LC_IDENTIFICATION = "de_DE.UTF-8";
+    LC_MEASUREMENT = "de_DE.UTF-8";
+    LC_MONETARY = "de_DE.UTF-8";
+    LC_NAME = "de_DE.UTF-8";
+    LC_NUMERIC = "de_DE.UTF-8";
+    LC_PAPER = "de_DE.UTF-8";
+    LC_TELEPHONE = "de_DE.UTF-8";
+    LC_TIME = "de_DE.UTF-8";
   };
 
   # coommon packages
@@ -38,10 +46,5 @@
     file
     unzip
     lshw
-  ];
-
-  # install at leaset one Chinese font
-  fonts.packages = with pkgs; [
-    wqy_microhei
   ];
 }
