@@ -83,9 +83,7 @@ fi
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
-alias nv='nvim'
 alias c='clear'
-alias ya='yazi'
 
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
@@ -110,13 +108,3 @@ bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
 bind '"\eOA": history-search-backward'
 bind '"\eOB": history-search-forward'
-
-
-. "$HOME/.cargo/env"
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
-export PATH=$PATH:/usr/local/go/bin
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH=$BUN_INSTALL/bin:$PATH

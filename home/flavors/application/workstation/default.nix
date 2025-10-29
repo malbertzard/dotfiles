@@ -7,6 +7,7 @@
     with pkgs;
     [
       spotify
+      gimp
       krita
       zotero
       obsidian

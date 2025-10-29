@@ -14,7 +14,6 @@
       ../../nixos/flavors/gaming/default.nix
       ../../nixos/flavors/virtualisation/default.nix
     ];
-  
 
   networking.hostName = host.hostname; # Define your hostname.
 

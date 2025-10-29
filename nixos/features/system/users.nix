@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, host, ... }:
 
 let
   users = import ../../../users.nix;
@@ -14,7 +14,7 @@ in
     };
   };
 
-  users.users.${users.default} = {
+  users.users.${host.user} = {
     isNormalUser = true;
     extraGroups =
       [ "wheel" ]
