@@ -29,6 +29,7 @@ let
         epkgs.ht
         epkgs.elgrep
         epkgs.yaml
+        epkgs.cond-let
       ];
   };
 in

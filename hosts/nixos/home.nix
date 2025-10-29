@@ -11,7 +11,7 @@ in
 
   home = {
     username = host.user;
-    homeDirectory = "/home/${users.user}";
+    homeDirectory = "/home/${host.user}";
     stateVersion = "24.11";
     packages = with pkgs; [];
   };

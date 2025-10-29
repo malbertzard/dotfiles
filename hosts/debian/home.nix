@@ -8,7 +8,6 @@ in
     ../../home/flavors/application/development
     ../../home/flavors/application/workstation
 
-    ../../overlays/emacs.nix
     ../../home/features/application/emacs.nix
   ];
 
