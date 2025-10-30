@@ -8,6 +8,7 @@
     ../../../features/development/build.nix
     ../../../features/development/devops.nix
 
+    ../../../features/development/perl/perl526.nix
     ../../../features/development/lua.nix
     ../../../features/development/nodejs.nix
     ../../../features/development/python.nix
