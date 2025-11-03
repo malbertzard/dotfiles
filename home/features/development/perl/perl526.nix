@@ -8,14 +8,17 @@ let
     system = pkgs.stdenv.hostPlatform.system;
   };
 
+  # https://github.com/NixOS/nixpkgs/blob/6a3f5bcb061e1822f50e299f5616a0731636e4e7/pkgs/development/interpreters/perl/default.nix
+
   perl526 = pkgs1809.perl526;
   buildPerlModule = pkgs1809.perlPackages.buildPerlModule;
   perl526Packages = import ./perl526Packages.nix {
     inherit lib stdenv pkgs perl526 buildPerlModule;
   };
 in
-  {
-	home.packages = [
-      perl526
-	];
-  }
+{
+  home.packages = [
+    perl526
+    perl526Packages.ClamAVClient
+  ];
+}
