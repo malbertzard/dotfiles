@@ -17,5 +17,8 @@
 
   networking.hostName = host.hostname; # Define your hostname.
 
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_zen;
+
   system.stateVersion = "24.11"; # Did you read the comment?
 }

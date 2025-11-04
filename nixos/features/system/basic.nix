@@ -1,7 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  boot.kernelPackages = pkgs.linuxPackages_latest;
   # Set your time zone.
   time.timeZone = "Europe/Berlin";
 

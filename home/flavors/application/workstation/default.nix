@@ -12,6 +12,7 @@
       zotero
       obsidian
       firefox-bin
+      chromium
       blender
       orca-slicer
       audacity
