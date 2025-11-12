@@ -45,5 +45,6 @@
     file
     unzip
     lshw
+    usbutils
   ];
 }

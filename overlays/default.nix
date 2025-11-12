@@ -8,5 +8,6 @@
   nixpkgs.overlays = [
     (import ./pkgs.nix)
     (import ./emacs.nix)
+    (import ./rust.nix)
   ];
 }

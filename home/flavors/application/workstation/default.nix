@@ -8,6 +8,7 @@
     [
       spotify
       gimp
+	  inkscape
       krita
       zotero
       obsidian
