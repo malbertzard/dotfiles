@@ -45,4 +45,5 @@ in
         enable = true;
         package = my_emacs;
     };
+	services.emacs.enable = true;
 }

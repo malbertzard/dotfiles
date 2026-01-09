@@ -6,6 +6,8 @@
   home.packages =
     with pkgs;
     [
+	  libreoffice
+      qemu
       spotify
       gimp
 	  inkscape
@@ -20,5 +22,6 @@
       signal-desktop
     ]
     ++ mkLinuxOnly [
+	  caffeine-ng
     ];
 }

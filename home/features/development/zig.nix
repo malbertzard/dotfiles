@@ -1,6 +1,9 @@
 { pkgs, ... }:
+let
+in
 {
   home.packages = with pkgs; [
-    godot_4
+  zig			
+  zls			
   ];
 }
