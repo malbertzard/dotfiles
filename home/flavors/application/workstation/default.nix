@@ -22,6 +22,5 @@
       signal-desktop
     ]
     ++ mkLinuxOnly [
-	  caffeine-ng
     ];
 }
