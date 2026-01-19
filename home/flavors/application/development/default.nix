@@ -26,5 +26,6 @@
       insomnia
     ]
     ++ mkLinuxOnly [
+      ghostty
     ];
 }
