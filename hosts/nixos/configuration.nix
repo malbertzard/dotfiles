@@ -19,6 +19,6 @@
 
   # boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelPackages = pkgs.linuxPackages_zen;
-
-  system.stateVersion = "24.11"; # Did you read the comment?
+  boot.kernelParams = [ "mem_sleep_default=deep" ];
+  system.stateVersion = "24.11"; 
 }
