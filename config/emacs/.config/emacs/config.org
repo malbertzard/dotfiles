@@ -54,6 +54,7 @@
   - [[#markdown][Markdown]]
   - [[#org][Org]]
 - [[#helper-packages][Helper packages]]
+  - [[#direnv][Direnv]]
   - [[#midnight-commander--cleanup][Midnight commander / cleanup]]
   - [[#making-emacs-more-explorable][Making Emacs more explorable]]
   - [[#manage-system-packages-from-inside-emacs][Manage System packages from inside Emacs]]
@@ -1055,6 +1056,14 @@ Interact with surrounds remove add them change them
 #+END_SRC
 
 * Helper packages
+** Direnv
+#+begin_src emacs-lisp
+    (use-package direnv
+      :ensure t
+      :config
+      (direnv-mode))
+#+end_src
+
 ** Midnight commander / cleanup
 #+BEGIN_SRC emacs-lisp
     (defun my/clear-minibuffer-histories ()

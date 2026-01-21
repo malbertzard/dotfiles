@@ -19,6 +19,10 @@
     ../../../features/development/godot.nix
     ../../../features/development/commonlisp.nix
   ];
+  
+  programs.direnv.enable = true;
+  programs.direnv.nix-direnv.enable = true;
+
   home.packages =
     with pkgs;
     [
