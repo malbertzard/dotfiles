@@ -1,12 +1,19 @@
 { config, pkgs, ... }:
 {
-  # Bluetooth
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.powerOnBoot = true;
-
-  hardware.bluetooth.settings = {
-	  General = {
-		  Experimental = true;
-	  };
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        Name = "Computer";
+        ControllerMode = "dual";
+        FastConnectable = "true";
+        Experimental = "true";
+      };
+      Policy = { AutoEnable = "true"; };
+      LE = { EnableAdvMonInterleaveScan = "true"; };
+    };
   };
+
+  services.blueman.enable = true;
 }

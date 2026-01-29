@@ -18,6 +18,8 @@
       chromium
       blender
       orca-slicer
+      freecad
+	  openscad
       audacity
       signal-desktop
     ]
