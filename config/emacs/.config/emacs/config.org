@@ -29,8 +29,9 @@
   - [[#formattierung][Formattierung]]
   - [[#lsp][LSP]]
 - [[#layouting][Layouting]]
-  - [[#shackle][Shackle]]
+  - [[#display-buffer-alist][Display buffer alist]]
 - [[#editing][Editing]]
+  - [[#diff][Diff]]
   - [[#jump-to-char][Jump to char]]
   - [[#move-lines][Move lines]]
   - [[#surround][Surround]]
@@ -50,12 +51,10 @@
   - [[#perl][Perl]]
   - [[#python][Python]]
   - [[#nix][Nix]]
-  - [[#scad-mode][SCAD Mode]]
   - [[#csv-mode][CSV Mode]]
   - [[#markdown][Markdown]]
   - [[#org][Org]]
 - [[#helper-packages][Helper packages]]
-  - [[#direnv][Direnv]]
   - [[#midnight-commander--cleanup][Midnight commander / cleanup]]
   - [[#making-emacs-more-explorable][Making Emacs more explorable]]
   - [[#manage-system-packages-from-inside-emacs][Manage System packages from inside Emacs]]
@@ -69,6 +68,7 @@
   - [[#replacing-stuff][Replacing stuff]]
   - [[#hydra][Hydra]]
   - [[#search-stuff][Search Stuff]]
+- [[#local-config][Local Config]]
 
 * Grunt work to make Emacs behave
 ** Early Init
@@ -107,13 +107,13 @@
 #+end_src
 
 *** Use Package
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (setq package-enable-at-startup nil)
     (setq use-package-ensure-function 'ignore)
     (setq package-archives nil)
 #+end_src
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
     (require 'package)
     (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
@@ -209,6 +209,7 @@
 #+END_SRC
 ** Faster TRAMP
 #+begin_src emacs-lisp
+    (setq tramp-histfile-override t)
     (setq vc-ignore-dir-regexp
           (format "\\(%s\\)\\|\\(%s\\)"
                   vc-ignore-dir-regexp
@@ -514,6 +515,8 @@ Connection flycheck with eglot and the lsps
       ;; (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil)
       (setq eldoc-box-hover-mode nil)
       (setq eldoc-box-cleanup-interval 3))
+
+
 #+END_SRC
 ** Syntax Highlighting
 *** Folding
@@ -543,7 +546,7 @@ Connection flycheck with eglot and the lsps
     (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.ruby\\'" . ruby-ts-mode))
-    (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
+    ;; (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
     (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
 #+end_src
 **** Tree-sitter Pre Compiles Langs
@@ -693,51 +696,134 @@ We want to use the same Configurations as out teammates
 #+end_src
 
 * Layouting
-** Shackle
+** Display buffer alist
 #+begin_src emacs-lisp
-    ;; Ensure shackle is installed
-    ;; Ensure shackle is installed
-    (use-package shackle
-      :ensure t
-      :init
-      ;; Enable shackle globally
-      (shackle-mode 1)
+    (setq window-sides-slots '(1 2 3 4))
+    (setq split-width-threshold 0)
+    (setq split-height-threshold nil)
+    (setq window-combination-resize t)
 
-      (setq shackle-default-rule '(:select nil))  ;; Focus popups by default
+    (setq display-buffer-alist
+          '(
+            ;; -----------------------------
+            ;; Bottom tool panel (shared)
+            ;; -----------------------------
 
-      (setq shackle-rules
-            '(
-              ;; File-related stuff (dired, find-file, grep) on the left
-              ("*dired*" :align left :size 0.25 :select t)
-    		  ("*dired*" :mode dired-mode :align left :size 0.25 :select t)
-              ("*grep*"  :align left :size 0.25)
-              ("*find-file*" :align left :size 0.25 :select t)
+            ;; vterm (all variants)
+            ("\\*vterm.*\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . -1))
 
-              ;; Help/Info messages go to the right
-              ("*Help*" :align right :size 0.30)
-              ("*Messages*" :align right :size 0.20)
-              ("*Apropos*" :align right :size 0.25)
-              ("*info*" :align right :size 0.35)
-    		  
-              ("*Diff*" :frame t)
+            ;; compilation
+            ("\\*compilation\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 0))
 
-              ;; Compilation buffers go to the bottom
-              ("*compilation*" :align below :size 0.30)
-              ("*shell*" :align below :size 0.30 :select t)
-              ("*vterm*" :align below :size 0.30 :select t)
-              ("*ansi-term*" :align below :size 0.30 :select t)
+            ;; async shell commands
+            ("\\*Async Shell Command\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 1))
 
-              ;; Magit, Org-mode-related buffers at bottom too
-              ("*Magit*" :align below :size 0.40)
-              ("*Org Agenda*" :align below :size 0.35)
+            ;; shell / ansi-term
+            ("\\*shell\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 2))
 
-              ;; General fallback for any other popups
-              ("\\*.*\\*" :regexp t :align below :size 0.30)
-    		  
-              ("*.*" :regexp t :align t :select t :inhibit-window-quit t)
-              )))
+            ("\\*ansi-term\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 2))
+
+            ;; -----------------------------
+            ;; Left side tools (like your old shackle setup)
+            ;; -----------------------------
+
+            ("\\*grep\\*"
+             (display-buffer-in-side-window)
+             (side . left)
+             (window-width . 0.25))
+
+            ("\\*dired\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . left)
+             (window-width . 0.25))
+
+            ;; -----------------------------
+            ;; Right side help/info
+            ;; -----------------------------
+
+            ("\\*Help\\*"
+             (display-buffer-in-side-window)
+             (side . right)
+             (window-width . 0.30))
+
+            ("\\*Messages\\*"
+             (display-buffer-in-side-window)
+             (side . right)
+             (window-width . 0.20))
+
+            ("\\*Apropos\\*"
+             (display-buffer-in-side-window)
+             (side . right)
+             (window-width . 0.25))
+
+            ("\\*info\\*"
+             (display-buffer-in-side-window)
+             (side . right)
+             (window-width . 0.35))
+
+            ;; -----------------------------
+            ;; Diff / ediff in frames (unchanged behavior)
+            ;; -----------------------------
+
+            ("\\*Diff\\*"
+             (display-buffer-pop-up-frame))
+
+            (ediff-control-buffer
+             (display-buffer-pop-up-frame))
+
+            (ediff-diff-buffer-A
+             (display-buffer-pop-up-frame))
+
+            (ediff-diff-buffer-B
+             (display-buffer-pop-up-frame))
+
+            (ediff-diff-buffer-C
+             (display-buffer-pop-up-frame))
+
+            ;; -----------------------------
+            ;; fallback
+            ;; -----------------------------
+
+            ("\\*.*\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30))
+            ))
+
 #+end_src
 * Editing
+** Diff
+#+begin_src emacs-lisp
+    (setq ediff-split-window-function #'split-window-horizontally)
+    (setq ediff-window-setup-function #'ediff-setup-windows-plain)
+#+end_src
 ** Jump to char
 #+begin_src emacs-lisp
     (use-package avy
@@ -831,19 +917,72 @@ Interact with surrounds remove add them change them
     (use-package vterm
       :config
       (setq vterm-term-environment-variable "xterm-color")
+      (setq vterm-kill-buffer-on-exit t)
       (defun vterm-with-prefix ()
-    	"Run `vterm` with a universal- argument (C-u)."
-    	(interactive)
-    	(let ((current-prefix-arg '(4))) ; C-u
+        "Run `vterm` with a universal- argument (C-u)."
+        (interactive)
+        (let ((current-prefix-arg '(4))) ; C-u
           (call-interactively 'vterm)))
       (defun vterm-other-window-with-prefix ()
-    	"Run `eat` with a universal- argument (C-u)."
-    	(interactive)
-    	(let ((current-prefix-arg '(4))) ; C-u
+        "Run `eat` with a universal- argument (C-u)."
+        (interactive)
+        (let ((current-prefix-arg '(4))) ; C-u
           (call-interactively 'vterm-other-window)))
       (global-set-key (kbd "C-c t T") 'vterm-with-prefix)
-      (global-set-key (kbd "C-c t t") 'vterm-other-window-with-prefix)
       :ensure t)
+
+    (add-to-list 'display-buffer-alist
+                 '((major-mode . vterm-mode)
+                   (display-buffer-reuse-window
+                    display-buffer-in-side-window)
+                   (side . bottom)
+                   (window-height . 0.3)))
+
+    (defvar my/tab-vterm-last-buffer nil)
+
+    (defun my/tab-vterm-toggle ()
+      (interactive)
+      (let* ((tab (tab-bar--current-tab))
+             (tab-name (alist-get 'name tab))
+             (buf-name (format "*vterm:%s*" tab-name))
+             (buf (get-buffer buf-name)))
+
+        (if (and buf (eq (current-buffer) buf))
+            ;; If we're in the vterm → go back
+            (when my/tab-vterm-last-buffer
+              (pop-to-buffer my/tab-vterm-last-buffer))
+
+          ;; Otherwise → open/switch to vterm
+          (setq my/tab-vterm-last-buffer (current-buffer))
+
+          (if buf
+              (pop-to-buffer buf)
+            (let ((new (vterm-other-window)))
+              (with-current-buffer new
+                (rename-buffer buf-name)))))))
+
+    (global-set-key (kbd "C-c t t") #'my/tab-vterm-toggle)
+
+    (defun my/vterm-update-last-access ()
+      (setq-local my/vterm-last-access (float-time)))
+
+    (add-hook 'vterm-mode-hook #'my/vterm-update-last-access)
+    (add-hook 'buffer-list-update-hook
+              (lambda ()
+                (when (eq major-mode 'vterm-mode)
+                  (my/vterm-update-last-access))))
+
+    (defun my/kill-stale-vterms (&optional hours)
+      "Kill vterm buffers unused for HOURS (default 24)."
+      (interactive "P")
+      (let* ((hours (or hours 24))
+             (cutoff (- (float-time) (* hours 3600))))
+        (dolist (buf (buffer-list))
+          (with-current-buffer buf
+            (when (and (eq major-mode 'vterm-mode)
+                       (boundp 'my/vterm-last-access)
+                       (< my/vterm-last-access cutoff))
+              (kill-buffer buf))))))
 #+END_SRC
 
 ** Docker
@@ -859,9 +998,11 @@ Interact with surrounds remove add them change them
     (use-package tab-bar
       :ensure nil
       :init
-      (setq tab-bar-show nil)
+      (setq tab-bar-show 1)
+      (setq tab-bar-close-button-show nil)       ;; hide tab close / X button
+      (setq tab-bar-tab-hints t)                 ;; show tab numbers
+      (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
       (tab-bar-mode 1))
-
 
     (use-package activities
       :ensure t
@@ -972,24 +1113,6 @@ Interact with surrounds remove add them change them
       :ensure t)
 #+END_SRC
 
-** SCAD Mode
-#+begin_src elisp
-    (use-package scad-mode
-      :ensure t
-      :mode ("\\.scad\\'" . scad-mode)
-      :config
-      (setq scad-indent-level 2))
-
-    (defun scad-preview ()
-      "Render current OpenSCAD file to PNG and display."
-      (interactive)
-      (let ((png (concat (file-name-sans-extension buffer-file-name) ".png")))
-        (compile
-         (format "openscad --imgsize=800,600 -o %s %s"
-                 png buffer-file-name))
-        (find-file-other-window png)))
-
-#+end_src
 ** CSV Mode
 #+begin_src emacs-lisp
     (use-package csv-mode
@@ -1075,14 +1198,6 @@ Interact with surrounds remove add them change them
 #+END_SRC
 
 * Helper packages
-** Direnv
-#+begin_src emacs-lisp
-    (use-package direnv
-      :ensure t
-      :config
-      (direnv-mode))
-#+end_src
-
 ** Midnight commander / cleanup
 #+BEGIN_SRC emacs-lisp
     (defun my/clear-minibuffer-histories ()
@@ -1354,7 +1469,8 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       (define-key my/lang-server-map (kbd "q") #'eglot-shutdown))
 #+END_SRC
 
-*** Error
+
+*** Compilation
 **** Errors in Compilation
 
 Make compilation look better and therefore make it work with modern tools
@@ -1370,27 +1486,47 @@ Make compilation look better and therefore make it work with modern tools
 #+END_SRC
 
 #+begin_src emacs-lisp
-    (defun compile-or-open ()
-      "Open the existing compilation buffer in a split window, or run compile if it doesn't exist."
+    (defvar my/compile-last-buffer nil)
+
+    (defun my/compile-toggle ()
+      "Toggle compilation buffer like a terminal panel."
       (interactive)
-      (let ((compilation-buffer (get-buffer "*compilation*")))
-        (if compilation-buffer
-            (progn
-              (unless (get-buffer-window compilation-buffer)
-                (save-selected-window
-                  (select-window (split-window-below -15))
-                  (switch-to-buffer compilation-buffer)
-                  (shrink-window-if-larger-than-buffer))))
-          (call-interactively 'compile))))
+      (let ((buf (get-buffer "*compilation*")))
+        (if (and buf (get-buffer-window buf))
+            ;; If visible → hide it
+            (delete-window (get-buffer-window buf))
 
-    (global-set-key (kbd "C-c C o") 'compile-or-open)
-    (global-set-key (kbd "C-c C c") 'compile)
-    (global-set-key (kbd "C-c C r") 'recompile)
-    (global-set-key (kbd "C-c C k") 'kill-compilation)
+          ;; If not visible → show or create it
+          (setq my/compile-last-buffer (current-buffer))
 
-    (global-set-key (kbd "C-c C e j") 'compilation-next-error)
-    (global-set-key (kbd "C-c C e k") 'compilation-previous-error)
-    (global-set-key (kbd "C-c C e l") 'consult-compile-error)
+          (if buf
+              (pop-to-buffer buf)
+            (call-interactively 'my/compile)))))
+
+    (defun my/tab-name ()
+      "Return current tab name safely."
+      (alist-get 'name (tab-bar--current-tab)))
+
+    (setq compilation-buffer-name-function
+          (lambda (_mode)
+            (format "*compilation:%s*" (my/tab-name))))
+
+    (defun my/compile ()
+      "Compile per tab, reusing tab-specific compilation buffer."
+      (interactive)
+      (let ((compilation-buffer-name-function
+             (lambda (_)
+               (format "*compilation:%s*" (my/tab-name)))))
+        (call-interactively 'compile)))
+
+    (global-set-key (kbd "C-c C o") #'my/compile-toggle)
+    (global-set-key (kbd "C-c C c") #'compile)
+    (global-set-key (kbd "C-c C r") #'recompile)
+    (global-set-key (kbd "C-c C k") #'kill-compilation)
+
+    (global-set-key (kbd "C-c C e j") #'compilation-next-error)
+    (global-set-key (kbd "C-c C e k") #'compilation-previous-error)
+    (global-set-key (kbd "C-c C e l") #'consult-compile-error)
 #+END_SRC
 
 ** Replacing stuff
@@ -1402,7 +1538,7 @@ Make compilation look better and therefore make it work with modern tools
 ** Hydra
 *** Resizing Windows
 #+begin_src emacs-lisp
-    (use-package hydra 
+    (use-package hydra
       :config
       (defhydra hydra-window (:hint nil)
         "
@@ -1431,4 +1567,15 @@ Make compilation look better and therefore make it work with modern tools
     (global-set-key (kbd "C-c s s") 'occur)
     (global-set-key (kbd "C-c s o") 'consult-outline)
     (global-set-key (kbd "C-c s l") 'consult-line)
+#+END_SRC
+
+* Local Config
+
+#+begin_src emacs-lisp
+    (defvar my-local-config
+      (expand-file-name "~/.config/emacs/local.el")
+      "Local configuration file for this machine.")
+
+    (when (file-exists-p my-local-config)
+      (load my-local-config))
 #+END_SRC
