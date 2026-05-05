@@ -30,7 +30,7 @@
     vim
     curl
     dig
-    neofetch
+    fastfetch
     htop
     iftop
     tcpdump

@@ -3,6 +3,8 @@
   programs.git = {
     enable = true;
 
+	signing.format = null;
+
 	settings = {
 	  user = {
         signingKey = "~/.ssh/id_ed25519";

@@ -3,7 +3,6 @@
   home.packages =
     with pkgs;
     [
-      neofetch
       htop
       coreutils
       file
