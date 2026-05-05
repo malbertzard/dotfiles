@@ -24,6 +24,7 @@
   - [[#templates][Templates]]
 - [[#ui--eyecandy][UI / Eyecandy]]
   - [[#line-numbers][Line Numbers]]
+  - [[#dim-inactive-windows][Dim Inactive windows]]
   - [[#scroll-margins][Scroll Margins]]
   - [[#indent-bars][Indent Bars]]
   - [[#modeline][Modeline]]
@@ -418,6 +419,17 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (add-hook 'vterm-mode-hook 'disable-line-numbers)
     (add-hook 'org-mode-hook 'disable-line-numbers)
     (add-hook 'compilation-mode-hook 'disable-line-numbers)
+#+end_src
+** Dim Inactive windows
+#+begin_src emacs-lisp
+    (use-package dimmer
+      :ensure t
+      :config
+      (setq dimmer-fraction 0.4)
+      (setq dimmer-adjustment-mode :foreground)
+      (setq dimmer-use-colorspace :rgb)
+
+      (dimmer-mode 1))
 #+end_src
 
 ** Scroll Margins
