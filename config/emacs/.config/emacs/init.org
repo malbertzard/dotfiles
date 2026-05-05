@@ -123,7 +123,7 @@ Depending on if we use nixos or not use package or not
     (setq package-archives nil)
 #+end_src
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (require 'package)
     (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
@@ -137,6 +137,29 @@ Depending on if we use nixos or not use package or not
       (setq use-package-expand-minimally t))
 #+end_src
 
+#+begin_src emacs-lisp
+    (defvar my/use-nix-packages
+      (getenv "IN_NIX_SHELL")
+      "Non-nil when running inside Nix environment.")
+
+    (require 'package)
+
+    (unless my/use-nix-packages
+      (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
+      (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+      (package-initialize)
+
+      (unless (package-installed-p 'use-package)
+        (package-refresh-contents)
+        (package-install 'use-package)))
+
+    (require 'use-package)
+
+    (eval-and-compile
+      (setq use-package-expand-minimally t))
+
+    (setq use-package-always-ensure (not my/use-nix-packages))
+#+end_src
 ** Keep folders clean
 #+begin_src emacs-lisp
     (use-package no-littering
