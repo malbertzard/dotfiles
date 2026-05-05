@@ -18,6 +18,7 @@
     ../../../features/development/rust.nix
     ../../../features/development/godot.nix
     ../../../features/development/commonlisp.nix
+    ../../../features/development/keyboard.nix
   ];
   
   programs.direnv.enable = true;
