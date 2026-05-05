@@ -47,6 +47,7 @@
   - [[#dired][Dired]]
   - [[#harpoon][Harpoon]]
 - [[#terminal][Terminal]]
+  - [[#eshell][Eshell]]
   - [[#terminal-emulation][Terminal Emulation]]
 - [[#project-managment][Project Managment]]
   - [[#vcs][VCS]]
@@ -178,6 +179,7 @@ Depending on if we use nixos or not use package or not
 
 * Normal Defaults
 ** Sensible Defaults
+Hide unused UI Elements for cleaner look
 #+BEGIN_SRC emacs-lisp
     (use-package emacs
       :ensure nil
@@ -185,24 +187,51 @@ Depending on if we use nixos or not use package or not
       (menu-bar-mode nil)
       (scroll-bar-mode nil)
       (tool-bar-mode nil)
-      (inhibit-startup-screen t)
+      (inhibit-startup-screen t))
+#+END_SRC
+
+We do not want trash files everywhere
+#+BEGIN_SRC emacs-lisp
+    (use-package emacs
+      :ensure nil
+      :custom
+      (defalias 'yes-or-no-p 'y-or-n-p)
+      (create-lockfiles nil)
+      (make-backup-files nil)
+      (auto-save-default nil))
+#+END_SRC
+
+Modern Input stuff
+#+BEGIN_SRC emacs-lisp
+    (use-package emacs
+      :ensure nil
+      :custom
+      (xterm-mouse-mode 1)
+      (mouse-wheel-progressive-speed nil)
+      (blink-cursor-mode nil)
+      (ring-bell-function 'ignore))
+#+END_SRC
+
+etc
+#+BEGIN_SRC emacs-lisp
+    (custom-set-variables
+     '(auto-save-visited-mode t))
+
+    (setq auto-save-visited-interval 2)
+
+    (use-package emacs
+      :ensure nil
+      :custom
       (delete-selection-mode t)
       (electric-indent-mode nil)
       (electric-pair-mode t)
-      (ring-bell-function 'ignore)
-      (blink-cursor-mode nil)
-      (global-auto-revert-mode t)
+      (global-auto-revert-mode nil)
       (dired-kill-when-opening-new-dired-buffer t)
       (dired-async-mode t)
       (truncate-lines t)
-      (xterm-mouse-mode 1)
       (gnus-agent nil)
       (defalias 'yes-or-no-p 'y-or-n-p)
-      (mouse-wheel-progressive-speed nil)
       (tab-width 4)
-      (make-backup-files nil)
-      (auto-save-default nil)
-      :config
       :bind (
              ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
              )
@@ -246,11 +275,6 @@ Ensure the Emacs server is started if not already running
       :init
       (global-corfu-mode))
 
-    (use-package nerd-icons-corfu
-      :ensure t
-      :after corfu
-      :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-
     (use-package cape
       :ensure t
       :after corfu
@@ -272,12 +296,11 @@ Ensure the Emacs server is started if not already running
 #+BEGIN_SRC emacs-lisp
     (use-package vertico
       :ensure t
-      ;; :bind (:map vertico-map
-      ;;             ("<tab>" . vertico-insert)
-      ;;             ("C-j" . vertico-next)
-      ;;             ("C-k" . vertico-previous)
-      ;;             ("C-l" . vertico-exit))
-
+      :bind (:map vertico-map
+                  ("<tab>" . vertico-insert)
+                  ("C-j" . vertico-next)
+                  ("C-k" . vertico-previous)
+                  ("C-l" . vertico-exit))
       :custom
       (vertico-cycle t)
       (vertico-count 13)
@@ -297,25 +320,16 @@ Ensure the Emacs server is started if not already running
       (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
       :init
       (marginalia-mode))
-
-    (use-package nerd-icons-completion
-      :ensure t
-      :after marginalia
-      :config
-      (nerd-icons-completion-mode)
-      :hook
-      (marginalia-mode-hook . nerd-icons-completion-marginalia-setup))
 #+END_SRC
 
 ** Actions on completions
 #+BEGIN_SRC emacs-lisp
     (use-package embark
       :ensure t
-      ;; :bind (("C-." . embark-act)
-      ;;        :map minibuffer-local-map
-      ;;        ("C-c C-c" . embark-collect)
-      ;;        ("C-c C-e" . embark-export))
-      )
+      :bind (("C-." . embark-act)
+             :map minibuffer-local-map
+             ("C-c C-c" . embark-collect)
+             ("C-c C-e" . embark-export)))
 
     (use-package embark-consult
       :ensure t
@@ -342,20 +356,45 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+BEGIN_SRC emacs-lisp
     (use-package tempel
       :ensure t
+      :bind (("C-c i" . tempel-insert))
       :custom
       (tempel-trigger-prefix "<")
+      (setq tempel-path '("~/.config/emacs/templates"))
       :init
       (defun tempel-setup-capf ()
         (setq-local completion-at-point-functions
                     (cons #'tempel-complete
                           completion-at-point-functions)))
 
-      (add-hook 'conf-mode-hook 'tempel-setup-capf)
-      (add-hook 'prog-mode-hook 'tempel-setup-capf)
-      (add-hook 'text-mode-hook 'tempel-setup-capf))
+      (add-hook 'conf-mode-hook #'tempel-setup-capf)
+      (add-hook 'prog-mode-hook #'tempel-setup-capf)
+      (add-hook 'text-mode-hook #'tempel-setup-capf)
+
+      :config
+      (defvar my/tempel-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "i") #'tempel-insert)
+          (define-key map (kbd "c") #'tempel-complete)
+          (define-key map (kbd "n") #'tempel-next)
+          (define-key map (kbd "p") #'tempel-previous)
+          (define-key map (kbd "k") #'tempel-kill)
+          map)
+        "Tempel one-shot keymap.")
+
+      (global-set-key (kbd "C-c i") my/tempel-prefix-map))
 
     (use-package tempel-collection :ensure t)
 
+#+END_SRC
+
+#+BEGIN_SRC text :tangle ~/.config/emacs/etc/tempel/templates.eld :mkdirp yes
+    perl-mode
+
+    (dump "print Dumper(" q ");")
+
+    cperl-mode
+
+    (dump "print Dumper(" q ");")
 #+END_SRC
 
 * UI / Eyecandy
@@ -413,14 +452,27 @@ Hide some minor modes so the modeline is not that cluttert
     (use-package minions
       :ensure t
       :config (minions-mode 1))
-
 #+END_SRC
 
 Install the doom modeline
 #+BEGIN_SRC emacs-lisp
-    (use-package doom-modeline
+    ;; (use-package doom-modeline
+    ;;   :ensure t
+    ;;   :hook (after-init . doom-modeline-mode))
+
+    (setq-default mode-line-format nil)
+    (use-package smart-mode-line
       :ensure t
-      :hook (after-init . doom-modeline-mode))
+      :config
+      (setq sml/no-confirm-load-theme t)
+      (setq sml/theme 'respectful)
+      (sml/setup))
+
+    (use-package mini-modeline
+      :ensure t
+      :after smart-mode-line
+      :config
+      (mini-modeline-mode t))
 #+END_SRC
 
 Install the nano modeline
@@ -437,7 +489,7 @@ Install the nano modeline
       :config
       (setq doom-themes-enable-bold t
             doom-themes-enable-italic t)
-      (load-theme 'doom-gruvbox t)
+      (load-theme 'doom-material-dark t)
       (doom-themes-org-config))
 #+END_SRC
 
@@ -455,6 +507,23 @@ Install the nano modeline
 #+BEGIN_SRC emacs-lisp
     (use-package nerd-icons
       :ensure t)
+#+END_SRC
+
+*** Completions
+#+BEGIN_SRC  emacs-lisp
+    (use-package nerd-icons-completion
+      :ensure t
+      :after marginalia
+      :config
+      (nerd-icons-completion-mode)
+      :hook
+      (marginalia-mode-hook . nerd-icons-completion-marginalia-setup))
+
+    (use-package nerd-icons-corfu
+      :ensure t
+      :after corfu
+      :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
 #+END_SRC
 
 *** Dired
@@ -482,8 +551,14 @@ Install the nano modeline
     (use-package which-key
       :ensure nil
       :config
-      (setq which-key-popup-type 'minibuffer)
-      (which-key-mode))
+      (setq which-key-popup-type 'minibuffer
+            which-key-idle-delay 0.8
+            which-key-min-display-lines 1
+            which-key-max-description-length 25
+            which-key-separator " → ")
+      (setq which-key-show-remaining-keys nil)
+
+      (which-key-mode 1))
 #+END_SRC
 
 * Info Sources
@@ -492,12 +567,37 @@ Lets use flycheck and not flymake
 #+BEGIN_SRC emacs-lisp
     (use-package flycheck
       :ensure t
-      :bind (
-             ("C-c e k" . flycheck-previous-error)
-             ("C-c e j" . flycheck-next-error)
-             ("C-c e l" . flycheck-list-errors)
-             ("C-c e e" . flycheck-explain-error-at-point)
-             ("C-c e d" . flycheck-display-error-at-point)))
+
+      :config
+      (defvar my/flycheck-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "j") #'flycheck-next-error)
+          (define-key map (kbd "k") #'flycheck-previous-error)
+          (define-key map (kbd "l") #'flycheck-list-errors)
+          (define-key map (kbd "e") #'flycheck-explain-error-at-point)
+          (define-key map (kbd "d") #'flycheck-display-error-at-point)
+          map)
+        "Flycheck keymap.")
+
+      (global-set-key (kbd "C-c e") my/flycheck-prefix-map)
+      (global-set-key (kbd "C-c E") #'my/flycheck-transient)
+
+      (require 'transient)
+
+      (transient-define-prefix my/flycheck-transient ()
+    	"Flycheck Sticky commands"
+    	:transient-suffix 'transient--do-stay
+    	[["Navigate"
+          ("j" "next error" flycheck-next-error)
+          ("k" "previous error" flycheck-previous-error)]
+
+    	 ["View"
+          ("l" "list errors" flycheck-list-errors)
+          ("e" "explain error" flycheck-explain-error-at-point)
+          ("d" "display error" flycheck-display-error-at-point)]
+
+    	 ["Exit"
+          ("q" "quit" transient-quit-one)]]))
 #+end_src
 
 Connection flycheck with eglot and the lsps
@@ -513,8 +613,38 @@ Connection flycheck with eglot and the lsps
 #+BEGIN_SRC emacs-lisp
     (use-package jinx
       :ensure t
-      :bind (("M-$" . jinx-correct)
-             ("C-M-$" . jinx-languages)))
+      :after transient
+      :config
+
+      (defvar my/jinx-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "j") #'jinx-next)
+          (define-key map (kbd "k") #'jinx-previous)
+          (define-key map (kbd "c") #'jinx-correct)
+          (define-key map (kbd "l") #'jinx-languages)
+          (define-key map (kbd "m") #'jinx-mode)
+          map)
+        "Jinx keymap.")
+
+      (global-set-key (kbd "C-c j") my/jinx-prefix-map)
+      (global-set-key (kbd "C-c J") #'my/jinx-transient)
+
+      (require 'transient)
+
+      (transient-define-prefix my/jinx-transient ()
+        "Jinx Sticky commands"
+        :transient-suffix 'transient--do-stay
+        [["Correct / Navigation"
+          ("c" "correct" jinx-correct)
+          ("n" "next" jinx-next)
+          ("k" "previous" jinx-previous)]
+
+         ["Mode / Config"
+          ("l" "languages" jinx-languages)
+          ("m" "toggle mode" jinx-mode)]
+
+         ["Quit"
+          ("q" "quit" transient-quit-one)]]))
 #+END_SRC
 
 ** Info's
@@ -538,6 +668,27 @@ Connection flycheck with eglot and the lsps
 #+END_SRC
 ** Syntax Highlighting
 *** Folding
+**** Fold Keybinds
+#+BEGIN_SRC emacs-lisp
+    (use-package kirigami
+      :ensure t
+      :config
+      (defvar my/kirigami-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "o") #'kirigami-open-fold)
+          (define-key map (kbd "O") #'kirigami-open-fold-rec)
+          (define-key map (kbd "r") #'kirigami-open-folds)
+          (define-key map (kbd "c") #'kirigami-close-fold)
+          (define-key map (kbd "C") #'kirigami-close-folds)
+          (define-key map (kbd "a") #'kirigami-toggle-fold)
+          map)
+        "Kirigami one-shot keymap.")
+
+      (global-set-key (kbd "C-c z") my/kirigami-prefix-map))
+
+#+END_SRC
+
+**** Treesit Fold
 #+BEGIN_SRC emacs-lisp :tangle no
     (use-package treesit-fold
       :ensure t)
@@ -705,13 +856,6 @@ We want to use the same Configurations as out teammates
       (add-to-list 'eglot-server-programs
                    '(python-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 #+END_SRC
-*** LSP Booster
-#+begin_src emacs-lisp :tangle no
-    (use-package eglot-booster
-      :ensure t
-      :after eglot
-      :config	(eglot-booster-mode))
-#+end_src
 
 * Editing
 ** Jump to char
@@ -779,23 +923,65 @@ Interact with surrounds remove add them change them
         (or tab-name "default")))
 
     (use-package harpoon
-      :bind (("C-c H 1" . harpoon-go-to-1)
-             ("C-c H 2" . harpoon-go-to-2)
-             ("C-c H 3" . harpoon-go-to-3)
-             ("C-c H 4" . harpoon-go-to-4)
-             ("C-c H 5" . harpoon-go-to-5)
-
-             ("C-c H a" . harpoon-add-file)
-             ("C-c H c" . harpoon-clear)
-             ("C-c H l" . harpoon-toggle-quick-menu)
-             ("C-c H f" . harpoon-toggle-file)
-             ("C-c H H" . harpoon-quick-menu-hydra))
+      :ensure t
       :config
       (setq harpoon-without-project-function #'my-harpoon-tab-name)
-      :ensure t)
+
+      ;; --- One-shot prefix (C-c h) ---
+      (defvar my/harpoon-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "1") #'harpoon-go-to-1)
+          (define-key map (kbd "2") #'harpoon-go-to-2)
+          (define-key map (kbd "3") #'harpoon-go-to-3)
+          (define-key map (kbd "4") #'harpoon-go-to-4)
+          (define-key map (kbd "5") #'harpoon-go-to-5)
+
+          ;; actions
+          (define-key map (kbd "a") #'harpoon-add-file)
+          (define-key map (kbd "c") #'harpoon-clear)
+          (define-key map (kbd "l") #'harpoon-toggle-quick-menu)
+          (define-key map (kbd "f") #'harpoon-toggle-file)
+          map)
+        "Harpoon one-shot keymap.")
+
+      (global-set-key (kbd "C-c H") my/harpoon-prefix-map)
+
+      ;; --- Hydra (C-c H) ---
+      (global-set-key (kbd "C-c H H") #'harpoon-quick-menu-hydra))
 #+END_SRC
 
 * Terminal
+** Eshell
+#+begin_src emacs-lisp
+    (require 'notifications)
+
+    (defun eshell/alert-me (&rest args)
+      "Run a command and notify when it finishes."
+      (let* ((cmd (string-join args " "))
+             (buf (current-buffer))
+             (proc (start-process-shell-command
+                    "eshell-alert-me" buf cmd)))
+
+        ;; store metadata on the process (this is the key fix)
+        (process-put proc 'cmd cmd)
+        (process-put proc 'start-time (current-time))
+
+        (set-process-sentinel
+         proc
+         (lambda (p _event)
+           (when (memq (process-status p) '(exit signal))
+             (let* ((cmd (process-get p 'cmd))
+                    (start-time (process-get p 'start-time))
+                    (elapsed (float-time
+                              (time-subtract (current-time)
+                                             start-time))))
+               (notifications-notify
+                :title "Eshell done"
+                :body (format "%.2fs: %s" elapsed cmd)
+                :app-name "Emacs")))))
+
+        proc))
+#+end_src
 ** Terminal Emulation
 #+begin_src emacs-lisp
     (use-package vterm
@@ -815,7 +1001,58 @@ Interact with surrounds remove add them change them
       (global-set-key (kbd "C-c t T") 'vterm-with-prefix)
       :ensure t)
 
+    (add-to-list 'display-buffer-alist
+                 '((major-mode . vterm-mode)
+                   (display-buffer-reuse-window
+                    display-buffer-in-side-window)
+                   (side . bottom)
+                   (window-height . 0.3)))
 
+    (defvar my/tab-vterm-last-buffer nil)
+
+    (defun my/tab-vterm-toggle ()
+      (interactive)
+      (let* ((tab (tab-bar--current-tab))
+             (tab-name (alist-get 'name tab))
+             (buf-name (format "*vterm:%s*" tab-name))
+             (buf (get-buffer buf-name)))
+
+        (if (and buf (eq (current-buffer) buf))
+            ;; If we're in the vterm → go back
+            (when my/tab-vterm-last-buffer
+              (pop-to-buffer my/tab-vterm-last-buffer))
+
+          ;; Otherwise → open/switch to vterm
+          (setq my/tab-vterm-last-buffer (current-buffer))
+
+          (if buf
+              (pop-to-buffer buf)
+            (let ((new (vterm-other-window)))
+              (with-current-buffer new
+                (rename-buffer buf-name)))))))
+
+    (global-set-key (kbd "C-c t t") #'my/tab-vterm-toggle)
+
+    (defun my/vterm-update-last-access ()
+      (setq-local my/vterm-last-access (float-time)))
+
+    (add-hook 'vterm-mode-hook #'my/vterm-update-last-access)
+    (add-hook 'buffer-list-update-hook
+              (lambda ()
+                (when (eq major-mode 'vterm-mode)
+                  (my/vterm-update-last-access))))
+
+    (defun my/kill-stale-vterms (&optional hours)
+      "Kill vterm buffers unused for HOURS (default 24)."
+      (interactive "P")
+      (let* ((hours (or hours 24))
+             (cutoff (- (float-time) (* hours 3600))))
+        (dolist (buf (buffer-list))
+          (with-current-buffer buf
+            (when (and (eq major-mode 'vterm-mode)
+                       (boundp 'my/vterm-last-access)
+                       (< my/vterm-last-access cutoff))
+              (kill-buffer buf))))))
 #+end_src
 * Project Managment
 ** VCS
@@ -823,8 +1060,7 @@ Interact with surrounds remove add them change them
 #+BEGIN_SRC emacs-lisp
     (use-package magit
       :ensure t
-      ;; :bind (("C-c G G" . magit-status))
-
+      :bind (("C-c G G" . magit-status))
       :commands magit-status)
 
     (use-package magit-todos
@@ -868,6 +1104,13 @@ Interact with surrounds remove add them change them
              (side . bottom)
              (window-height . 0.30)
              (slot . -1))
+
+            ("\\*eshell.*\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 0))
 
             ;; compilation
             ("\\*compilation\\*"
@@ -966,8 +1209,7 @@ Interact with surrounds remove add them change them
              (display-buffer-reuse-window
               display-buffer-in-side-window)
              (side . bottom)
-             (window-height . 0.30))
-            ))
+             (window-height . 0.30))))
 
 #+end_src
 
@@ -977,18 +1219,27 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
     (use-package tab-bar
       :ensure nil
       :init
-      (setq tab-bar-show 1)
-      (setq tab-bar-close-button-show nil)       ;; hide tab close / X button
-      (setq tab-bar-tab-hints t)                 ;; show tab numbers
-      (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
+      (setq tab-bar-show 1
+            tab-bar-close-button-show nil
+            tab-bar-tab-hints nil
+            tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
+
+      :config
       (tab-bar-mode 1))
+
+    (use-package vim-tab-bar
+      :ensure t
+      :after (tab-bar)
+      :commands vim-tab-bar-mode
+      :hook
+      (after-init . vim-tab-bar-mode))
 
     (use-package activities
       :ensure t
+      :after (tab-bar)
       :init
       (activities-mode)
       (activities-tabs-mode)
-      ;; Prevent `edebug' default bindings from interfering.
       (setq edebug-inhibit-emacs-lisp-mode-bindings t)
       :bind
       (("C-c b b" . activities-switch-buffer)
@@ -1091,16 +1342,14 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
       :after (perl-mode)
       :config
       (setq cperl-invalid-face nil)
+      (setq cperl-indent-parens-as-block t)
+      (setq cperl-close-paren-offset (- cperl-indent-level))
 
       (add-hook 'cperl-mode-hook
     			(lambda ()
                   (setq tab-width 8)              ; Display width of a tab character
                   (setq indent-tabs-mode t)))     ; Use tabs instead of spaces
-
-      (setq cperl-indent-parens-as-block t)
-      (setq cperl-close-paren-offset (- cperl-indent-level))
-      (fset 'perl-mode 'cperl-mode)
-      :ensure nil)
+      (fset 'perl-mode 'cperl-mode))
 #+END_SRC
 
 ** Python
@@ -1139,7 +1388,7 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
 #+END_SRC
 
 *** Obsidian
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (use-package obsidian
       :ensure t
       :config
@@ -1210,119 +1459,119 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
 #+BEGIN_SRC emacs-lisp
     (use-package meow
       :after surround
-      :ensure t)
+      :ensure t
+      :init
+      (defun meow-setup ()
+        (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
+        (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
+        (meow-motion-overwrite-define-key
+         '("j" . meow-next)
+         '("k" . meow-prev)
+         '("<escape>" . ignore))
+        (meow-leader-define-key
+         ;; SPC j/k will run the original command in MOTION state.
+         '("j" . "H-j")
+         '("k" . "H-k")
+         ;; Use SPC (0-9) for digit arguments.
+         '("1" . meow-digit-argument)
+         '("2" . meow-digit-argument)
+         '("3" . meow-digit-argument)
+         '("4" . meow-digit-argument)
+         '("5" . meow-digit-argument)
+         '("6" . meow-digit-argument)
+         '("7" . meow-digit-argument)
+         '("8" . meow-digit-argument)
+         '("9" . meow-digit-argument)
+         '("0" . meow-digit-argument)
 
-    (defun meow-setup ()
-      (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
-      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
-      (meow-motion-overwrite-define-key
-       '("j" . meow-next)
-       '("k" . meow-prev)
-       '("<escape>" . ignore))
-      (meow-leader-define-key
-       ;; SPC j/k will run the original command in MOTION state.
-       '("j" . "H-j")
-       '("k" . "H-k")
-       ;; Use SPC (0-9) for digit arguments.
-       '("1" . meow-digit-argument)
-       '("2" . meow-digit-argument)
-       '("3" . meow-digit-argument)
-       '("4" . meow-digit-argument)
-       '("5" . meow-digit-argument)
-       '("6" . meow-digit-argument)
-       '("7" . meow-digit-argument)
-       '("8" . meow-digit-argument)
-       '("9" . meow-digit-argument)
-       '("0" . meow-digit-argument)
+         '("?" . meow-cheatsheet))
 
-       '("?" . meow-cheatsheet))
+        (meow-normal-define-key
+         '("0" . meow-expand-0)
+         '("1" . meow-expand-1)
+         '("2" . meow-expand-2)
+         '("3" . meow-expand-3)
+         '("4" . meow-expand-4)
+         '("5" . meow-expand-5)
+         '("6" . meow-expand-6)
+         '("7" . meow-expand-7)
+         '("8" . meow-expand-8)
+         '("9" . meow-expand-9)
 
-      (meow-normal-define-key
-       '("0" . meow-expand-0)
-       '("1" . meow-expand-1)
-       '("2" . meow-expand-2)
-       '("3" . meow-expand-3)
-       '("4" . meow-expand-4)
-       '("5" . meow-expand-5)
-       '("6" . meow-expand-6)
-       '("7" . meow-expand-7)
-       '("8" . meow-expand-8)
-       '("9" . meow-expand-9)
+         '("-" . negative-argument)
 
-       '("-" . negative-argument)
+         '("/" . comment-or-uncomment-region)
+         '("," . meow-inner-of-thing)
+         '("." . meow-bounds-of-thing)
+         '(";" . meow-beginning-of-thing)
+         '(":" . meow-end-of-thing)
 
-       '("/" . comment-or-uncomment-region)
-       '("," . meow-inner-of-thing)
-       '("." . meow-bounds-of-thing)
-       '(";" . meow-beginning-of-thing)
-       '(":" . meow-end-of-thing)
+         '("a" . meow-append)
+         '("A" . meow-open-below)
 
-       '("a" . meow-append)
-       '("A" . meow-open-below)
+         '("b" . meow-back-word)
+         '("B" . meow-back-symbol)
+         '("c" . meow-change)
 
-       '("b" . meow-back-word)
-       '("B" . meow-back-symbol)
-       '("c" . meow-change)
+         '("d" . meow-delete)
+         '("D" . meow-backward-delete)
 
-       '("d" . meow-delete)
-       '("D" . meow-backward-delete)
+         '("e" . meow-next-word)
+         '("E" . meow-next-symbol)
+         '("f" . meow-find)
 
-       '("e" . meow-next-word)
-       '("E" . meow-next-symbol)
-       '("f" . meow-find)
+         '("g" . meow-cancel-selection)
 
-       '("g" . meow-cancel-selection)
+         '("R" . meow-swap-grab)
+         '("G" . meow-grab)
 
-       '("R" . meow-swap-grab)
-       '("G" . meow-grab)
+         '("h" . meow-left)
+         '("i" . meow-insert)
+         '("j" . meow-next)
+         '("k" . meow-prev)
+         '("l" . meow-right)
+         '("n" . meow-search)
+         '("o" . meow-block)
+         '("O" . meow-to-block)
 
-       '("h" . meow-left)
-       '("i" . meow-insert)
-       '("j" . meow-next)
-       '("k" . meow-prev)
-       '("l" . meow-right)
-       '("n" . meow-search)
-       '("o" . meow-block)
-       '("O" . meow-to-block)
+         '("p" . meow-yank)
+         '("P" . clipboard-yank)
 
-       '("p" . meow-yank)
-       '("P" . clipboard-yank)
+         '("y" . meow-save)
+         '("Y" . meow-clipboard-save)
 
-       '("y" . meow-save)
-       '("Y" . meow-clipboard-save)
+         '("H" . meow-left-expand)
+         '("I" . meow-open-above)
+         '("J" . meow-next-expand)
+         '("K" . meow-prev-expand)
+         '("L" . meow-right-expand)
 
-       '("H" . meow-left-expand)
-       '("I" . meow-open-above)
-       '("J" . meow-next-expand)
-       '("K" . meow-prev-expand)
-       '("L" . meow-right-expand)
+         '("q" . kmacro-start-macro-or-insert-counter)
+         '("Q" . meow-end-or-call-kmacro)
 
-       '("q" . kmacro-start-macro-or-insert-counter)
-       '("Q" . meow-end-or-call-kmacro)
+         '("r" . meow-replace)
+         '("s" . meow-kill)
+         '("t" . meow-till)
 
-       '("r" . meow-replace)
-       '("s" . meow-kill)
-       '("t" . meow-till)
+         '("Z" . avy-goto-char) ;; TODO
+         (cons "S" surround-keymap) ;; TODO
 
-       '("Z" . avy-goto-char) ;; TODO
-       (cons "S" surround-keymap) ;; TODO
+         '("u" . undo)
+         '("U" . undo-redo)
 
-       '("u" . undo)
-       '("U" . undo-redo)
-
-       '("v" . meow-visit)
-       '("w" . meow-mark-word)
-       '("W" . meow-mark-symbol)
-       '("x" . meow-line)
-       '("X" . consult-goto-line)
-       '("z" . meow-pop-selection)
-       '("#" . meow-reverse)
-       '("'" . repeat)
-       '("<escape>" . ignore)))
-
-    (meow-setup)
-    (setq meow-keypad-leader-dispatch "C-c")
-    (meow-global-mode 1)
+         '("v" . meow-visit)
+         '("w" . meow-mark-word)
+         '("W" . meow-mark-symbol)
+         '("x" . meow-line)
+         '("X" . consult-goto-line)
+         '("z" . meow-pop-selection)
+         '("#" . meow-reverse)
+         '("'" . repeat)
+         '("<escape>" . ignore)))
+      :config
+      (meow-setup)
+      (setq meow-keypad-leader-dispatch "C-c")
+      (meow-global-mode 1))
 #+END_SRC
 
 *** Meow Things for semantic editing
@@ -1476,7 +1725,9 @@ Make compilation look better and therefore make it work with modern tools
 ** Hydra
 *** Resizing Windows
 #+begin_src emacs-lisp
+    (use-package transient :ensure t)
     (use-package hydra
+      :ensure t
       :config
       (defhydra hydra-window (:hint nil)
         "
@@ -1494,8 +1745,7 @@ Make compilation look better and therefore make it work with modern tools
         ("q" nil "quit"))
 
       (with-eval-after-load 'hydra
-        (global-set-key (kbd "C-c w W") 'hydra-window/body))
-      :ensure t)
+        (global-set-key (kbd "C-c w W") 'hydra-window/body)))
 #+end_src
 ** Search Stuff
 #+begin_src emacs-lisp
