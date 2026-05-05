@@ -425,7 +425,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (use-package dimmer
       :ensure t
       :config
-      (setq dimmer-fraction 0.4)
+      (setq dimmer-fraction 0.3)
       (setq dimmer-adjustment-mode :foreground)
       (setq dimmer-use-colorspace :rgb)
 
@@ -1332,8 +1332,7 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
 * File specific Modes
 ** PDF Tools
 #+begin_src emacs-lisp
-    (use-package pdf-tools
-      :ensure t)
+    (use-package pdf-tools :ensure t)
 #+END_SRC
 
 ** Lua Mode
@@ -1415,7 +1414,6 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
              ("C-c N o" . obsidian-follow-link-at-point)
              ("C-c N p" . obsidian-jump)
              ("C-c N b" . obsidian-backlink-jump)))
-
 #+end_src
 ** Org
 *** Org Mode
