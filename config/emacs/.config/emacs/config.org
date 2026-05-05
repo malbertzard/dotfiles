@@ -1,26 +1,38 @@
 #+Title: Emacs Config
 #+Author: Mathis Albertzard
 #+Description: My Config based on a starter config probably don't use this I have no clue
-#+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
 * Table of contents :toc:
-- [[#grunt-work-to-make-emacs-behave][Grunt work to make Emacs behave]]
-  - [[#early-init][Early Init]]
-  - [[#bootstrapping-and-installing-packages][Bootstrapping and installing packages]]
-  - [[#increase-performance][Increase performance]]
+- [[#bootstrap][Bootstrap]]
+- [[#early-init][Early Init]]
+- [[#external-packages][External Packages]]
+  - [[#use-package][Use Package]]
   - [[#keep-folders-clean][Keep folders clean]]
-  - [[#sensible-defaults][Sensible Defaults]]
+- [[#performace][Performace]]
+  - [[#compile-external-packages][Compile External Packages]]
   - [[#better-gc][Better GC]]
-  - [[#faster-tramp][Faster TRAMP]]
+  - [[#view-large-filesvfl][View large files(VFL)]]
+- [[#normal-defaults][Normal Defaults]]
+  - [[#sensible-defaults][Sensible Defaults]]
   - [[#start-emacs-server-on-startup][Start Emacs server on startup]]
-  - [[#save-changes-automaticly][Save changes automaticly]]
-- [[#ui-stuff][UI Stuff]]
-  - [[#making-it-look-good][Making it look good]]
-- [[#completions-systems][Completions Systems]]
+- [[#completion-systems][Completion Systems]]
   - [[#completions-at-point][Completions at point]]
   - [[#vertical-completions][Vertical Completions]]
   - [[#actions-on-completions][Actions on completions]]
+  - [[#useful-commands-consult][Useful commands Consult]]
   - [[#templates][Templates]]
+- [[#ui--eyecandy][UI / Eyecandy]]
+  - [[#line-numbers][Line Numbers]]
+  - [[#dim-inactive-windows][Dim Inactive windows]]
+  - [[#scroll-margins][Scroll Margins]]
+  - [[#indent-bars][Indent Bars]]
+  - [[#modeline][Modeline]]
+  - [[#theme][Theme]]
+  - [[#font][Font]]
+  - [[#nerdicons][Nerdicons]]
+  - [[#zoom-verschieben][Zoom (Verschieben)]]
+  - [[#which-key][Which Key]]
 - [[#info-sources][Info Sources]]
   - [[#error][Error]]
   - [[#spelling][Spelling]]
@@ -28,22 +40,26 @@
   - [[#syntax-highlighting][Syntax Highlighting]]
   - [[#formattierung][Formattierung]]
   - [[#lsp][LSP]]
-- [[#layouting][Layouting]]
-  - [[#display-buffer-alist][Display buffer alist]]
 - [[#editing][Editing]]
-  - [[#diff][Diff]]
   - [[#jump-to-char][Jump to char]]
   - [[#move-lines][Move lines]]
   - [[#surround][Surround]]
   - [[#better-undo-and-redo][Better undo and redo]]
-  - [[#files][Files]]
-  - [[#search][Search]]
-- [[#development][Development]]
+  - [[#dired][Dired]]
+  - [[#harpoon][Harpoon]]
+- [[#terminal][Terminal]]
+  - [[#eshell][Eshell]]
   - [[#terminal-emulation][Terminal Emulation]]
-  - [[#docker][Docker]]
-  - [[#project-management][Project Management]]
+- [[#project-managment][Project Managment]]
+  - [[#vcs][VCS]]
+  - [[#layout][Layout]]
+- [[#helper-packages][Helper packages]]
+  - [[#midnight-commander--cleanup][Midnight commander / cleanup]]
+  - [[#making-emacs-more-explorable][Making Emacs more explorable]]
+  - [[#manage-system-packages-from-inside-emacs][Manage System packages from inside Emacs]]
+  - [[#manage-system-processes-from-inside-emacs][Manage System processes from inside Emacs]]
+  - [[#collection-of-useful-commands][Collection of useful commands]]
 - [[#file-specific-modes][File specific Modes]]
-  - [[#view-large-filesvfl][View large files(VFL)]]
   - [[#pdf-tools][PDF Tools]]
   - [[#lua-mode][Lua Mode]]
   - [[#zig-mode][Zig Mode]]
@@ -54,24 +70,23 @@
   - [[#csv-mode][CSV Mode]]
   - [[#markdown][Markdown]]
   - [[#org][Org]]
-- [[#helper-packages][Helper packages]]
-  - [[#midnight-commander--cleanup][Midnight commander / cleanup]]
-  - [[#making-emacs-more-explorable][Making Emacs more explorable]]
-  - [[#manage-system-packages-from-inside-emacs][Manage System packages from inside Emacs]]
-  - [[#manage-system-processes-from-inside-emacs][Manage System processes from inside Emacs]]
-  - [[#useful-commands][Useful commands]]
-  - [[#collection-of-useful-commands][Collection of useful commands]]
 - [[#keymaps][Keymaps]]
   - [[#meow][Meow]]
   - [[#window--buffer-nav][Window / Buffer Nav]]
-  - [[#development-1][Development]]
+  - [[#development][Development]]
   - [[#replacing-stuff][Replacing stuff]]
   - [[#hydra][Hydra]]
   - [[#search-stuff][Search Stuff]]
 - [[#local-config][Local Config]]
 
-* Grunt work to make Emacs behave
-** Early Init
+* Bootstrap
+
+#+begin_src emacs-lisp
+    (setq lexical-binding t)
+    ;;; -*- lexical-binding: t -*-
+#+end_src
+* Early Init
+
 #+begin_src emacs-lisp :tangle early-init.el
     (setq gc-cons-threshold 10000000)
     (setq byte-compile-warnings '(not obsolete))
@@ -99,21 +114,16 @@
     (setq package-enable-at-startup nil)
 #+end_src
 
-** Bootstrapping and installing packages
-
-#+begin_src emacs-lisp
-    (setq lexical-binding t)
-    ;;; -*- lexical-binding: t -*-
-#+end_src
-
-*** Use Package
+* External Packages
+** Use Package
+Depending on if we use nixos or not use package or not
 #+begin_src emacs-lisp :tangle no
     (setq package-enable-at-startup nil)
     (setq use-package-ensure-function 'ignore)
     (setq package-archives nil)
 #+end_src
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (require 'package)
     (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
@@ -125,36 +135,31 @@
 
     (eval-and-compile
       (setq use-package-expand-minimally t))
-
-
-    (defvar bootstrap-version)
-    (let ((bootstrap-file
-           (expand-file-name
-            "straight/repos/straight.el/bootstrap.el"
-            (or (bound-and-true-p straight-base-dir)
-                user-emacs-directory)))
-          (bootstrap-version 7))
-      (unless (file-exists-p bootstrap-file)
-        (with-current-buffer
-            (url-retrieve-synchronously
-             "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-             'silent 'inhibit-cookies)
-          (goto-char (point-max))
-          (eval-print-last-sexp)))
-      (load bootstrap-file nil 'nomessage))
 #+end_src
 
-** Increase performance
 #+begin_src emacs-lisp
-    (use-package compile-angel
-      :ensure t
-      :demand t
-      :init
-      :config
-      (setq compile-angel-verbose t)
-      (compile-angel-on-load-mode))
-#+end_src
+    (defvar my/use-nix-packages
+      (getenv "IN_NIX_SHELL")
+      "Non-nil when running inside Nix environment.")
 
+    (require 'package)
+
+    (unless my/use-nix-packages
+      (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
+      (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+      (package-initialize)
+
+      (unless (package-installed-p 'use-package)
+        (package-refresh-contents)
+        (package-install 'use-package)))
+
+    (require 'use-package)
+
+    (eval-and-compile
+      (setq use-package-expand-minimally t))
+
+    (setq use-package-always-ensure (not my/use-nix-packages))
+#+end_src
 ** Keep folders clean
 #+begin_src emacs-lisp
     (use-package no-littering
@@ -164,39 +169,19 @@
       (no-littering-theme-backups))
 #+end_src
 
-** Sensible Defaults
-#+BEGIN_SRC emacs-lisp
-    (use-package emacs
-      :ensure nil
-      :custom
-      (menu-bar-mode nil)
-      (scroll-bar-mode nil)
-      (tool-bar-mode nil)
-      (inhibit-startup-screen t)
-      (delete-selection-mode t)
-      (electric-indent-mode nil)
-      (electric-pair-mode t)
-      (ring-bell-function 'ignore)
-      (blink-cursor-mode nil)
-      (global-auto-revert-mode t)
-      (dired-kill-when-opening-new-dired-buffer t)
-      (dired-async-mode t)
-      (truncate-lines t)
-      (xterm-mouse-mode 1)
-      (gnus-agent nil)
-      (defalias 'yes-or-no-p 'y-or-n-p)
-      (mouse-wheel-progressive-speed nil)
-      (tab-width 4)
-      (make-backup-files nil)
-      (auto-save-default nil)
+* Performace
+** Compile External Packages
+#+begin_src emacs-lisp
+    (use-package compile-angel
+      :ensure t
+      :demand t
+      :init
       :config
-      :bind (
-             ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
-             )
-      :hook
-      (prog-mode . (lambda () (hs-minor-mode t))))
-#+END_SRC
+      (setq compile-angel-verbose t)
+      (compile-angel-on-load-mode))
+#+end_src
 ** Better GC
+
 #+begin_src emacs-lisp
     (use-package gcmh
       :ensure t
@@ -207,13 +192,75 @@
       (gcmh-auto-idle-delay-factor 10)
       (gcmh-high-cons-threshold (* 16 1024 1024)))
 #+END_SRC
-** Faster TRAMP
-#+begin_src emacs-lisp
-    (setq tramp-histfile-override t)
-    (setq vc-ignore-dir-regexp
-          (format "\\(%s\\)\\|\\(%s\\)"
-                  vc-ignore-dir-regexp
-                  tramp-file-name-regexp))
+
+** View large files(VFL)
+
+#+BEGIN_SRC emacs-lisp
+    (use-package vlf
+      :config (require 'vlf-setup)
+      :ensure t)
+#+END_SRC
+
+* Normal Defaults
+** Sensible Defaults
+Hide unused UI Elements for cleaner look
+#+BEGIN_SRC emacs-lisp
+    (use-package emacs
+      :ensure nil
+      :custom
+      (menu-bar-mode nil)
+      (scroll-bar-mode nil)
+      (tool-bar-mode nil)
+      (inhibit-startup-screen t))
+#+END_SRC
+
+We do not want trash files everywhere
+#+BEGIN_SRC emacs-lisp
+    (use-package emacs
+      :ensure nil
+      :custom
+      (defalias 'yes-or-no-p 'y-or-n-p)
+      (create-lockfiles nil)
+      (make-backup-files nil)
+      (auto-save-default nil))
+#+END_SRC
+
+Modern Input stuff
+#+BEGIN_SRC emacs-lisp
+    (use-package emacs
+      :ensure nil
+      :custom
+      (xterm-mouse-mode 1)
+      (mouse-wheel-progressive-speed nil)
+      (blink-cursor-mode nil)
+      (ring-bell-function 'ignore))
+#+END_SRC
+
+etc
+#+BEGIN_SRC emacs-lisp
+    (custom-set-variables
+     '(auto-save-visited-mode t))
+
+    (setq auto-save-visited-interval 2)
+
+    (use-package emacs
+      :ensure nil
+      :custom
+      (delete-selection-mode t)
+      (electric-indent-mode nil)
+      (electric-pair-mode t)
+      (global-auto-revert-mode nil)
+      (dired-kill-when-opening-new-dired-buffer t)
+      (dired-async-mode t)
+      (truncate-lines t)
+      (gnus-agent nil)
+      (defalias 'yes-or-no-p 'y-or-n-p)
+      (tab-width 4)
+      :bind (
+             ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
+             )
+      :hook
+      (prog-mode . (lambda () (hs-minor-mode t))))
 #+END_SRC
 
 ** Start Emacs server on startup
@@ -223,132 +270,8 @@ Ensure the Emacs server is started if not already running
     (unless (server-running-p)
       (server-start))
 #+END_SRC
-** Save changes automaticly
-#+BEGIN_SRC emacs-lisp
-    (custom-set-variables
-     '(auto-save-visited-mode t))
 
-    (setq auto-save-visited-interval 2)
-#+END_SRC
-* UI Stuff
-** Making it look good
-*** Line Numbers
-#+BEGIN_SRC emacs-lisp
-    (use-package emacs
-      :ensure nil
-      :custom
-      (display-line-numbers-type 'relative)
-      (global-display-line-numbers-mode t))
-
-    (defun disable-line-numbers ()
-      "Disable display-line-numbers-mode for certain modes."
-      (display-line-numbers-mode 0))
-
-    (add-hook 'dired-mode-hook 'disable-line-numbers)
-    (add-hook 'doc-view-presentation-mode-hook 'disable-line-numbers)
-    (add-hook 'doc-view-mode-hook 'disable-line-numbers)
-    (add-hook 'pdf-view-mode-hook 'disable-line-numbers)
-    (add-hook 'term-mode-hook 'disable-line-numbers)
-    (add-hook 'vterm-mode-hook 'disable-line-numbers)
-    (add-hook 'org-mode-hook 'disable-line-numbers)
-    (add-hook 'compilation-mode-hook 'disable-line-numbers)
-#+end_src
-*** Scroll Margins
-#+BEGIN_SRC emacs-lisp
-    (use-package emacs
-      :ensure nil
-      :custom
-      (scroll-conservatively 10)
-      (scroll-margin 10))
-#+END_SRC
-*** Indent Bars
-#+begin_src emacs-lisp
-    ;; (use-package indent-bars
-    ;;	 :ensure t
-    ;;	 :custom
-    ;;	 (indent-bars-no-descend-lists t)
-    ;;	 (indent-bars-treesit-support t)
-    ;;	 :hook (prog-mode . indent-bars-mode))
-
-    (use-package indent-bars
-      :ensure t
-      :hook (prog-mode . indent-bars-mode))
-
-#+end_src
-*** Modeline
-#+BEGIN_SRC emacs-lisp
-    (use-package time
-      :ensure nil
-      :config
-      (setq display-time-24hr-format t)
-      (setq display-time-default-load-average nil)
-      (display-time-mode 1))
-
-    (use-package doom-modeline
-      :ensure t
-      :hook (after-init . doom-modeline-mode))
-
-    (use-package minions
-      :ensure t
-      :config (minions-mode 1))
-
-#+END_SRC
-
-*** Theme
-#+BEGIN_SRC emacs-lisp
-    (use-package doom-themes
-      :ensure t
-      :config
-      (setq doom-themes-enable-bold t
-            doom-themes-enable-italic t)
-      (load-theme 'doom-gruvbox t)
-      (doom-themes-org-config))
-#+END_SRC
-*** Center Content
-#+BEGIN_SRC emacs-lisp
-    (use-package olivetti
-      :ensure t
-      :config
-      (setq olivetti-body-width 180)
-      :hook
-      (markdown-mode . olivetti-mode)
-      (org-mode . olivetti-mode))
-#+END_SRC
-
-*** Font
-#+BEGIN_SRC emacs-lisp
-    (set-face-attribute 'default nil :family "Iosevka")
-    (set-face-attribute 'default nil
-                        :height 120
-                        :weight 'medium)
-    (setq-default line-spacing 0.15)
-#+END_SRC
-
-*** Icons
-#+BEGIN_SRC emacs-lisp
-    (use-package nerd-icons
-      :ensure t)
-#+END_SRC
-*** Zoom
-#+BEGIN_SRC emacs-lisp
-    (use-package emacs
-      :ensure nil
-      :bind
-      ("C-+" . text-scale-increase)
-      ("C--" . text-scale-decrease)
-      ("<C-wheel-up>" . text-scale-increase)
-      ("<C-wheel-down>" . text-scale-decrease))
-#+END_SRC
-
-*** Which Key
-#+BEGIN_SRC emacs-lisp
-    (use-package which-key
-      :ensure nil
-      :config
-      (setq which-key-popup-type 'minibuffer)
-      (which-key-mode))
-#+END_SRC
-* Completions Systems
+* Completion Systems
 ** Completions at point
 #+BEGIN_SRC emacs-lisp
     (use-package orderless
@@ -376,11 +299,6 @@ Ensure the Emacs server is started if not already running
       :init
       (global-corfu-mode))
 
-    (use-package nerd-icons-corfu
-      :ensure t
-      :after corfu
-      :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-
     (use-package cape
       :ensure t
       :after corfu
@@ -397,6 +315,7 @@ Ensure the Emacs server is started if not already running
     (setq completion-category-overrides '((eglot (styles orderless))
                                           (eglot-capf (styles orderless))))
 #+END_SRC
+
 ** Vertical Completions
 #+BEGIN_SRC emacs-lisp
     (use-package vertico
@@ -425,15 +344,8 @@ Ensure the Emacs server is started if not already running
       (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
       :init
       (marginalia-mode))
-
-    (use-package nerd-icons-completion
-      :ensure t
-      :after marginalia
-      :config
-      (nerd-icons-completion-mode)
-      :hook
-      (marginalia-mode-hook . nerd-icons-completion-marginalia-setup))
 #+END_SRC
+
 ** Actions on completions
 #+BEGIN_SRC emacs-lisp
     (use-package embark
@@ -448,24 +360,241 @@ Ensure the Emacs server is started if not already running
       :hook
       (embark-collect-mode . consult-preview-at-point-mode))
 #+END_SRC
+
+** Useful commands Consult
+Provides search and navigation commands based on the Emacs completion function.
+Check out their [[https://github.com/minad/consult][git repository]] for more awesome functions.
+#+begin_src emacs-lisp
+    (use-package consult
+      :ensure t
+      :hook (completion-list-mode . consult-preview-at-point-mode)
+      :init
+      (setq register-preview-delay 0.5
+            register-preview-function #'consult-register-format)
+      (advice-add #'register-preview :override #'consult-register-window)
+      (setq xref-show-xrefs-function #'consult-xref
+            xref-show-definitions-function #'consult-xref))
+#+end_src
+
 ** Templates
 #+BEGIN_SRC emacs-lisp
     (use-package tempel
       :ensure t
+      :bind (("C-c i" . tempel-insert))
       :custom
       (tempel-trigger-prefix "<")
+      (setq tempel-path '("~/.config/emacs/templates"))
       :init
       (defun tempel-setup-capf ()
         (setq-local completion-at-point-functions
                     (cons #'tempel-complete
                           completion-at-point-functions)))
 
-      (add-hook 'conf-mode-hook 'tempel-setup-capf)
-      (add-hook 'prog-mode-hook 'tempel-setup-capf)
-      (add-hook 'text-mode-hook 'tempel-setup-capf))
+      (add-hook 'conf-mode-hook #'tempel-setup-capf)
+      (add-hook 'prog-mode-hook #'tempel-setup-capf)
+      (add-hook 'text-mode-hook #'tempel-setup-capf)
+
+      :config
+      (defvar my/tempel-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "i") #'tempel-insert)
+          (define-key map (kbd "c") #'tempel-complete)
+          (define-key map (kbd "n") #'tempel-next)
+          (define-key map (kbd "p") #'tempel-previous)
+          (define-key map (kbd "k") #'tempel-kill)
+          map)
+        "Tempel one-shot keymap.")
+
+      (global-set-key (kbd "C-c i") my/tempel-prefix-map))
 
     (use-package tempel-collection :ensure t)
 
+#+END_SRC
+
+#+BEGIN_SRC text :tangle ~/.config/emacs/etc/tempel/templates.eld :mkdirp yes
+    perl-mode
+
+    (dump "print Dumper(" q ");")
+
+    cperl-mode
+
+    (dump "print Dumper(" q ");")
+#+END_SRC
+
+* UI / Eyecandy
+** Line Numbers
+#+BEGIN_SRC emacs-lisp
+    (use-package emacs
+      :ensure nil
+      :custom
+      (display-line-numbers-type 'relative)
+      (global-display-line-numbers-mode t))
+
+    (defun disable-line-numbers ()
+      "Disable display-line-numbers-mode for certain modes."
+      (display-line-numbers-mode 0))
+
+    (add-hook 'dired-mode-hook 'disable-line-numbers)
+    (add-hook 'doc-view-presentation-mode-hook 'disable-line-numbers)
+    (add-hook 'doc-view-mode-hook 'disable-line-numbers)
+    (add-hook 'pdf-view-mode-hook 'disable-line-numbers)
+    (add-hook 'term-mode-hook 'disable-line-numbers)
+    (add-hook 'vterm-mode-hook 'disable-line-numbers)
+    (add-hook 'org-mode-hook 'disable-line-numbers)
+    (add-hook 'compilation-mode-hook 'disable-line-numbers)
+#+end_src
+** Dim Inactive windows
+#+begin_src emacs-lisp
+    (use-package dimmer
+      :ensure t
+      :config
+      (setq dimmer-fraction 0.3)
+      (setq dimmer-adjustment-mode :foreground)
+      (setq dimmer-use-colorspace :rgb)
+
+      (dimmer-mode 1))
+#+end_src
+
+** Scroll Margins
+#+BEGIN_SRC emacs-lisp
+    (use-package emacs
+      :ensure nil
+      :custom
+      (scroll-conservatively 10)
+      (scroll-margin 10))
+#+END_SRC
+
+** Indent Bars
+#+begin_src emacs-lisp
+    (use-package indent-bars
+      :ensure t
+      :hook (prog-mode . indent-bars-mode))
+#+end_src
+
+** Modeline
+Use the right time format for the modeline
+#+BEGIN_SRC emacs-lisp
+    (use-package time
+      :ensure nil
+      :config
+      (setq display-time-24hr-format t)
+      (setq display-time-default-load-average nil)
+      (display-time-mode 1))
+#+END_SRC
+
+Hide some minor modes so the modeline is not that cluttert
+#+BEGIN_SRC emacs-lisp
+    (use-package minions
+      :ensure t
+      :config (minions-mode 1))
+#+END_SRC
+
+Install the doom modeline
+#+BEGIN_SRC emacs-lisp
+    (use-package doom-modeline
+      :ensure t
+      :init
+      ;; Keep it minimal
+      (setq doom-modeline-buffer-file-name-style 'truncate-upto-project
+    		doom-modeline-icon t
+    		doom-modeline-major-mode-icon nil
+    		doom-modeline-minor-modes nil
+    		doom-modeline-enable-word-count nil
+    		doom-modeline-buffer-encoding nil
+    		doom-modeline-percent-position nil
+    		doom-modeline-indent-info nil
+    		doom-modeline-checker-simple-format t
+    		doom-modeline-vcs-max-length 12
+    		doom-modeline-lsp nil
+    		doom-modeline-env-version nil)
+      :config
+      (doom-modeline-mode 1))
+#+END_SRC
+
+Install the nano modeline
+#+BEGIN_SRC emacs-lisp :tangle no
+    (use-package nano-modeline
+      :ensure t
+      :hook (after-init . nano-modeline-mode))
+#+END_SRC
+
+** Theme
+#+BEGIN_SRC emacs-lisp
+    (use-package doom-themes
+      :ensure t
+      :config
+      (setq doom-themes-enable-bold t
+            doom-themes-enable-italic t)
+      (load-theme 'doom-material-dark t)
+      (doom-themes-org-config))
+#+END_SRC
+
+** Font
+#+BEGIN_SRC emacs-lisp
+    (set-face-attribute 'default nil :family "Iosevka")
+    (set-face-attribute 'default nil
+                        :height 120
+                        :weight 'medium)
+    (setq-default line-spacing 0.15)
+#+END_SRC
+
+** Nerdicons
+
+#+BEGIN_SRC emacs-lisp
+    (use-package nerd-icons
+      :ensure t)
+#+END_SRC
+
+*** Completions
+#+BEGIN_SRC  emacs-lisp
+    (use-package nerd-icons-completion
+      :ensure t
+      :after marginalia
+      :config
+      (nerd-icons-completion-mode)
+      :hook
+      (marginalia-mode-hook . nerd-icons-completion-marginalia-setup))
+
+    (use-package nerd-icons-corfu
+      :ensure t
+      :after corfu
+      :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+#+END_SRC
+
+*** Dired
+#+BEGIN_SRC  emacs-lisp
+    (use-package nerd-icons-dired
+      :ensure t
+      :after dired
+      :hook
+      (dired-mode . nerd-icons-dired-mode))
+#+END_SRC
+
+** Zoom (Verschieben)
+#+BEGIN_SRC emacs-lisp
+    (use-package emacs
+      :ensure nil
+      :bind
+      ("C-+" . text-scale-increase)
+      ("C--" . text-scale-decrease)
+      ("<C-wheel-up>" . text-scale-increase)
+      ("<C-wheel-down>" . text-scale-decrease))
+#+END_SRC
+
+** Which Key
+#+BEGIN_SRC emacs-lisp
+    (use-package which-key
+      :ensure nil
+      :config
+      (setq which-key-popup-type 'minibuffer
+            which-key-idle-delay 0.8
+            which-key-min-display-lines 1
+            which-key-max-description-length 25
+            which-key-separator " → ")
+      (setq which-key-show-remaining-keys nil)
+
+      (which-key-mode 1))
 #+END_SRC
 
 * Info Sources
@@ -474,12 +603,37 @@ Lets use flycheck and not flymake
 #+BEGIN_SRC emacs-lisp
     (use-package flycheck
       :ensure t
-      :bind (
-             ("C-c e k" . flycheck-previous-error)
-             ("C-c e j" . flycheck-next-error)
-             ("C-c e l" . flycheck-list-errors)
-             ("C-c e e" . flycheck-explain-error-at-point)
-             ("C-c e d" . flycheck-display-error-at-point)))
+
+      :config
+      (defvar my/flycheck-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "j") #'flycheck-next-error)
+          (define-key map (kbd "k") #'flycheck-previous-error)
+          (define-key map (kbd "l") #'flycheck-list-errors)
+          (define-key map (kbd "e") #'flycheck-explain-error-at-point)
+          (define-key map (kbd "d") #'flycheck-display-error-at-point)
+          map)
+        "Flycheck keymap.")
+
+      (global-set-key (kbd "C-c e") my/flycheck-prefix-map)
+      (global-set-key (kbd "C-c E") #'my/flycheck-transient)
+
+      (require 'transient)
+
+      (transient-define-prefix my/flycheck-transient ()
+    	"Flycheck Sticky commands"
+    	:transient-suffix 'transient--do-stay
+    	[["Navigate"
+          ("j" "next error" flycheck-next-error)
+          ("k" "previous error" flycheck-previous-error)]
+
+    	 ["View"
+          ("l" "list errors" flycheck-list-errors)
+          ("e" "explain error" flycheck-explain-error-at-point)
+          ("d" "display error" flycheck-display-error-at-point)]
+
+    	 ["Exit"
+          ("q" "quit" transient-quit-one)]]))
 #+end_src
 
 Connection flycheck with eglot and the lsps
@@ -495,8 +649,38 @@ Connection flycheck with eglot and the lsps
 #+BEGIN_SRC emacs-lisp
     (use-package jinx
       :ensure t
-      :bind (("M-$" . jinx-correct)
-             ("C-M-$" . jinx-languages)))
+      :after transient
+      :config
+
+      (defvar my/jinx-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "j") #'jinx-next)
+          (define-key map (kbd "k") #'jinx-previous)
+          (define-key map (kbd "c") #'jinx-correct)
+          (define-key map (kbd "l") #'jinx-languages)
+          (define-key map (kbd "m") #'jinx-mode)
+          map)
+        "Jinx keymap.")
+
+      (global-set-key (kbd "C-c j") my/jinx-prefix-map)
+      (global-set-key (kbd "C-c J") #'my/jinx-transient)
+
+      (require 'transient)
+
+      (transient-define-prefix my/jinx-transient ()
+        "Jinx Sticky commands"
+        :transient-suffix 'transient--do-stay
+        [["Correct / Navigation"
+          ("c" "correct" jinx-correct)
+          ("n" "next" jinx-next)
+          ("k" "previous" jinx-previous)]
+
+         ["Mode / Config"
+          ("l" "languages" jinx-languages)
+          ("m" "toggle mode" jinx-mode)]
+
+         ["Quit"
+          ("q" "quit" transient-quit-one)]]))
 #+END_SRC
 
 ** Info's
@@ -520,6 +704,27 @@ Connection flycheck with eglot and the lsps
 #+END_SRC
 ** Syntax Highlighting
 *** Folding
+**** Fold Keybinds
+#+BEGIN_SRC emacs-lisp
+    (use-package kirigami
+      :ensure t
+      :config
+      (defvar my/kirigami-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "o") #'kirigami-open-fold)
+          (define-key map (kbd "O") #'kirigami-open-fold-rec)
+          (define-key map (kbd "r") #'kirigami-open-folds)
+          (define-key map (kbd "c") #'kirigami-close-fold)
+          (define-key map (kbd "C") #'kirigami-close-folds)
+          (define-key map (kbd "a") #'kirigami-toggle-fold)
+          map)
+        "Kirigami one-shot keymap.")
+
+      (global-set-key (kbd "C-c z") my/kirigami-prefix-map))
+
+#+END_SRC
+
+**** Treesit Fold
 #+BEGIN_SRC emacs-lisp :tangle no
     (use-package treesit-fold
       :ensure t)
@@ -687,148 +892,14 @@ We want to use the same Configurations as out teammates
       (add-to-list 'eglot-server-programs
                    '(python-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 #+END_SRC
-*** LSP Booster
-#+begin_src emacs-lisp :tangle no
-    (use-package eglot-booster
-      :ensure t
-      :after eglot
-      :config	(eglot-booster-mode))
-#+end_src
 
-* Layouting
-** Display buffer alist
-#+begin_src emacs-lisp
-    (setq window-sides-slots '(1 2 3 4))
-    (setq split-width-threshold 0)
-    (setq split-height-threshold nil)
-    (setq window-combination-resize t)
-
-    (setq display-buffer-alist
-          '(
-            ;; -----------------------------
-            ;; Bottom tool panel (shared)
-            ;; -----------------------------
-
-            ;; vterm (all variants)
-            ("\\*vterm.*\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . -1))
-
-            ;; compilation
-            ("\\*compilation\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . 0))
-
-            ;; async shell commands
-            ("\\*Async Shell Command\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . 1))
-
-            ;; shell / ansi-term
-            ("\\*shell\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . 2))
-
-            ("\\*ansi-term\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . 2))
-
-            ;; -----------------------------
-            ;; Left side tools (like your old shackle setup)
-            ;; -----------------------------
-
-            ("\\*grep\\*"
-             (display-buffer-in-side-window)
-             (side . left)
-             (window-width . 0.25))
-
-            ("\\*dired\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . left)
-             (window-width . 0.25))
-
-            ;; -----------------------------
-            ;; Right side help/info
-            ;; -----------------------------
-
-            ("\\*Help\\*"
-             (display-buffer-in-side-window)
-             (side . right)
-             (window-width . 0.30))
-
-            ("\\*Messages\\*"
-             (display-buffer-in-side-window)
-             (side . right)
-             (window-width . 0.20))
-
-            ("\\*Apropos\\*"
-             (display-buffer-in-side-window)
-             (side . right)
-             (window-width . 0.25))
-
-            ("\\*info\\*"
-             (display-buffer-in-side-window)
-             (side . right)
-             (window-width . 0.35))
-
-            ;; -----------------------------
-            ;; Diff / ediff in frames (unchanged behavior)
-            ;; -----------------------------
-
-            ("\\*Diff\\*"
-             (display-buffer-pop-up-frame))
-
-            (ediff-control-buffer
-             (display-buffer-pop-up-frame))
-
-            (ediff-diff-buffer-A
-             (display-buffer-pop-up-frame))
-
-            (ediff-diff-buffer-B
-             (display-buffer-pop-up-frame))
-
-            (ediff-diff-buffer-C
-             (display-buffer-pop-up-frame))
-
-            ;; -----------------------------
-            ;; fallback
-            ;; -----------------------------
-
-            ("\\*.*\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30))
-            ))
-
-#+end_src
 * Editing
-** Diff
-#+begin_src emacs-lisp
-    (setq ediff-split-window-function #'split-window-horizontally)
-    (setq ediff-window-setup-function #'ediff-setup-windows-plain)
-#+end_src
 ** Jump to char
 #+begin_src emacs-lisp
     (use-package avy
       :ensure t)
 #+end_src
+
 ** Move lines
 #+BEGIN_SRC emacs-lisp
     (use-package move-text
@@ -837,6 +908,7 @@ We want to use the same Configurations as out teammates
             ("M-k" . move-text-up))
       :ensure t)
 #+end_src
+
 ** Surround
 Interact with surrounds remove add them change them
 
@@ -846,14 +918,13 @@ Interact with surrounds remove add them change them
 #+END_SRC
 
 ** Better undo and redo
+
 #+BEGIN_SRC emacs-lisp
     (use-package vundo
       :bind (("C-c u" . vundo))
       :ensure t)
 #+END_SRC
-
-** Files
-*** Dired Tweaks
+** Dired
 #+BEGIN_SRC emacs-lisp
     (use-package dired
       :ensure nil ;; built-in
@@ -879,7 +950,7 @@ Interact with surrounds remove add them change them
       (dired-mode . nerd-icons-dired-mode))
 #+END_SRC
 
-*** Harpoon
+** Harpoon
 
 #+BEGIN_SRC  emacs-lisp
     (defun my-harpoon-tab-name ()
@@ -888,31 +959,66 @@ Interact with surrounds remove add them change them
         (or tab-name "default")))
 
     (use-package harpoon
-      :bind (("C-c H 1" . harpoon-go-to-1)
-             ("C-c H 2" . harpoon-go-to-2)
-             ("C-c H 3" . harpoon-go-to-3)
-             ("C-c H 4" . harpoon-go-to-4)
-             ("C-c H 5" . harpoon-go-to-5)
-
-             ("C-c H a" . harpoon-add-file)
-             ("C-c H c" . harpoon-clear)
-             ("C-c H l" . harpoon-toggle-quick-menu)
-             ("C-c H f" . harpoon-toggle-file)
-             ("C-c H H" . harpoon-quick-menu-hydra))
+      :ensure t
       :config
       (setq harpoon-without-project-function #'my-harpoon-tab-name)
-      :ensure t)
+
+      ;; --- One-shot prefix (C-c h) ---
+      (defvar my/harpoon-prefix-map
+        (let ((map (make-sparse-keymap)))
+          (define-key map (kbd "1") #'harpoon-go-to-1)
+          (define-key map (kbd "2") #'harpoon-go-to-2)
+          (define-key map (kbd "3") #'harpoon-go-to-3)
+          (define-key map (kbd "4") #'harpoon-go-to-4)
+          (define-key map (kbd "5") #'harpoon-go-to-5)
+
+          ;; actions
+          (define-key map (kbd "a") #'harpoon-add-file)
+          (define-key map (kbd "c") #'harpoon-clear)
+          (define-key map (kbd "l") #'harpoon-toggle-quick-menu)
+          (define-key map (kbd "f") #'harpoon-toggle-file)
+          map)
+        "Harpoon one-shot keymap.")
+
+      (global-set-key (kbd "C-c H") my/harpoon-prefix-map)
+
+      ;; --- Hydra (C-c H) ---
+      (global-set-key (kbd "C-c H H") #'harpoon-quick-menu-hydra))
 #+END_SRC
 
-** Search
-*** Wgrep
+* Terminal
+** Eshell
 #+begin_src emacs-lisp
-    (use-package wgrep :ensure t)
-#+END_SRC
+    (require 'notifications)
 
-* Development
+    (defun eshell/alert-me (&rest args)
+      "Run a command and notify when it finishes."
+      (let* ((cmd (string-join args " "))
+             (buf (current-buffer))
+             (proc (start-process-shell-command
+                    "eshell-alert-me" buf cmd)))
+
+        ;; store metadata on the process (this is the key fix)
+        (process-put proc 'cmd cmd)
+        (process-put proc 'start-time (current-time))
+
+        (set-process-sentinel
+         proc
+         (lambda (p _event)
+           (when (memq (process-status p) '(exit signal))
+             (let* ((cmd (process-get p 'cmd))
+                    (start-time (process-get p 'start-time))
+                    (elapsed (float-time
+                              (time-subtract (current-time)
+                                             start-time))))
+               (notifications-notify
+                :title "Eshell done"
+                :body (format "%.2fs: %s" elapsed cmd)
+                :app-name "Emacs")))))
+
+        proc))
+#+end_src
 ** Terminal Emulation
-
 #+begin_src emacs-lisp
     (use-package vterm
       :config
@@ -983,48 +1089,10 @@ Interact with surrounds remove add them change them
                        (boundp 'my/vterm-last-access)
                        (< my/vterm-last-access cutoff))
               (kill-buffer buf))))))
-#+END_SRC
-
-** Docker
-#+begin_src emacs-lisp
-    (use-package docker
-      :ensure t
-      :bind ("C-c D" . docker))
 #+end_src
-
-** Project Management
-*** Activities
-#+begin_src emacs-lisp
-    (use-package tab-bar
-      :ensure nil
-      :init
-      (setq tab-bar-show 1)
-      (setq tab-bar-close-button-show nil)       ;; hide tab close / X button
-      (setq tab-bar-tab-hints t)                 ;; show tab numbers
-      (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
-      (tab-bar-mode 1))
-
-    (use-package activities
-      :ensure t
-      :init
-      (activities-mode)
-      (activities-tabs-mode)
-      ;; Prevent `edebug' default bindings from interfering.
-      (setq edebug-inhibit-emacs-lisp-mode-bindings t)
-      :bind
-      (("C-c b b" . activities-switch-buffer)
-       ("C-x C-a C-d" . activities-define)
-       ("C-x C-a C-d" . activities-define)
-       ("C-x C-a C-a" . activities-resume)
-       ("C-x C-a C-s" . activities-suspend)
-       ("C-x C-a C-k" . activities-kill)
-       ("C-x C-a RET" . activities-switch)
-       ("C-x C-a b" . activities-switch-buffer)
-       ("C-x C-a g" . activities-revert)
-       ("C-x C-a l" . activities-list)))
-#+end_src
-*** Git Stuff
-**** Magit
+* Project Managment
+** VCS
+*** Magit
 #+BEGIN_SRC emacs-lisp
     (use-package magit
       :ensure t
@@ -1037,7 +1105,7 @@ Interact with surrounds remove add them change them
       :config (magit-todos-mode 1))
 #+END_SRC
 
-**** Gutter
+*** Gutter
 #+begin_src emacs-lisp
     (use-package diff-hl
       :ensure t
@@ -1051,19 +1119,243 @@ Interact with surrounds remove add them change them
       (add-hook 'vc-checkin 'diff-hl-update))
 #+end_src
 
-* File specific Modes
-** View large files(VFL)
+** Layout
+*** Display buffer alist
+#+begin_src emacs-lisp
+    (setq window-sides-slots '(1 2 3 4))
+    (setq split-width-threshold 0)
+    (setq split-height-threshold nil)
+    (setq window-combination-resize t)
 
+    (setq display-buffer-alist
+          '(
+            ;; -----------------------------
+            ;; Bottom tool panel (shared)
+            ;; -----------------------------
+
+            ;; vterm
+            ("\\*vterm.*\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . -1))
+
+            ("\\*eshell.*\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 0))
+
+            ;; compilation
+            ("\\*compilation\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 0))
+
+            ;; async shell commands
+            ("\\*Async Shell Command\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 1))
+
+            ;; shell / ansi-term
+            ("\\*shell\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 2))
+
+            ("\\*ansi-term\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30)
+             (slot . 2))
+
+            ;; -----------------------------
+            ;; Left side tools
+            ;; -----------------------------
+
+            ("\\*grep\\*"
+             (display-buffer-in-side-window)
+             (side . left)
+             (window-width . 0.25))
+
+            ("\\*dired\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . left)
+             (window-width . 0.25))
+
+            ;; -----------------------------
+            ;; Right side help/info
+            ;; -----------------------------
+
+            ("\\*Help\\*"
+             (display-buffer-in-side-window)
+             (side . right)
+             (window-width . 0.30))
+
+            ("\\*Messages\\*"
+             (display-buffer-in-side-window)
+             (side . right)
+             (window-width . 0.20))
+
+            ("\\*Apropos\\*"
+             (display-buffer-in-side-window)
+             (side . right)
+             (window-width . 0.25))
+
+            ("\\*info\\*"
+             (display-buffer-in-side-window)
+             (side . right)
+             (window-width . 0.35))
+
+            ;; -----------------------------
+            ;; Diff / ediff in frames (unchanged behavior)
+            ;; -----------------------------
+
+            ("\\*Diff\\*"
+             (display-buffer-pop-up-frame))
+
+            (ediff-control-buffer
+             (display-buffer-pop-up-frame))
+
+            (ediff-diff-buffer-A
+             (display-buffer-pop-up-frame))
+
+            (ediff-diff-buffer-B
+             (display-buffer-pop-up-frame))
+
+            (ediff-diff-buffer-C
+             (display-buffer-pop-up-frame))
+
+            ;; -----------------------------
+            ;; fallback
+            ;; -----------------------------
+
+            ("\\*.*\\*"
+             (display-buffer-reuse-window
+              display-buffer-in-side-window)
+             (side . bottom)
+             (window-height . 0.30))))
+
+#+end_src
+
+*** Activities
+Tab Bar Mode um einzelne Buffer Layouts zu Trennen
+#+begin_src emacs-lisp
+    (use-package tab-bar
+      :ensure nil
+      :init
+      (setq tab-bar-show 1
+            tab-bar-close-button-show nil
+            tab-bar-tab-hints nil
+            tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
+
+      :config
+      (tab-bar-mode 1))
+
+    (use-package vim-tab-bar
+      :ensure t
+      :after (tab-bar)
+      :commands vim-tab-bar-mode
+      :hook
+      (after-init . vim-tab-bar-mode))
+
+    (use-package activities
+      :ensure t
+      :after (tab-bar)
+      :init
+      (activities-mode)
+      (activities-tabs-mode)
+      (setq edebug-inhibit-emacs-lisp-mode-bindings t)
+      :bind
+      (("C-c b b" . activities-switch-buffer)
+       ("C-x C-a C-d" . activities-define)
+       ("C-x C-a C-d" . activities-define)
+       ("C-x C-a C-a" . activities-resume)
+       ("C-x C-a C-s" . activities-suspend)
+       ("C-x C-a C-k" . activities-kill)
+       ("C-x C-a RET" . activities-switch)
+       ("C-x C-a b" . activities-switch-buffer)
+       ("C-x C-a g" . activities-revert)
+       ("C-x C-a l" . activities-list)))
+#+end_src
+
+* Helper packages
+** Midnight commander / cleanup
 #+BEGIN_SRC emacs-lisp
-    (use-package vlf
-      :config (require 'vlf-setup)
-      :ensure t)
+    (defun my/clear-minibuffer-histories ()
+      "Clear common minibuffer and command history variables."
+      (interactive)
+      (setq command-history nil
+            extended-command-history nil
+            minibuffer-history nil
+            file-name-history nil
+            search-ring nil
+            regexp-search-ring nil
+            read-expression-history nil)
+      (message "Minibuffer and command histories cleared."))
+
+    (use-package midnight
+      :ensure nil
+      :hook (after-init . midnight-mode)
+      :custom
+      (midnight-delay "00:00")
+      :config
+      (add-hook 'midnight-hook #'clean-buffer-list)
+      (add-hook 'midnight-hook #'tramp-cleanup-all-buffers)
+      (add-hook 'midnight-hook #'tramp-cleanup-all-connections)
+      (add-hook 'midnight-hook #'package-refresh-contents)
+      (add-hook 'midnight-hook #'my/clear-minibuffer-histories)
+      (add-hook 'midnight-hook
+                (lambda ()
+                  (message "[midnight-mode] Cleanup..."))))
 #+END_SRC
 
+** Making Emacs more explorable
+#+BEGIN_SRC emacs-lisp
+    (use-package helpful :ensure t)
+#+END_SRC
+
+** Manage System packages from inside Emacs
+#+BEGIN_SRC emacs-lisp
+    (use-package system-packages :ensure t)
+#+END_SRC
+** Manage System processes from inside Emacs
+
+#+BEGIN_SRC emacs-lisp
+    (use-package proced
+      :ensure nil
+      :commands proced
+      :custom
+      (proced-auto-update-flag t)
+      (proced-goal-attribute nil)
+      (proced-show-remote-processes t)
+      (proced-enable-color-flag t)
+      (proced-format 'custom)
+      :config
+      (add-to-list
+       'proced-format-alist
+       '(custom user pid ppid sess tree pcpu pmem rss start time state (args comm))))
+#+END_SRC
+
+** Collection of useful commands
+#+BEGIN_SRC emacs-lisp
+    (use-package crux :ensure t)
+#+END_SRC
+* File specific Modes
 ** PDF Tools
 #+begin_src emacs-lisp
-    (use-package pdf-tools
-      :ensure t)
+    (use-package pdf-tools :ensure t)
 #+END_SRC
 
 ** Lua Mode
@@ -1085,16 +1377,14 @@ Interact with surrounds remove add them change them
       :after (perl-mode)
       :config
       (setq cperl-invalid-face nil)
+      (setq cperl-indent-parens-as-block t)
+      (setq cperl-close-paren-offset (- cperl-indent-level))
 
       (add-hook 'cperl-mode-hook
     			(lambda ()
                   (setq tab-width 8)              ; Display width of a tab character
                   (setq indent-tabs-mode t)))     ; Use tabs instead of spaces
-
-      (setq cperl-indent-parens-as-block t)
-      (setq cperl-close-paren-offset (- cperl-indent-level))
-      (fset 'perl-mode 'cperl-mode)
-      :ensure nil)
+      (fset 'perl-mode 'cperl-mode))
 #+END_SRC
 
 ** Python
@@ -1133,7 +1423,7 @@ Interact with surrounds remove add them change them
 #+END_SRC
 
 *** Obsidian
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (use-package obsidian
       :ensure t
       :config
@@ -1147,7 +1437,6 @@ Interact with surrounds remove add them change them
              ("C-c N o" . obsidian-follow-link-at-point)
              ("C-c N p" . obsidian-jump)
              ("C-c N b" . obsidian-backlink-jump)))
-
 #+end_src
 ** Org
 *** Org Mode
@@ -1197,84 +1486,6 @@ Interact with surrounds remove add them change them
       :hook (org-mode . org-modern-mode))
 #+END_SRC
 
-* Helper packages
-** Midnight commander / cleanup
-#+BEGIN_SRC emacs-lisp
-    (defun my/clear-minibuffer-histories ()
-      "Clear common minibuffer and command history variables."
-      (interactive)
-      (setq command-history nil
-            extended-command-history nil
-            minibuffer-history nil
-            file-name-history nil
-            search-ring nil
-            regexp-search-ring nil
-            read-expression-history nil)
-      (message "Minibuffer and command histories cleared."))
-
-    (use-package midnight
-      :ensure nil
-      :hook (after-init . midnight-mode)
-      :custom
-      (midnight-delay "00:00")
-      :config
-      (add-hook 'midnight-hook #'clean-buffer-list)
-      (add-hook 'midnight-hook #'tramp-cleanup-all-buffers)
-      (add-hook 'midnight-hook #'tramp-cleanup-all-connections)
-      (add-hook 'midnight-hook #'package-refresh-contents)
-      (add-hook 'midnight-hook #'my/clear-minibuffer-histories)
-      (add-hook 'midnight-hook
-                (lambda ()
-                  (message "[midnight-mode] Cleanup..."))))
-#+END_SRC
-
-** Making Emacs more explorable
-#+BEGIN_SRC emacs-lisp
-    (use-package helpful :ensure t)
-#+END_SRC
-
-** Manage System packages from inside Emacs
-#+BEGIN_SRC emacs-lisp
-    (use-package system-packages :ensure t)
-#+END_SRC
-** Manage System processes from inside Emacs
-
-#+BEGIN_SRC emacs-lisp
-    (use-package proced
-      :ensure nil
-      :commands proced
-      :bind (("C-M-p" . proced))
-      :custom
-      (proced-auto-update-flag t)
-      (proced-goal-attribute nil)
-      (proced-show-remote-processes t)
-      (proced-enable-color-flag t)
-      (proced-format 'custom)
-      :config
-      (add-to-list
-       'proced-format-alist
-       '(custom user pid ppid sess tree pcpu pmem rss start time state (args comm))))
-#+END_SRC
-
-** Useful commands
-Provides search and navigation commands based on the Emacs completion function.
-Check out their [[https://github.com/minad/consult][git repository]] for more awesome functions.
-#+begin_src emacs-lisp
-    (use-package consult
-      :ensure t
-      :hook (completion-list-mode . consult-preview-at-point-mode)
-      :init
-      (setq register-preview-delay 0.5
-            register-preview-function #'consult-register-format)
-      (advice-add #'register-preview :override #'consult-register-window)
-      (setq xref-show-xrefs-function #'consult-xref
-            xref-show-definitions-function #'consult-xref))
-#+end_src
-
-** Collection of useful commands
-#+BEGIN_SRC emacs-lisp
-    (use-package crux :ensure t)
-#+END_SRC
 * Keymaps
 ** Meow
 *** Meow Basic Layout
@@ -1282,121 +1493,119 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+BEGIN_SRC emacs-lisp
     (use-package meow
       :after surround
-      :ensure t)
+      :ensure t
+      :init
+      (defun meow-setup ()
+        (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
+        (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
+        (meow-motion-overwrite-define-key
+         '("j" . meow-next)
+         '("k" . meow-prev)
+         '("<escape>" . ignore))
+        (meow-leader-define-key
+         ;; SPC j/k will run the original command in MOTION state.
+         '("j" . "H-j")
+         '("k" . "H-k")
+         ;; Use SPC (0-9) for digit arguments.
+         '("1" . meow-digit-argument)
+         '("2" . meow-digit-argument)
+         '("3" . meow-digit-argument)
+         '("4" . meow-digit-argument)
+         '("5" . meow-digit-argument)
+         '("6" . meow-digit-argument)
+         '("7" . meow-digit-argument)
+         '("8" . meow-digit-argument)
+         '("9" . meow-digit-argument)
+         '("0" . meow-digit-argument)
 
-    (defun meow-setup ()
-      (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
-      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
-      (meow-motion-overwrite-define-key
-       '("j" . meow-next)
-       '("k" . meow-prev)
-       '("<escape>" . ignore))
-      (meow-leader-define-key
-       ;; SPC j/k will run the original command in MOTION state.
-       '("j" . "H-j")
-       '("k" . "H-k")
-       ;; Use SPC (0-9) for digit arguments.
-       '("1" . meow-digit-argument)
-       '("2" . meow-digit-argument)
-       '("3" . meow-digit-argument)
-       '("4" . meow-digit-argument)
-       '("5" . meow-digit-argument)
-       '("6" . meow-digit-argument)
-       '("7" . meow-digit-argument)
-       '("8" . meow-digit-argument)
-       '("9" . meow-digit-argument)
-       '("0" . meow-digit-argument)
+         '("?" . meow-cheatsheet))
 
-       '("?" . meow-cheatsheet))
+        (meow-normal-define-key
+         '("0" . meow-expand-0)
+         '("1" . meow-expand-1)
+         '("2" . meow-expand-2)
+         '("3" . meow-expand-3)
+         '("4" . meow-expand-4)
+         '("5" . meow-expand-5)
+         '("6" . meow-expand-6)
+         '("7" . meow-expand-7)
+         '("8" . meow-expand-8)
+         '("9" . meow-expand-9)
 
-      (meow-normal-define-key
-       '("0" . meow-expand-0)
-       '("1" . meow-expand-1)
-       '("2" . meow-expand-2)
-       '("3" . meow-expand-3)
-       '("4" . meow-expand-4)
-       '("5" . meow-expand-5)
-       '("6" . meow-expand-6)
-       '("7" . meow-expand-7)
-       '("8" . meow-expand-8)
-       '("9" . meow-expand-9)
+         '("-" . negative-argument)
 
-       '("-" . negative-argument)
+         '("/" . comment-or-uncomment-region)
+         '("," . meow-inner-of-thing)
+         '("." . meow-bounds-of-thing)
+         '(";" . meow-beginning-of-thing)
+         '(":" . meow-end-of-thing)
 
-       '("/" . comment-or-uncomment-region)
-       '("," . meow-inner-of-thing)
-       '("." . meow-bounds-of-thing)
-       '(";" . meow-beginning-of-thing)
-       '(":" . meow-end-of-thing)
+         '("a" . meow-append)
+         '("A" . meow-open-below)
 
-       '("a" . meow-append)
-       '("A" . meow-open-below)
+         '("b" . meow-back-word)
+         '("B" . meow-back-symbol)
+         '("c" . meow-change)
 
-       '("b" . meow-back-word)
-       '("B" . meow-back-symbol)
-       '("c" . meow-change)
+         '("d" . meow-delete)
+         '("D" . meow-backward-delete)
 
-       '("d" . meow-delete)
-       '("D" . meow-backward-delete)
+         '("e" . meow-next-word)
+         '("E" . meow-next-symbol)
+         '("f" . meow-find)
 
-       '("e" . meow-next-word)
-       '("E" . meow-next-symbol)
-       '("f" . meow-find)
+         '("g" . meow-cancel-selection)
 
-       '("g" . meow-cancel-selection)
+         '("R" . meow-swap-grab)
+         '("G" . meow-grab)
 
-       '("R" . meow-swap-grab)
-       '("G" . meow-grab)
+         '("h" . meow-left)
+         '("i" . meow-insert)
+         '("j" . meow-next)
+         '("k" . meow-prev)
+         '("l" . meow-right)
+         '("n" . meow-search)
+         '("o" . meow-block)
+         '("O" . meow-to-block)
 
-       '("h" . meow-left)
-       '("i" . meow-insert)
-       '("j" . meow-next)
-       '("k" . meow-prev)
-       '("l" . meow-right)
-       '("n" . meow-search)
-       '("o" . meow-block)
-       '("O" . meow-to-block)
+         '("p" . meow-yank)
+         '("P" . clipboard-yank)
 
-       '("p" . meow-yank)
-       '("P" . clipboard-yank)
+         '("y" . meow-save)
+         '("Y" . meow-clipboard-save)
 
-       '("y" . meow-save)
-       '("Y" . meow-clipboard-save)
+         '("H" . meow-left-expand)
+         '("I" . meow-open-above)
+         '("J" . meow-next-expand)
+         '("K" . meow-prev-expand)
+         '("L" . meow-right-expand)
 
-       '("H" . meow-left-expand)
-       '("I" . meow-open-above)
-       '("J" . meow-next-expand)
-       '("K" . meow-prev-expand)
-       '("L" . meow-right-expand)
+         '("q" . kmacro-start-macro-or-insert-counter)
+         '("Q" . meow-end-or-call-kmacro)
 
-       '("q" . kmacro-start-macro-or-insert-counter)
-       '("Q" . meow-end-or-call-kmacro)
+         '("r" . meow-replace)
+         '("s" . meow-kill)
+         '("t" . meow-till)
 
-       '("r" . meow-replace)
-       '("s" . meow-kill)
-       '("t" . meow-till)
+         '("Z" . avy-goto-char) ;; TODO
+         (cons "S" surround-keymap) ;; TODO
 
-       '("Z" . avy-goto-char)
-       (cons "S" surround-keymap)
+         '("u" . undo)
+         '("U" . undo-redo)
 
-       '("u" . undo)
-       '("U" . undo-redo)
-
-       '("v" . meow-visit)
-       '("w" . meow-mark-word)
-       '("W" . meow-mark-symbol)
-       '("x" . meow-line)
-       '("X" . consult-goto-line)
-       '("z" . meow-pop-selection)
-       '("#" . meow-reverse)
-       '("'" . repeat)
-       '("<escape>" . ignore)))
-
-    (meow-setup)
-    (setq meow-keypad-leader-dispatch "C-c")
-    (meow-global-mode 1)
-
-    (add-hook 'eat-mode-hook 'meow-temp-normal)
+         '("v" . meow-visit)
+         '("w" . meow-mark-word)
+         '("W" . meow-mark-symbol)
+         '("x" . meow-line)
+         '("X" . consult-goto-line)
+         '("z" . meow-pop-selection)
+         '("#" . meow-reverse)
+         '("'" . repeat)
+         '("<escape>" . ignore)))
+      :config
+      (meow-setup)
+      (setq meow-keypad-leader-dispatch "C-c")
+      (meow-global-mode 1))
 #+END_SRC
 
 *** Meow Things for semantic editing
@@ -1407,6 +1616,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (meow-tree-sitter-register-defaults)
 
 #+end_src
+
 ** Window / Buffer Nav
 *** Buffer
 #+begin_src emacs-lisp
@@ -1426,6 +1636,8 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (global-set-key (kbd "C-c w k") 'windmove-up)
     (global-set-key (kbd "C-c w j") 'windmove-down)
 
+    (global-set-key (kbd "C-c w w") 'window-toggle-side-windows)
+
     (global-set-key (kbd "C-c w v") 'split-window-right)
     (global-set-key (kbd "C-c w s") 'split-window-below)
 
@@ -1433,6 +1645,16 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
     (global-set-key (kbd "C-c w o") 'delete-other-windows)
 #+END_SRC
 ** Development
+*** Dumb jump
+#+begin_src emacs-lisp
+    (use-package dumb-jump
+      :ensure t
+      :custom
+      (dumb-jump-prefer-searcher 'rg)
+      (xref-show-definitions-function #'consult-xref)
+      :config
+      (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+#+end_src
 *** Language Bindings
 #+BEGIN_SRC emacs-lisp
     ;; Define main language keymap under "C-c l"
@@ -1468,7 +1690,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       (define-key my/lang-server-map (kbd "Q") #'eglot-shutdown-all)
       (define-key my/lang-server-map (kbd "q") #'eglot-shutdown))
 #+END_SRC
-
 
 *** Compilation
 **** Errors in Compilation
@@ -1538,7 +1759,9 @@ Make compilation look better and therefore make it work with modern tools
 ** Hydra
 *** Resizing Windows
 #+begin_src emacs-lisp
+    (use-package transient :ensure t)
     (use-package hydra
+      :ensure t
       :config
       (defhydra hydra-window (:hint nil)
         "
@@ -1556,8 +1779,7 @@ Make compilation look better and therefore make it work with modern tools
         ("q" nil "quit"))
 
       (with-eval-after-load 'hydra
-        (global-set-key (kbd "C-c w W") 'hydra-window/body))
-      :ensure t)
+        (global-set-key (kbd "C-c w W") 'hydra-window/body)))
 #+end_src
 ** Search Stuff
 #+begin_src emacs-lisp
