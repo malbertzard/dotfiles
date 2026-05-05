@@ -456,23 +456,9 @@ Hide some minor modes so the modeline is not that cluttert
 
 Install the doom modeline
 #+BEGIN_SRC emacs-lisp
-    ;; (use-package doom-modeline
-    ;;   :ensure t
-    ;;   :hook (after-init . doom-modeline-mode))
-
-    (setq-default mode-line-format nil)
-    (use-package smart-mode-line
+    (use-package doom-modeline
       :ensure t
-      :config
-      (setq sml/no-confirm-load-theme t)
-      (setq sml/theme 'respectful)
-      (sml/setup))
-
-    (use-package mini-modeline
-      :ensure t
-      :after smart-mode-line
-      :config
-      (mini-modeline-mode t))
+      :hook (after-init . doom-modeline-mode))
 #+END_SRC
 
 Install the nano modeline
