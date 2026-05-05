@@ -470,7 +470,22 @@ Install the doom modeline
 #+BEGIN_SRC emacs-lisp
     (use-package doom-modeline
       :ensure t
-      :hook (after-init . doom-modeline-mode))
+      :init
+      ;; Keep it minimal
+      (setq doom-modeline-buffer-file-name-style 'truncate-upto-project
+    		doom-modeline-icon t
+    		doom-modeline-major-mode-icon nil
+    		doom-modeline-minor-modes nil
+    		doom-modeline-enable-word-count nil
+    		doom-modeline-buffer-encoding nil
+    		doom-modeline-percent-position nil
+    		doom-modeline-indent-info nil
+    		doom-modeline-checker-simple-format t
+    		doom-modeline-vcs-max-length 12
+    		doom-modeline-lsp nil
+    		doom-modeline-env-version nil)
+      :config
+      (doom-modeline-mode 1))
 #+END_SRC
 
 Install the nano modeline
