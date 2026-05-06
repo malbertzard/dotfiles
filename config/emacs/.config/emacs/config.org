@@ -1,7 +1,7 @@
 #+Title: Emacs Config
 #+Author: Mathis Albertzard
 #+Description: My Config based on a starter config probably don't use this I have no clue
-#+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
 
 * Table of contents :toc:
 - [[#bootstrap][Bootstrap]]
@@ -84,8 +84,8 @@
 * Bootstrap
 
 #+begin_src emacs-lisp
-    (setq lexical-binding t)
     ;;; -*- lexical-binding: t -*-
+    (setq lexical-binding t)
 #+end_src
 * Early Init
 
@@ -152,8 +152,8 @@ Depending on if we use nixos or not use package or not
       (package-initialize)
 
       (unless (package-installed-p 'use-package)
-        (package-refresh-contents)
-        (package-install 'use-package)))
+    	(package-refresh-contents)
+    	(package-install 'use-package)))
 
     (require 'use-package)
 
@@ -164,11 +164,18 @@ Depending on if we use nixos or not use package or not
 #+end_src
 ** Keep folders clean
 #+begin_src emacs-lisp
-    (use-package no-littering
-      :ensure t
-      :config
-      (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-      (no-littering-theme-backups))
+    (unless my/use-nix-packages
+      (use-package no-littering
+        :ensure t
+        :init
+        ;; Set these BEFORE the package loads
+        (setq no-littering-etc-directory
+              (expand-file-name "config/" user-emacs-directory))
+        (setq no-littering-var-directory
+              (expand-file-name "data/" user-emacs-directory))
+
+        :config
+        (no-littering-theme-backups)))
 #+end_src
 
 * Performace
@@ -246,7 +253,7 @@ etc
     (setq auto-save-visited-interval 2)
 
     (setq read-extended-command-predicate
-          #'command-completion-default-include-p)
+    	  #'command-completion-default-include-p)
 
     (setopt use-short-answers t)
     (setopt read-answer-short t)
@@ -267,8 +274,8 @@ etc
       (gnus-agent nil)
       (tab-width 4)
       :bind (
-             ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
-             )
+    		 ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
+    		 )
       :hook
       (prog-mode . (lambda () (hs-minor-mode t))))
 #+END_SRC
@@ -323,7 +330,7 @@ Ensure the Emacs server is started if not already running
 
     (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
     (setq completion-category-overrides '((eglot (styles orderless))
-                                          (eglot-capf (styles orderless))))
+    									  (eglot-capf (styles orderless))))
 #+END_SRC
 
 ** Vertical Completions
@@ -331,10 +338,10 @@ Ensure the Emacs server is started if not already running
     (use-package vertico
       :ensure t
       :bind (:map vertico-map
-                  ("<tab>" . vertico-insert)
-                  ("C-j" . vertico-next)
-                  ("C-k" . vertico-previous)
-                  ("C-l" . vertico-exit))
+    			  ("<tab>" . vertico-insert)
+    			  ("C-j" . vertico-next)
+    			  ("C-k" . vertico-previous)
+    			  ("C-l" . vertico-exit))
       :custom
       (vertico-cycle t)
       (vertico-count 13)
@@ -361,9 +368,9 @@ Ensure the Emacs server is started if not already running
     (use-package embark
       :ensure t
       :bind (("C-." . embark-act)
-             :map minibuffer-local-map
-             ("C-c C-c" . embark-collect)
-             ("C-c C-e" . embark-export)))
+    		 :map minibuffer-local-map
+    		 ("C-c C-c" . embark-collect)
+    		 ("C-c C-e" . embark-export)))
 
     (use-package embark-consult
       :ensure t
@@ -380,10 +387,10 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       :hook (completion-list-mode . consult-preview-at-point-mode)
       :init
       (setq register-preview-delay 0.5
-            register-preview-function #'consult-register-format)
+    		register-preview-function #'consult-register-format)
       (advice-add #'register-preview :override #'consult-register-window)
       (setq xref-show-xrefs-function #'consult-xref
-            xref-show-definitions-function #'consult-xref))
+    		xref-show-definitions-function #'consult-xref))
 #+end_src
 
 ** Templates
@@ -396,9 +403,9 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        (list (expand-file-name "tempel/*" user-emacs-directory)))
       :init
       (defun tempel-setup-capf ()
-        (setq-local completion-at-point-functions
-                    (cons #'tempel-complete
-                          completion-at-point-functions)))
+    	(setq-local completion-at-point-functions
+    				(cons #'tempel-complete
+    					  completion-at-point-functions)))
 
       (add-hook 'conf-mode-hook #'tempel-setup-capf)
       (add-hook 'prog-mode-hook #'tempel-setup-capf)
@@ -406,14 +413,14 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
       :config
       (defvar my/tempel-prefix-map
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "i") #'tempel-insert)
-          (define-key map (kbd "c") #'tempel-complete)
-          (define-key map (kbd "n") #'tempel-next)
-          (define-key map (kbd "p") #'tempel-previous)
-          (define-key map (kbd "k") #'tempel-kill)
-          map)
-        "Tempel one-shot keymap.")
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "i") #'tempel-insert)
+    	  (define-key map (kbd "e") #'tempel-end)
+    	  (define-key map (kbd "n") #'tempel-next)
+    	  (define-key map (kbd "p") #'tempel-previous)
+    	  (define-key map (kbd "k") #'tempel-kill)
+    	  map)
+    	"Tempel one-shot keymap.")
 
       (global-set-key (kbd "C-c i") my/tempel-prefix-map))
 
@@ -421,39 +428,41 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
 #+END_SRC
 
-#+BEGIN_SRC text :tangle (expand-file-name "tempel/perl.eld" user-emacs-directory) :mkdirp yes
-    cperl-mode perl-mode
+#+BEGIN_SRC emacs-lisp
+    (defvar my-perl-templates
+      '((dump "print Dumper(" q ");")
 
-    (dump "print Dumper(" q ");")
+    	(sub
+    	 "sub " p " {\n"
+    	 "    my (" p ") = @_;\n"
+    	 n> r>
+    	 "\n}")
 
-    (sub
-    "sub " p " {\n"
-    "    my (" p ") = @_;\n"
-    > q
-    "\n}"
-    )
+    	(foreach
+    	 "foreach my $" p " (" p ") {\n"
+    	 n> r>
+    	 "\n}")
 
-    (foreach
-    "foreach my $" p " (" p ") {\n"
-    > q
-    "\n}"
-    )
+    	(foreach-hash
+    	 "foreach my $" p " (keys %" p2 ") {\n"
+    	 "    my $" p " = $" p2 "{" p "};\n"
+    	 n> r>
+    	 "\n}")
 
-
-    (foreach-hash
-    "foreach my $" p " (keys %" p2 ") {\n"
-    "    my $" p " = $" p2 "{" p "};\n"
-    > q
-    "\n}"
-    )
+    	(foreach-kv
+    	 "while (my ($" p ", $" p2 ") = each %" p3 ") {\n"
+    	 n> r>
+    	 "\n}"))
+      "List of Perl templates.")
 
 
-    (foreach-kv
-    "while (my ($" p ", $" p2 ") = each %" p3 ") {\n"
-    > q
-    "\n}"
-    )
-
+    (dolist (hook '(perl-mode-hook cperl-mode-hook))
+      (add-hook
+       hook
+       (lambda ()
+    	 (setq-local tempel-template-sources
+    				 (cons 'my-perl-templates
+    					   tempel-template-sources)))))
 #+END_SRC
 
 * UI / Eyecandy
@@ -559,7 +568,7 @@ Install the nano modeline
       :ensure t
       :config
       (setq doom-themes-enable-bold t
-            doom-themes-enable-italic t)
+    		doom-themes-enable-italic t)
       (load-theme 'doom-material-dark t)
       (doom-themes-org-config))
 #+END_SRC
@@ -568,8 +577,8 @@ Install the nano modeline
 #+BEGIN_SRC emacs-lisp
     (set-face-attribute 'default nil :family "Iosevka")
     (set-face-attribute 'default nil
-                        :height 120
-                        :weight 'medium)
+    					:height 120
+    					:weight 'medium)
     (setq-default line-spacing 0.15)
 #+END_SRC
 
@@ -623,10 +632,10 @@ Install the nano modeline
       :ensure nil
       :config
       (setq which-key-popup-type 'minibuffer
-            which-key-idle-delay 0.8
-            which-key-min-display-lines 1
-            which-key-max-description-length 25
-            which-key-separator " → ")
+    		which-key-idle-delay 0.8
+    		which-key-min-display-lines 1
+    		which-key-max-description-length 25
+    		which-key-separator " → ")
       (setq which-key-show-remaining-keys nil)
 
       (which-key-mode 1))
@@ -641,14 +650,14 @@ Lets use flycheck and not flymake
 
       :config
       (defvar my/flycheck-prefix-map
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "j") #'flycheck-next-error)
-          (define-key map (kbd "k") #'flycheck-previous-error)
-          (define-key map (kbd "l") #'flycheck-list-errors)
-          (define-key map (kbd "e") #'flycheck-explain-error-at-point)
-          (define-key map (kbd "d") #'flycheck-display-error-at-point)
-          map)
-        "Flycheck keymap.")
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "j") #'flycheck-next-error)
+    	  (define-key map (kbd "k") #'flycheck-previous-error)
+    	  (define-key map (kbd "l") #'flycheck-list-errors)
+    	  (define-key map (kbd "e") #'flycheck-explain-error-at-point)
+    	  (define-key map (kbd "d") #'flycheck-display-error-at-point)
+    	  map)
+    	"Flycheck keymap.")
 
       (global-set-key (kbd "C-c e") my/flycheck-prefix-map)
       (global-set-key (kbd "C-c E") #'my/flycheck-transient)
@@ -659,16 +668,16 @@ Lets use flycheck and not flymake
     	"Flycheck Sticky commands"
     	:transient-suffix 'transient--do-stay
     	[["Navigate"
-          ("j" "next error" flycheck-next-error)
-          ("k" "previous error" flycheck-previous-error)]
+    	  ("j" "next error" flycheck-next-error)
+    	  ("k" "previous error" flycheck-previous-error)]
 
     	 ["View"
-          ("l" "list errors" flycheck-list-errors)
-          ("e" "explain error" flycheck-explain-error-at-point)
-          ("d" "display error" flycheck-display-error-at-point)]
+    	  ("l" "list errors" flycheck-list-errors)
+    	  ("e" "explain error" flycheck-explain-error-at-point)
+    	  ("d" "display error" flycheck-display-error-at-point)]
 
     	 ["Exit"
-          ("q" "quit" transient-quit-one)]]))
+    	  ("q" "quit" transient-quit-one)]]))
 #+end_src
 
 Connection flycheck with eglot and the lsps
@@ -688,14 +697,14 @@ Connection flycheck with eglot and the lsps
       :config
 
       (defvar my/jinx-prefix-map
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "j") #'jinx-next)
-          (define-key map (kbd "k") #'jinx-previous)
-          (define-key map (kbd "c") #'jinx-correct)
-          (define-key map (kbd "l") #'jinx-languages)
-          (define-key map (kbd "m") #'jinx-mode)
-          map)
-        "Jinx keymap.")
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "j") #'jinx-next)
+    	  (define-key map (kbd "k") #'jinx-previous)
+    	  (define-key map (kbd "c") #'jinx-correct)
+    	  (define-key map (kbd "l") #'jinx-languages)
+    	  (define-key map (kbd "m") #'jinx-mode)
+    	  map)
+    	"Jinx keymap.")
 
       (global-set-key (kbd "C-c j") my/jinx-prefix-map)
       (global-set-key (kbd "C-c J") #'my/jinx-transient)
@@ -703,19 +712,19 @@ Connection flycheck with eglot and the lsps
       (require 'transient)
 
       (transient-define-prefix my/jinx-transient ()
-        "Jinx Sticky commands"
-        :transient-suffix 'transient--do-stay
-        [["Correct / Navigation"
-          ("c" "correct" jinx-correct)
-          ("n" "next" jinx-next)
-          ("k" "previous" jinx-previous)]
+    	"Jinx Sticky commands"
+    	:transient-suffix 'transient--do-stay
+    	[["Correct / Navigation"
+    	  ("c" "correct" jinx-correct)
+    	  ("n" "next" jinx-next)
+    	  ("k" "previous" jinx-previous)]
 
-         ["Mode / Config"
-          ("l" "languages" jinx-languages)
-          ("m" "toggle mode" jinx-mode)]
+    	 ["Mode / Config"
+    	  ("l" "languages" jinx-languages)
+    	  ("m" "toggle mode" jinx-mode)]
 
-         ["Quit"
-          ("q" "quit" transient-quit-one)]]))
+    	 ["Quit"
+    	  ("q" "quit" transient-quit-one)]]))
 #+END_SRC
 
 ** Info's
@@ -745,15 +754,15 @@ Connection flycheck with eglot and the lsps
       :ensure t
       :config
       (defvar my/kirigami-prefix-map
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "o") #'kirigami-open-fold)
-          (define-key map (kbd "O") #'kirigami-open-fold-rec)
-          (define-key map (kbd "r") #'kirigami-open-folds)
-          (define-key map (kbd "c") #'kirigami-close-fold)
-          (define-key map (kbd "C") #'kirigami-close-folds)
-          (define-key map (kbd "a") #'kirigami-toggle-fold)
-          map)
-        "Kirigami one-shot keymap.")
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "o") #'kirigami-open-fold)
+    	  (define-key map (kbd "O") #'kirigami-open-fold-rec)
+    	  (define-key map (kbd "r") #'kirigami-open-folds)
+    	  (define-key map (kbd "c") #'kirigami-close-fold)
+    	  (define-key map (kbd "C") #'kirigami-close-folds)
+    	  (define-key map (kbd "a") #'kirigami-toggle-fold)
+    	  map)
+    	"Kirigami one-shot keymap.")
 
       (global-set-key (kbd "C-c z") my/kirigami-prefix-map))
 
@@ -769,7 +778,7 @@ Connection flycheck with eglot and the lsps
     (use-package tree-sitter
       :ensure t
       :config(global-tree-sitter-mode
-              (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
+    		  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)))
 
     (setq treesit-font-lock-level 4)
 
@@ -797,46 +806,46 @@ Connection flycheck with eglot and the lsps
 
     (defun my/move-tree-sitter-grammar-files ()
       "Move all files from `tree-sitter-langs-grammar-dir/bin` to `~/.config/emacs/tree-sitter`,
-      appending 'libtree-sitter-' to the front of each filename."
+    appending 'libtree-sitter-' to the front of each filename."
       (interactive)
       (let* ((source-dir (expand-file-name "bin" tree-sitter-langs-grammar-dir))
-             (target-dir (expand-file-name "~/.config/emacs/tree-sitter"))
-             (files (directory-files source-dir t "^[^.].*"))) ; Get all files, excluding hidden files
-        (unless (file-exists-p target-dir)
-          (make-directory target-dir t)) ; Create target directory if it doesn't exist
-        (dolist (file files)
-          (let ((filename (file-name-nondirectory file))
-                (new-filename (concat "libtree-sitter-" (file-name-nondirectory file))))
-            (rename-file file (expand-file-name new-filename target-dir) t)))))
+    		 (target-dir (expand-file-name "~/.config/emacs/tree-sitter"))
+    		 (files (directory-files source-dir t "^[^.].*"))) ; Get all files, excluding hidden files
+    	(unless (file-exists-p target-dir)
+    	  (make-directory target-dir t)) ; Create target directory if it doesn't exist
+    	(dolist (file files)
+    	  (let ((filename (file-name-nondirectory file))
+    			(new-filename (concat "libtree-sitter-" (file-name-nondirectory file))))
+    		(rename-file file (expand-file-name new-filename target-dir) t)))))
 #+END_SRC
 **** Tree-sitter source List
 #+BEGIN_SRC emacs-lisp
     (setq treesit-language-source-alist
-          '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-            (cmake "https://github.com/uyha/tree-sitter-cmake")
-            (css "https://github.com/tree-sitter/tree-sitter-css")
-            (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-            (html "https://github.com/tree-sitter/tree-sitter-html")
-            (zig "https://github.com/GrayJack/tree-sitter-zig")
-            (go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.1" "src")
-            (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-            (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
-            (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-            (json "https://github.com/tree-sitter/tree-sitter-json")
-            (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
-            (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-            (make "https://github.com/alemuller/tree-sitter-make")
-            (perl "https://github.com/tree-sitter-perl/tree-sitter-perl" "release")
-            (pod "https://github.com/tree-sitter-perl/tree-sitter-pod" "release")
-            (rust "https://github.com/tree-sitter/tree-sitter-rust" "v0.23.0" "master")
-            (php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
-            (phpdoc "https://github.com/claytonrcarter/tree-sitter-phpdoc" "master" "src")
-            (twig "https://github.com/kaermorchen/tree-sitter-twig")
-            (python "https://github.com/tree-sitter/tree-sitter-python")
-            (toml "https://github.com/tree-sitter/tree-sitter-toml")
-            (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-            (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-            (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+    	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+    		(cmake "https://github.com/uyha/tree-sitter-cmake")
+    		(css "https://github.com/tree-sitter/tree-sitter-css")
+    		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+    		(html "https://github.com/tree-sitter/tree-sitter-html")
+    		(zig "https://github.com/GrayJack/tree-sitter-zig")
+    		(go "https://github.com/tree-sitter/tree-sitter-go" "v0.23.1" "src")
+    		(gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+    		(gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
+    		(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+    		(json "https://github.com/tree-sitter/tree-sitter-json")
+    		(ruby "https://github.com/tree-sitter/tree-sitter-ruby")
+    		(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+    		(make "https://github.com/alemuller/tree-sitter-make")
+    		(perl "https://github.com/tree-sitter-perl/tree-sitter-perl" "release")
+    		(pod "https://github.com/tree-sitter-perl/tree-sitter-pod" "release")
+    		(rust "https://github.com/tree-sitter/tree-sitter-rust" "v0.23.0" "master")
+    		(php "https://github.com/tree-sitter/tree-sitter-php" "v0.21.1" "php/src")
+    		(phpdoc "https://github.com/claytonrcarter/tree-sitter-phpdoc" "master" "src")
+    		(twig "https://github.com/kaermorchen/tree-sitter-twig")
+    		(python "https://github.com/tree-sitter/tree-sitter-python")
+    		(toml "https://github.com/tree-sitter/tree-sitter-toml")
+    		(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+    		(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+    		(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
     ;; Install all langs
     (defun my/treesitter-install-alist ()
@@ -860,11 +869,11 @@ We want to use the same Configurations as out teammates
       :ensure t
       :config
       (setf (alist-get 'perltidy apheleia-formatters)
-            '("perltidy" "-q" "-st"))
+    		'("perltidy" "-q" "-st"))
       (setf (alist-get 'perl-mode apheleia-mode-alist)
-            'perltidy)
+    		'perltidy)
       (setf (alist-get 'cperl-mode apheleia-mode-alist)
-            'perltidy)
+    		'perltidy)
 
       (apheleia-global-mode nil))
 #+end_src
@@ -898,34 +907,34 @@ We want to use the same Configurations as out teammates
     (setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
 
     (setq-default eglot-workspace-configuration
-                  '((:perlnavigator .
-                                    (:perlPath
-                                     "/usr/bin/perl"
-                                     :includePaths
-                                     ["/DATA/ds/DatenService/SCRIPT/lib/local/util/"
-                                      "/DATA/ds/DatenService/SCRIPT/lib/local/ds1/"
-                                      "/DATA/ds/DatenService/SCRIPT/lib/local/SDS/"]
-                                     :enableWarnings t))))
+    			  '((:perlnavigator .
+    								(:perlPath
+    								 "/usr/bin/perl"
+    								 :includePaths
+    								 ["/DATA/ds/DatenService/SCRIPT/lib/local/util/"
+    								  "/DATA/ds/DatenService/SCRIPT/lib/local/ds1/"
+    								  "/DATA/ds/DatenService/SCRIPT/lib/local/SDS/"]
+    								 :enableWarnings t))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                   '(gdscript-mode . ("localhost:6005"))))
+    			   '(gdscript-mode . ("localhost:6005"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                   '(go-ts-mode . ("gopls"))))
+    			   '(go-ts-mode . ("gopls"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                   '(rust-ts-mode . ("rust-analyzer"))))
+    			   '(rust-ts-mode . ("rust-analyzer"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                   '(cperl-mode . ("perlnavigator" "--stdio"))))
+    			   '(cperl-mode . ("perlnavigator" "--stdio"))))
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                   '(python-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
+    			   '(python-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
 #+END_SRC
 
 * Editing
@@ -939,8 +948,8 @@ We want to use the same Configurations as out teammates
 #+BEGIN_SRC emacs-lisp
     (use-package move-text
       :bind(
-            ("M-j" . move-text-down)
-            ("M-k" . move-text-up))
+    		("M-j" . move-text-down)
+    		("M-k" . move-text-up))
       :ensure t)
 #+end_src
 
@@ -974,7 +983,7 @@ Interact with surrounds remove add them change them
       (setq dired-mouse-drag-files t)
       (setq dired-kill-when-opening-new-dired-buffer t)	  ;; Tidy up open buffers by default
       (setq dired-use-ls-dired t
-            dired-listing-switches "-aBhl  --group-directories-first"))
+    		dired-listing-switches "-aBhl  --group-directories-first"))
 
     (put 'dired-find-alternate-file 'disabled nil)
 
@@ -991,7 +1000,7 @@ Interact with surrounds remove add them change them
     (defun my-harpoon-tab-name ()
       "Use the current tab-bar tab name as project name fallback."
       (let ((tab-name (alist-get 'name (tab-bar--current-tab))))
-        (or tab-name "default")))
+    	(or tab-name "default")))
 
     (use-package harpoon
       :ensure t
@@ -1000,20 +1009,20 @@ Interact with surrounds remove add them change them
 
       ;; --- One-shot prefix (C-c h) ---
       (defvar my/harpoon-prefix-map
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "1") #'harpoon-go-to-1)
-          (define-key map (kbd "2") #'harpoon-go-to-2)
-          (define-key map (kbd "3") #'harpoon-go-to-3)
-          (define-key map (kbd "4") #'harpoon-go-to-4)
-          (define-key map (kbd "5") #'harpoon-go-to-5)
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "1") #'harpoon-go-to-1)
+    	  (define-key map (kbd "2") #'harpoon-go-to-2)
+    	  (define-key map (kbd "3") #'harpoon-go-to-3)
+    	  (define-key map (kbd "4") #'harpoon-go-to-4)
+    	  (define-key map (kbd "5") #'harpoon-go-to-5)
 
-          ;; actions
-          (define-key map (kbd "a") #'harpoon-add-file)
-          (define-key map (kbd "c") #'harpoon-clear)
-          (define-key map (kbd "l") #'harpoon-toggle-quick-menu)
-          (define-key map (kbd "f") #'harpoon-toggle-file)
-          map)
-        "Harpoon one-shot keymap.")
+    	  ;; actions
+    	  (define-key map (kbd "a") #'harpoon-add-file)
+    	  (define-key map (kbd "c") #'harpoon-clear)
+    	  (define-key map (kbd "l") #'harpoon-toggle-quick-menu)
+    	  (define-key map (kbd "f") #'harpoon-toggle-file)
+    	  map)
+    	"Harpoon one-shot keymap.")
 
       (global-set-key (kbd "C-c H") my/harpoon-prefix-map)
 
@@ -1034,29 +1043,29 @@ Interact with surrounds remove add them change them
     (defun eshell/alert-me (&rest args)
       "Run a command and notify when it finishes."
       (let* ((cmd (string-join args " "))
-             (buf (current-buffer))
-             (proc (start-process-shell-command
-                    "eshell-alert-me" buf cmd)))
+    		 (buf (current-buffer))
+    		 (proc (start-process-shell-command
+    				"eshell-alert-me" buf cmd)))
 
-        ;; store metadata on the process (this is the key fix)
-        (process-put proc 'cmd cmd)
-        (process-put proc 'start-time (current-time))
+    	;; store metadata on the process (this is the key fix)
+    	(process-put proc 'cmd cmd)
+    	(process-put proc 'start-time (current-time))
 
-        (set-process-sentinel
-         proc
-         (lambda (p _event)
-           (when (memq (process-status p) '(exit signal))
-             (let* ((cmd (process-get p 'cmd))
-                    (start-time (process-get p 'start-time))
-                    (elapsed (float-time
-                              (time-subtract (current-time)
-                                             start-time))))
-               (notifications-notify
-                :title "Eshell done"
-                :body (format "%.2fs: %s" elapsed cmd)
-                :app-name "Emacs")))))
+    	(set-process-sentinel
+    	 proc
+    	 (lambda (p _event)
+    	   (when (memq (process-status p) '(exit signal))
+    		 (let* ((cmd (process-get p 'cmd))
+    				(start-time (process-get p 'start-time))
+    				(elapsed (float-time
+    						  (time-subtract (current-time)
+    										 start-time))))
+    		   (notifications-notify
+    			:title "Eshell done"
+    			:body (format "%.2fs: %s" elapsed cmd)
+    			:app-name "Emacs")))))
 
-        proc))
+    	proc))
 
 #+end_src
 ** Terminal Emulation
@@ -1066,47 +1075,47 @@ Interact with surrounds remove add them change them
       (setq vterm-term-environment-variable "xterm-color")
       (setq vterm-kill-buffer-on-exit t)
       (defun vterm-with-prefix ()
-        "Run `vterm` with a universal- argument (C-u)."
-        (interactive)
-        (let ((current-prefix-arg '(4))) ; C-u
-          (call-interactively 'vterm)))
+    	"Run `vterm` with a universal- argument (C-u)."
+    	(interactive)
+    	(let ((current-prefix-arg '(4))) ; C-u
+    	  (call-interactively 'vterm)))
       (defun vterm-other-window-with-prefix ()
-        "Run `eat` with a universal- argument (C-u)."
-        (interactive)
-        (let ((current-prefix-arg '(4))) ; C-u
-          (call-interactively 'vterm-other-window)))
+    	"Run `eat` with a universal- argument (C-u)."
+    	(interactive)
+    	(let ((current-prefix-arg '(4))) ; C-u
+    	  (call-interactively 'vterm-other-window)))
       (global-set-key (kbd "C-c t T") 'vterm-with-prefix)
       :ensure t)
 
     (add-to-list 'display-buffer-alist
-                 '((major-mode . vterm-mode)
-                   (display-buffer-reuse-window
-                    display-buffer-in-side-window)
-                   (side . bottom)
-                   (window-height . 0.3)))
+    			 '((major-mode . vterm-mode)
+    			   (display-buffer-reuse-window
+    				display-buffer-in-side-window)
+    			   (side . bottom)
+    			   (window-height . 0.3)))
 
     (defvar my/tab-vterm-last-buffer nil)
 
     (defun my/tab-vterm-toggle ()
       (interactive)
       (let* ((tab (tab-bar--current-tab))
-             (tab-name (alist-get 'name tab))
-             (buf-name (format "*vterm:%s*" tab-name))
-             (buf (get-buffer buf-name)))
+    		 (tab-name (alist-get 'name tab))
+    		 (buf-name (format "*vterm:%s*" tab-name))
+    		 (buf (get-buffer buf-name)))
 
-        (if (and buf (eq (current-buffer) buf))
-            ;; If we're in the vterm → go back
-            (when my/tab-vterm-last-buffer
-              (pop-to-buffer my/tab-vterm-last-buffer))
+    	(if (and buf (eq (current-buffer) buf))
+    		;; If we're in the vterm → go back
+    		(when my/tab-vterm-last-buffer
+    		  (pop-to-buffer my/tab-vterm-last-buffer))
 
-          ;; Otherwise → open/switch to vterm
-          (setq my/tab-vterm-last-buffer (current-buffer))
+    	  ;; Otherwise → open/switch to vterm
+    	  (setq my/tab-vterm-last-buffer (current-buffer))
 
-          (if buf
-              (pop-to-buffer buf)
-            (let ((new (vterm-other-window)))
-              (with-current-buffer new
-                (rename-buffer buf-name)))))))
+    	  (if buf
+    		  (pop-to-buffer buf)
+    		(let ((new (vterm-other-window)))
+    		  (with-current-buffer new
+    			(rename-buffer buf-name)))))))
 
     (global-set-key (kbd "C-c t t") #'my/tab-vterm-toggle)
 
@@ -1115,21 +1124,21 @@ Interact with surrounds remove add them change them
 
     (add-hook 'vterm-mode-hook #'my/vterm-update-last-access)
     (add-hook 'buffer-list-update-hook
-              (lambda ()
-                (when (eq major-mode 'vterm-mode)
-                  (my/vterm-update-last-access))))
+    		  (lambda ()
+    			(when (eq major-mode 'vterm-mode)
+    			  (my/vterm-update-last-access))))
 
     (defun my/kill-stale-vterms (&optional hours)
       "Kill vterm buffers unused for HOURS (default 24)."
       (interactive "P")
       (let* ((hours (or hours 24))
-             (cutoff (- (float-time) (* hours 3600))))
-        (dolist (buf (buffer-list))
-          (with-current-buffer buf
-            (when (and (eq major-mode 'vterm-mode)
-                       (boundp 'my/vterm-last-access)
-                       (< my/vterm-last-access cutoff))
-              (kill-buffer buf))))))
+    		 (cutoff (- (float-time) (* hours 3600))))
+    	(dolist (buf (buffer-list))
+    	  (with-current-buffer buf
+    		(when (and (eq major-mode 'vterm-mode)
+    				   (boundp 'my/vterm-last-access)
+    				   (< my/vterm-last-access cutoff))
+    		  (kill-buffer buf))))))
 #+end_src
 * Project Managment
 ** VCS
@@ -1169,124 +1178,124 @@ Interact with surrounds remove add them change them
     (setq window-combination-resize t)
 
     (setq display-buffer-alist
-          '(
-            ;; -----------------------------
-            ;; Bottom tool panel (shared)
-            ;; -----------------------------
+    	  '(
+    		;; -----------------------------
+    		;; Bottom tool panel (shared)
+    		;; -----------------------------
 
-            ;; vterm
-            ("\\*vterm.*\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . -1))
+    		;; vterm
+    		("\\*vterm.*\\*"
+    		 (display-buffer-reuse-window
+    		  display-buffer-in-side-window)
+    		 (side . bottom)
+    		 (window-height . 0.30)
+    		 (slot . -1))
 
-            ("\\*eshell.*\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . 0))
+    		("\\*eshell.*\\*"
+    		 (display-buffer-reuse-window
+    		  display-buffer-in-side-window)
+    		 (side . bottom)
+    		 (window-height . 0.30)
+    		 (slot . 0))
 
-            ;; compilation
-            ("\\*compilation\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . 0))
+    		;; compilation
+    		("\\*compilation\\*"
+    		 (display-buffer-reuse-window
+    		  display-buffer-in-side-window)
+    		 (side . bottom)
+    		 (window-height . 0.30)
+    		 (slot . 0))
 
-            ;; async shell commands
-            ("\\*Async Shell Command\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . 1))
+    		;; async shell commands
+    		("\\*Async Shell Command\\*"
+    		 (display-buffer-reuse-window
+    		  display-buffer-in-side-window)
+    		 (side . bottom)
+    		 (window-height . 0.30)
+    		 (slot . 1))
 
-            ;; shell / ansi-term
-            ("\\*shell\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . 2))
+    		;; shell / ansi-term
+    		("\\*shell\\*"
+    		 (display-buffer-reuse-window
+    		  display-buffer-in-side-window)
+    		 (side . bottom)
+    		 (window-height . 0.30)
+    		 (slot . 2))
 
-            ("\\*ansi-term\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30)
-             (slot . 2))
+    		("\\*ansi-term\\*"
+    		 (display-buffer-reuse-window
+    		  display-buffer-in-side-window)
+    		 (side . bottom)
+    		 (window-height . 0.30)
+    		 (slot . 2))
 
-            ;; -----------------------------
-            ;; Left side tools
-            ;; -----------------------------
+    		;; -----------------------------
+    		;; Left side tools
+    		;; -----------------------------
 
-            ("\\*grep\\*"
-             (display-buffer-in-side-window)
-             (side . left)
-             (window-width . 0.25))
+    		("\\*grep\\*"
+    		 (display-buffer-in-side-window)
+    		 (side . left)
+    		 (window-width . 0.25))
 
-            ("\\*dired\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . left)
-             (window-width . 0.25))
+    		("\\*dired\\*"
+    		 (display-buffer-reuse-window
+    		  display-buffer-in-side-window)
+    		 (side . left)
+    		 (window-width . 0.25))
 
-            ;; -----------------------------
-            ;; Right side help/info
-            ;; -----------------------------
+    		;; -----------------------------
+    		;; Right side help/info
+    		;; -----------------------------
 
-            ("\\*Help\\*"
-             (display-buffer-in-side-window)
-             (side . right)
-             (window-width . 0.30))
+    		("\\*Help\\*"
+    		 (display-buffer-in-side-window)
+    		 (side . right)
+    		 (window-width . 0.30))
 
-            ("\\*Messages\\*"
-             (display-buffer-in-side-window)
-             (side . right)
-             (window-width . 0.20))
+    		("\\*Messages\\*"
+    		 (display-buffer-in-side-window)
+    		 (side . right)
+    		 (window-width . 0.20))
 
-            ("\\*Apropos\\*"
-             (display-buffer-in-side-window)
-             (side . right)
-             (window-width . 0.25))
+    		("\\*Apropos\\*"
+    		 (display-buffer-in-side-window)
+    		 (side . right)
+    		 (window-width . 0.25))
 
-            ("\\*info\\*"
-             (display-buffer-in-side-window)
-             (side . right)
-             (window-width . 0.35))
+    		("\\*info\\*"
+    		 (display-buffer-in-side-window)
+    		 (side . right)
+    		 (window-width . 0.35))
 
-            ;; -----------------------------
-            ;; Diff / ediff in frames (unchanged behavior)
-            ;; -----------------------------
+    		;; -----------------------------
+    		;; Diff / ediff in frames (unchanged behavior)
+    		;; -----------------------------
 
-            ("\\*Diff\\*"
-             (display-buffer-pop-up-frame))
+    		("\\*Diff\\*"
+    		 (display-buffer-pop-up-frame))
 
-            (ediff-control-buffer
-             (display-buffer-pop-up-frame))
+    		(ediff-control-buffer
+    		 (display-buffer-pop-up-frame))
 
-            (ediff-diff-buffer-A
-             (display-buffer-pop-up-frame))
+    		(ediff-diff-buffer-A
+    		 (display-buffer-pop-up-frame))
 
-            (ediff-diff-buffer-B
-             (display-buffer-pop-up-frame))
+    		(ediff-diff-buffer-B
+    		 (display-buffer-pop-up-frame))
 
-            (ediff-diff-buffer-C
-             (display-buffer-pop-up-frame))
+    		(ediff-diff-buffer-C
+    		 (display-buffer-pop-up-frame))
 
-            ;; -----------------------------
-            ;; fallback
-            ;; -----------------------------
+    		;; -----------------------------
+    		;; fallback
+    		;; -----------------------------
 
-            ("\\*.*\\*"
-             (display-buffer-reuse-window
-              display-buffer-in-side-window)
-             (side . bottom)
-             (window-height . 0.30))))
+    		("\\*.*\\*"
+    		 (display-buffer-reuse-window
+    		  display-buffer-in-side-window)
+    		 (side . bottom)
+    		 (window-height . 0.30))))
 
 #+end_src
 
@@ -1297,9 +1306,9 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
       :ensure nil
       :init
       (setq tab-bar-show 1
-            tab-bar-close-button-show nil
-            tab-bar-tab-hints nil
-            tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
+    		tab-bar-close-button-show nil
+    		tab-bar-tab-hints nil
+    		tab-bar-format '(tab-bar-format-tabs tab-bar-separator))
 
       :config
       (tab-bar-mode 1))
@@ -1338,12 +1347,12 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
       "Clear common minibuffer and command history variables."
       (interactive)
       (setq command-history nil
-            extended-command-history nil
-            minibuffer-history nil
-            file-name-history nil
-            search-ring nil
-            regexp-search-ring nil
-            read-expression-history nil)
+    		extended-command-history nil
+    		minibuffer-history nil
+    		file-name-history nil
+    		search-ring nil
+    		regexp-search-ring nil
+    		read-expression-history nil)
       (message "Minibuffer and command histories cleared."))
 
     (use-package midnight
@@ -1358,8 +1367,8 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
       (add-hook 'midnight-hook #'package-refresh-contents)
       (add-hook 'midnight-hook #'my/clear-minibuffer-histories)
       (add-hook 'midnight-hook
-                (lambda ()
-                  (message "[midnight-mode] Cleanup..."))))
+    			(lambda ()
+    			  (message "[midnight-mode] Cleanup..."))))
 #+END_SRC
 
 ** Making Emacs more explorable
@@ -1399,15 +1408,15 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
     (use-package web-mode
       :ensure t
       :mode (("\\.phtml\\'" . web-mode)
-             ("\\.tpl\\.php\\'" . web-mode)
-             ("\\.[agj]sp\\'" . web-mode)
-             ("\\.as[cp]x\\'" . web-mode)
-             ("\\.erb\\'" . web-mode)
-             ("\\.tt\\'" . web-mode)
-             ("\\.mustache\\'" . web-mode)
-             ("\\.djhtml\\'" . web-mode)
-             ("\\.vue\\'" . web-mode)
-             ("\\.blade\\.php\\'" . web-mode))
+    		 ("\\.tpl\\.php\\'" . web-mode)
+    		 ("\\.[agj]sp\\'" . web-mode)
+    		 ("\\.as[cp]x\\'" . web-mode)
+    		 ("\\.erb\\'" . web-mode)
+    		 ("\\.tt\\'" . web-mode)
+    		 ("\\.mustache\\'" . web-mode)
+    		 ("\\.djhtml\\'" . web-mode)
+    		 ("\\.vue\\'" . web-mode)
+    		 ("\\.blade\\.php\\'" . web-mode))
       :config
       (setq web-mode-script-padding 0)
       (setq web-mode-code-indent-offset 2)
@@ -1437,6 +1446,7 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
 ** Perl
 #+begin_src emacs-lisp
     (use-package cperl-mode
+      :ensure nil
       :after (perl-mode)
       :config
       (setq cperl-invalid-face nil)
@@ -1445,8 +1455,8 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
 
       (add-hook 'cperl-mode-hook
     			(lambda ()
-                  (setq tab-width 8)              ; Display width of a tab character
-                  (setq indent-tabs-mode t)))     ; Use tabs instead of spaces
+    			  (setq tab-width 8)              ; Display width of a tab character
+    			  (setq indent-tabs-mode t)))     ; Use tabs instead of spaces
       (fset 'perl-mode 'cperl-mode))
 #+END_SRC
 
@@ -1559,112 +1569,112 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
       :ensure t
       :init
       (defun meow-setup ()
-        (setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
-        (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
-        (meow-motion-overwrite-define-key
-         '("j" . meow-next)
-         '("k" . meow-prev)
-         '("<escape>" . ignore))
-        (meow-leader-define-key
-         ;; SPC j/k will run the original command in MOTION state.
-         '("j" . "H-j")
-         '("k" . "H-k")
-         ;; Use SPC (0-9) for digit arguments.
-         '("1" . meow-digit-argument)
-         '("2" . meow-digit-argument)
-         '("3" . meow-digit-argument)
-         '("4" . meow-digit-argument)
-         '("5" . meow-digit-argument)
-         '("6" . meow-digit-argument)
-         '("7" . meow-digit-argument)
-         '("8" . meow-digit-argument)
-         '("9" . meow-digit-argument)
-         '("0" . meow-digit-argument)
+    	(setq meow-cheatsheet-physical-layout meow-cheatsheet-physical-layout-iso)
+    	(setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
+    	(meow-motion-overwrite-define-key
+    	 '("j" . meow-next)
+    	 '("k" . meow-prev)
+    	 '("<escape>" . ignore))
+    	(meow-leader-define-key
+    	 ;; SPC j/k will run the original command in MOTION state.
+    	 '("j" . "H-j")
+    	 '("k" . "H-k")
+    	 ;; Use SPC (0-9) for digit arguments.
+    	 '("1" . meow-digit-argument)
+    	 '("2" . meow-digit-argument)
+    	 '("3" . meow-digit-argument)
+    	 '("4" . meow-digit-argument)
+    	 '("5" . meow-digit-argument)
+    	 '("6" . meow-digit-argument)
+    	 '("7" . meow-digit-argument)
+    	 '("8" . meow-digit-argument)
+    	 '("9" . meow-digit-argument)
+    	 '("0" . meow-digit-argument)
 
-         '("?" . meow-cheatsheet))
+    	 '("?" . meow-cheatsheet))
 
-        (meow-normal-define-key
-         '("0" . meow-expand-0)
-         '("1" . meow-expand-1)
-         '("2" . meow-expand-2)
-         '("3" . meow-expand-3)
-         '("4" . meow-expand-4)
-         '("5" . meow-expand-5)
-         '("6" . meow-expand-6)
-         '("7" . meow-expand-7)
-         '("8" . meow-expand-8)
-         '("9" . meow-expand-9)
+    	(meow-normal-define-key
+    	 '("0" . meow-expand-0)
+    	 '("1" . meow-expand-1)
+    	 '("2" . meow-expand-2)
+    	 '("3" . meow-expand-3)
+    	 '("4" . meow-expand-4)
+    	 '("5" . meow-expand-5)
+    	 '("6" . meow-expand-6)
+    	 '("7" . meow-expand-7)
+    	 '("8" . meow-expand-8)
+    	 '("9" . meow-expand-9)
 
-         '("-" . negative-argument)
+    	 '("-" . negative-argument)
 
-         '("/" . comment-or-uncomment-region)
-         '("," . meow-inner-of-thing)
-         '("." . meow-bounds-of-thing)
-         '(";" . meow-beginning-of-thing)
-         '(":" . meow-end-of-thing)
+    	 '("/" . comment-or-uncomment-region)
+    	 '("," . meow-inner-of-thing)
+    	 '("." . meow-bounds-of-thing)
+    	 '(";" . meow-beginning-of-thing)
+    	 '(":" . meow-end-of-thing)
 
-         '("a" . meow-append)
-         '("A" . meow-open-below)
+    	 '("a" . meow-append)
+    	 '("A" . meow-open-below)
 
-         '("b" . meow-back-word)
-         '("B" . meow-back-symbol)
-         '("c" . meow-change)
+    	 '("b" . meow-back-word)
+    	 '("B" . meow-back-symbol)
+    	 '("c" . meow-change)
 
-         '("d" . meow-delete)
-         '("D" . meow-backward-delete)
+    	 '("d" . meow-delete)
+    	 '("D" . meow-backward-delete)
 
-         '("e" . meow-next-word)
-         '("E" . meow-next-symbol)
-         '("f" . meow-find)
+    	 '("e" . meow-next-word)
+    	 '("E" . meow-next-symbol)
+    	 '("f" . meow-find)
 
-         '("g" . meow-cancel-selection)
+    	 '("g" . meow-cancel-selection)
 
-         '("R" . meow-swap-grab)
-         '("G" . meow-grab)
+    	 '("R" . meow-swap-grab)
+    	 '("G" . meow-grab)
 
-         '("h" . meow-left)
-         '("i" . meow-insert)
-         '("j" . meow-next)
-         '("k" . meow-prev)
-         '("l" . meow-right)
-         '("n" . meow-search)
-         '("o" . meow-block)
-         '("O" . meow-to-block)
+    	 '("h" . meow-left)
+    	 '("i" . meow-insert)
+    	 '("j" . meow-next)
+    	 '("k" . meow-prev)
+    	 '("l" . meow-right)
+    	 '("n" . meow-search)
+    	 '("o" . meow-block)
+    	 '("O" . meow-to-block)
 
-         '("p" . meow-yank)
-         '("P" . clipboard-yank)
+    	 '("p" . meow-yank)
+    	 '("P" . clipboard-yank)
 
-         '("y" . meow-save)
-         '("Y" . meow-clipboard-save)
+    	 '("y" . meow-save)
+    	 '("Y" . meow-clipboard-save)
 
-         '("H" . meow-left-expand)
-         '("I" . meow-open-above)
-         '("J" . meow-next-expand)
-         '("K" . meow-prev-expand)
-         '("L" . meow-right-expand)
+    	 '("H" . meow-left-expand)
+    	 '("I" . meow-open-above)
+    	 '("J" . meow-next-expand)
+    	 '("K" . meow-prev-expand)
+    	 '("L" . meow-right-expand)
 
-         '("q" . kmacro-start-macro-or-insert-counter)
-         '("Q" . meow-end-or-call-kmacro)
+    	 '("q" . kmacro-start-macro-or-insert-counter)
+    	 '("Q" . meow-end-or-call-kmacro)
 
-         '("r" . meow-replace)
-         '("s" . meow-kill)
-         '("t" . meow-till)
+    	 '("r" . meow-replace)
+    	 '("s" . meow-kill)
+    	 '("t" . meow-till)
 
-         '("Z" . avy-goto-char) ;; TODO
-         (cons "S" surround-keymap) ;; TODO
+    	 '("Z" . avy-goto-char) ;; TODO
+    	 (cons "S" surround-keymap) ;; TODO
 
-         '("u" . undo)
-         '("U" . undo-redo)
+    	 '("u" . undo)
+    	 '("U" . undo-redo)
 
-         '("v" . meow-visit)
-         '("w" . meow-mark-word)
-         '("W" . meow-mark-symbol)
-         '("x" . meow-line)
-         '("X" . consult-goto-line)
-         '("z" . meow-pop-selection)
-         '("#" . meow-reverse)
-         '("'" . repeat)
-         '("<escape>" . ignore)))
+    	 '("v" . meow-visit)
+    	 '("w" . meow-mark-word)
+    	 '("W" . meow-mark-symbol)
+    	 '("x" . meow-line)
+    	 '("X" . consult-goto-line)
+    	 '("z" . meow-pop-selection)
+    	 '("#" . meow-reverse)
+    	 '("'" . repeat)
+    	 '("<escape>" . ignore)))
       :config
       (meow-setup)
       (setq meow-keypad-leader-dispatch "C-c")
@@ -1776,32 +1786,32 @@ Make compilation look better and therefore make it work with modern tools
       "Toggle compilation buffer like a terminal panel."
       (interactive)
       (let ((buf (get-buffer "*compilation*")))
-        (if (and buf (get-buffer-window buf))
-            ;; If visible → hide it
-            (delete-window (get-buffer-window buf))
+    	(if (and buf (get-buffer-window buf))
+    		;; If visible → hide it
+    		(delete-window (get-buffer-window buf))
 
-          ;; If not visible → show or create it
-          (setq my/compile-last-buffer (current-buffer))
+    	  ;; If not visible → show or create it
+    	  (setq my/compile-last-buffer (current-buffer))
 
-          (if buf
-              (pop-to-buffer buf)
-            (call-interactively 'my/compile)))))
+    	  (if buf
+    		  (pop-to-buffer buf)
+    		(call-interactively 'my/compile)))))
 
     (defun my/tab-name ()
       "Return current tab name safely."
       (alist-get 'name (tab-bar--current-tab)))
 
     (setq compilation-buffer-name-function
-          (lambda (_mode)
-            (format "*compilation:%s*" (my/tab-name))))
+    	  (lambda (_mode)
+    		(format "*compilation:%s*" (my/tab-name))))
 
     (defun my/compile ()
       "Compile per tab, reusing tab-specific compilation buffer."
       (interactive)
       (let ((compilation-buffer-name-function
-             (lambda (_)
-               (format "*compilation:%s*" (my/tab-name)))))
-        (call-interactively 'compile)))
+    		 (lambda (_)
+    		   (format "*compilation:%s*" (my/tab-name)))))
+    	(call-interactively 'compile)))
 
     (global-set-key (kbd "C-c C o") #'my/compile-toggle)
     (global-set-key (kbd "C-c C c") #'compile)
@@ -1827,22 +1837,22 @@ Make compilation look better and therefore make it work with modern tools
       :ensure t
       :config
       (defhydra hydra-window (:hint nil)
-        "
-            ^Resize^
-            --------------------------------
-            _H_ shrink horiz
-            _J_ shrink vert
-            _K_ enlarge vert
-            _L_ enlarge horiz
-            "
-        ("H" shrink-window-horizontally)
-        ("L" enlarge-window-horizontally)
-        ("J" shrink-window)
-        ("K" enlarge-window)
-        ("q" nil "quit"))
+    	"
+    ^Resize^
+    --------------------------------
+    _H_ shrink horiz
+    _J_ shrink vert
+    _K_ enlarge vert
+    _L_ enlarge horiz
+    "
+    	("H" shrink-window-horizontally)
+    	("L" enlarge-window-horizontally)
+    	("J" shrink-window)
+    	("K" enlarge-window)
+    	("q" nil "quit"))
 
       (with-eval-after-load 'hydra
-        (global-set-key (kbd "C-c w W") 'hydra-window/body)))
+    	(global-set-key (kbd "C-c w W") 'hydra-window/body)))
 #+end_src
 ** Search Stuff
 #+begin_src emacs-lisp
