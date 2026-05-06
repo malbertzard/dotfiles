@@ -12,6 +12,10 @@
 
   networking.networkmanager.enable = true;
 
+  networking.networkmanager.plugins = with pkgs; [
+    networkmanager-openconnect
+  ];
+
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "de_DE.UTF-8";
     LC_IDENTIFICATION = "de_DE.UTF-8";
