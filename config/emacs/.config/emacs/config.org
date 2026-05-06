@@ -48,6 +48,7 @@
   - [[#dired][Dired]]
   - [[#harpoon][Harpoon]]
 - [[#terminal][Terminal]]
+  - [[#commands][Commands]]
   - [[#eshell][Eshell]]
   - [[#terminal-emulation][Terminal Emulation]]
 - [[#project-managment][Project Managment]]
@@ -60,6 +61,7 @@
   - [[#manage-system-processes-from-inside-emacs][Manage System processes from inside Emacs]]
   - [[#collection-of-useful-commands][Collection of useful commands]]
 - [[#file-specific-modes][File specific Modes]]
+  - [[#web-mode][Web Mode]]
   - [[#pdf-tools][PDF Tools]]
   - [[#lua-mode][Lua Mode]]
   - [[#zig-mode][Zig Mode]]
@@ -243,6 +245,15 @@ etc
 
     (setq auto-save-visited-interval 2)
 
+    (setq read-extended-command-predicate
+          #'command-completion-default-include-p)
+
+    (setopt use-short-answers t)
+    (setopt read-answer-short t)
+    (setopt use-dialog-box nil)
+
+    (setq confirm-kill-emacs #'y-or-n-p)
+
     (use-package emacs
       :ensure nil
       :custom
@@ -254,7 +265,6 @@ etc
       (dired-async-mode t)
       (truncate-lines t)
       (gnus-agent nil)
-      (defalias 'yes-or-no-p 'y-or-n-p)
       (tab-width 4)
       :bind (
              ([escape] . keyboard-escape-quit) ;; Makes Escape quit prompts (Minibuffer Escape)
@@ -380,10 +390,10 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+BEGIN_SRC emacs-lisp
     (use-package tempel
       :ensure t
-      :bind (("C-c i" . tempel-insert))
       :custom
       (tempel-trigger-prefix "<")
-      (setq tempel-path '("~/.config/emacs/templates"))
+      (tempel-path
+       (list (expand-file-name "tempel/*" user-emacs-directory)))
       :init
       (defun tempel-setup-capf ()
         (setq-local completion-at-point-functions
@@ -411,14 +421,39 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
 #+END_SRC
 
-#+BEGIN_SRC text :tangle ~/.config/emacs/etc/tempel/templates.eld :mkdirp yes
-    perl-mode
+#+BEGIN_SRC text :tangle (expand-file-name "tempel/perl.eld" user-emacs-directory) :mkdirp yes
+    cperl-mode perl-mode
 
     (dump "print Dumper(" q ");")
 
-    cperl-mode
+    (sub
+    "sub " p " {\n"
+    "    my (" p ") = @_;\n"
+    > q
+    "\n}"
+    )
 
-    (dump "print Dumper(" q ");")
+    (foreach
+    "foreach my $" p " (" p ") {\n"
+    > q
+    "\n}"
+    )
+
+
+    (foreach-hash
+    "foreach my $" p " (keys %" p2 ") {\n"
+    "    my $" p " = $" p2 "{" p "};\n"
+    > q
+    "\n}"
+    )
+
+
+    (foreach-kv
+    "while (my ($" p ", $" p2 ") = each %" p3 ") {\n"
+    > q
+    "\n}"
+    )
+
 #+END_SRC
 
 * UI / Eyecandy
@@ -432,7 +467,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
     (defun disable-line-numbers ()
       "Disable display-line-numbers-mode for certain modes."
-      (display-line-numbers-mode 0))
+      (display-line-numbers-mode -1))
 
     (add-hook 'dired-mode-hook 'disable-line-numbers)
     (add-hook 'doc-view-presentation-mode-hook 'disable-line-numbers)
@@ -987,6 +1022,11 @@ Interact with surrounds remove add them change them
 #+END_SRC
 
 * Terminal
+** Commands
+#+begin_src emacs-lisp
+    (setq comint-buffer-maximum-size 10000)
+    (add-hook 'comint-output-filter-functions #'comint-truncate-buffer)
+#+end_src
 ** Eshell
 #+begin_src emacs-lisp
     (require 'notifications)
@@ -1017,6 +1057,7 @@ Interact with surrounds remove add them change them
                 :app-name "Emacs")))))
 
         proc))
+
 #+end_src
 ** Terminal Emulation
 #+begin_src emacs-lisp
@@ -1353,6 +1394,28 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
     (use-package crux :ensure t)
 #+END_SRC
 * File specific Modes
+** Web Mode
+#+begin_src emacs-lisp
+    (use-package web-mode
+      :ensure t
+      :mode (("\\.phtml\\'" . web-mode)
+             ("\\.tpl\\.php\\'" . web-mode)
+             ("\\.[agj]sp\\'" . web-mode)
+             ("\\.as[cp]x\\'" . web-mode)
+             ("\\.erb\\'" . web-mode)
+             ("\\.tt\\'" . web-mode)
+             ("\\.mustache\\'" . web-mode)
+             ("\\.djhtml\\'" . web-mode)
+             ("\\.vue\\'" . web-mode)
+             ("\\.blade\\.php\\'" . web-mode))
+      :config
+      (setq web-mode-script-padding 0)
+      (setq web-mode-code-indent-offset 2)
+      (setq web-mode-markup-indent-offset 2)
+      (setq web-mode-css-indent-offset 2)
+      (setq web-mode-style-padding 0)
+      (setq web-mode-enable-comment-annotation t))
+#+end_src
 ** PDF Tools
 #+begin_src emacs-lisp
     (use-package pdf-tools :ensure t)
