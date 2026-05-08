@@ -6,6 +6,7 @@
 	signing.format = null;
 
 	settings = {
+	  github.user = "malbertzard";
 	  user = {
         signingKey = "~/.ssh/id_ed25519";
 		email = "malbertzard@gmail.com";

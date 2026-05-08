@@ -28,7 +28,7 @@
     LC_TIME = "de_DE.UTF-8";
   };
 
-  # coommon packages
+  # common packages
   environment.systemPackages = with pkgs; [
     git
     vim

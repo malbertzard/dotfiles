@@ -1122,6 +1122,12 @@ Interact with surrounds remove add them change them
       :bind (("C-c G G" . magit-status))
       :commands magit-status)
 
+    (setq auth-sources '("~/.authinfo"))
+
+    (use-package forge
+      :ensure t
+      :after magit)
+
     (use-package magit-todos
       :ensure t
       :after magit
