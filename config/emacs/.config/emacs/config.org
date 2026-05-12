@@ -27,6 +27,7 @@
   - [[#dim-inactive-windows][Dim Inactive windows]]
   - [[#scroll-margins][Scroll Margins]]
   - [[#indent-bars][Indent Bars]]
+  - [[#highlight-current-line][Highlight Current line]]
   - [[#modeline][Modeline]]
   - [[#theme][Theme]]
   - [[#font][Font]]
@@ -494,6 +495,11 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
       :hook (prog-mode . indent-bars-mode))
 #+end_src
 
+** Highlight Current line
+#+begin_src emacs-lisp
+(use-package hl-line
+  :hook (prog-mode . hl-line-mode))
+#+end_src
 ** Modeline
 Use the right time format for the modeline
 #+BEGIN_SRC emacs-lisp
