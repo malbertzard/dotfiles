@@ -30,6 +30,7 @@ let
         epkgs.elgrep
         epkgs.yaml
         epkgs.cond-let
+        epkgs.jinx
       ];
   };
 in

@@ -497,8 +497,9 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 
 ** Highlight Current line
 #+begin_src emacs-lisp
-(use-package hl-line
-  :hook (prog-mode . hl-line-mode))
+    (use-package hl-line
+      :ensure nil
+      :hook (prog-mode . hl-line-mode))
 #+end_src
 ** Modeline
 Use the right time format for the modeline
@@ -630,57 +631,60 @@ Install the nano modeline
 ** Error
 Lets use flycheck and not flymake
 #+BEGIN_SRC emacs-lisp
-    (use-package flycheck
+    (use-package flymake
       :ensure t
-
+      :hook (prog-mode . flymake-mode)
       :config
-      (defvar my/flycheck-prefix-map
+      (defvar my/flymake-prefix-map
     	(let ((map (make-sparse-keymap)))
-    	  (define-key map (kbd "j") #'flycheck-next-error)
-    	  (define-key map (kbd "k") #'flycheck-previous-error)
-    	  (define-key map (kbd "l") #'flycheck-list-errors)
-    	  (define-key map (kbd "e") #'flycheck-explain-error-at-point)
-    	  (define-key map (kbd "d") #'flycheck-display-error-at-point)
-    	  map)
-    	"Flycheck keymap.")
+          (define-key map (kbd "j") #'flymake-goto-next-error)
+          (define-key map (kbd "k") #'flymake-goto-prev-error)
+          (define-key map (kbd "l") #'flymake-show-buffer-diagnostics)
+          (define-key map (kbd "L") #'flymake-show-project-diagnostics)
+          (define-key map (kbd "s") #'consult-flymake)
+          (define-key map (kbd "d") #'flymake-show-diagnostic)
+          map)
+    	"Flymake keymap.")
 
-      (global-set-key (kbd "C-c e") my/flycheck-prefix-map)
-      (global-set-key (kbd "C-c E") #'my/flycheck-transient)
+      (global-set-key (kbd "C-c e") my/flymake-prefix-map))
 
-      (require 'transient)
-
-      (transient-define-prefix my/flycheck-transient ()
-    	"Flycheck Sticky commands"
+    (use-package transient
+      :ensure t
+      :after flymake
+      :config
+      (transient-define-prefix my/flymake-transient ()
+    	"Flymake sticky commands"
     	:transient-suffix 'transient--do-stay
+
     	[["Navigate"
-    	  ("j" "next error" flycheck-next-error)
-    	  ("k" "previous error" flycheck-previous-error)]
+          ("j" "next error" flymake-goto-next-error)
+          ("k" "previous error" flymake-goto-prev-error)]
 
     	 ["View"
-    	  ("l" "list errors" flycheck-list-errors)
-    	  ("e" "explain error" flycheck-explain-error-at-point)
-    	  ("d" "display error" flycheck-display-error-at-point)]
+          ("l" "list errors" flymake-show-buffer-diagnostics)
+          ("L" "list project errors" flymake-show-project-diagnostics)
+          ("s" "search error" consult-flymake)
+          ("d" "display error" flymake-show-diagnostic)]
 
-    	 ["Exit"
-    	  ("q" "quit" transient-quit-one)]]))
+    	 ["Quit"
+          ("q" "quit" transient-quit-one)]])
+      (global-set-key (kbd "C-c E") #'my/flymake-transient))
 #+end_src
 
 Connection flycheck with eglot and the lsps
 #+BEGIN_SRC emacs-lisp
-    (use-package flycheck-eglot
-      :ensure t
-      :after (flycheck eglot)
-      :config
-      (global-flycheck-eglot-mode 1))
+    ;; (use-package flycheck-eglot
+    ;;   :ensure t
+    ;;   :after (flycheck eglot)
+    ;;   :config
+    ;;   (global-flycheck-eglot-mode 1))
 #+end_src
 
 ** Spelling
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle none
     (use-package jinx
       :ensure t
-      :after transient
       :config
-
       (defvar my/jinx-prefix-map
     	(let ((map (make-sparse-keymap)))
     	  (define-key map (kbd "j") #'jinx-next)
@@ -691,11 +695,12 @@ Connection flycheck with eglot and the lsps
     	  map)
     	"Jinx keymap.")
 
-      (global-set-key (kbd "C-c j") my/jinx-prefix-map)
-      (global-set-key (kbd "C-c J") #'my/jinx-transient)
+      (global-set-key (kbd "C-c j") my/jinx-prefix-map))
 
-      (require 'transient)
-
+    (use-package transient
+      :ensure t
+      :after jinx
+      :config
       (transient-define-prefix my/jinx-transient ()
     	"Jinx Sticky commands"
     	:transient-suffix 'transient--do-stay
@@ -709,7 +714,8 @@ Connection flycheck with eglot and the lsps
     	  ("m" "toggle mode" jinx-mode)]
 
     	 ["Quit"
-    	  ("q" "quit" transient-quit-one)]]))
+    	  ("q" "quit" transient-quit-one)]])
+      (global-set-key (kbd "C-c J") #'my/jinx-transient))
 #+END_SRC
 
 ** Info's
@@ -900,6 +906,12 @@ We want to use the same Configurations as out teammates
     								  "/DATA/ds/DatenService/SCRIPT/lib/local/ds1/"
     								  "/DATA/ds/DatenService/SCRIPT/lib/local/SDS/"]
     								 :enableWarnings t))))
+
+    (setq-default eglot-workspace-configuration
+    			  '((:python
+    				 (:analysis
+    				  (:diagnosticMode "workspace")))))
+
 
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
