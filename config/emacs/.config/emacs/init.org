@@ -268,7 +268,7 @@ Install the doom modeline
 #+END_SRC
 
 *** Completions
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
     (leaf nerd-icons-completion
       :ensure t
       :after marginalia nerd-icons
@@ -285,7 +285,7 @@ Install the doom modeline
 #+END_SRC
 
 *** Dired
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
     (leaf nerd-icons-dired
       :ensure t
       :after dired nerd-icons
@@ -603,6 +603,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+begin_src emacs-lisp
     (leaf consult
       :ensure t
+      :require t
       :bind
       (("C-c B"   . consult-bookmark)
        ("C-c b B" . consult-buffer)
@@ -630,10 +631,10 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 *** Move lines
 #+BEGIN_src emacs-lisp
     (leaf move-text
+      :ensure t
       :bind(
     		("M-j" . move-text-down)
-    		("M-k" . move-text-up))
-      :ensure t)
+    		("M-k" . move-text-up)))
 #+end_src
 *** Surround
 Interact with surrounds remove add them change them
@@ -705,8 +706,7 @@ Lets use flymake
 #+BEGIN_src emacs-lisp
     (leaf flymake
       :after consult
-      :hook
-      (prog-mode-hook . flymake-mode)
+      :hook (prog-mode-hook . flymake-mode)
       :bind
       (("C-c e j" . flymake-goto-next-error)
        ("C-c e k" . flymake-goto-prev-error)
@@ -753,15 +753,16 @@ Lets use flymake
 #+end_src
 
 *** Spelling
-#+BEGIN_src emacs-lisp :tangle no
+#+BEGIN_src emacs-lisp
     (leaf jinx
       :ensure t
+      :require t
       :bind
-      (("C-c j j" . jinx-next)
-       ("C-c j k" . jinx-previous)
-       ("C-c j c" . jinx-correct)
-       ("C-c j L" . jinx-languages)
-       ("C-c j m" . jinx-mode)))
+      (("C-c J j" . #'jinx-next)
+       ("C-c J k" . #'jinx-previous)
+       ("C-c J c" . #'jinx-correct)
+       ("C-c J L" . #'jinx-languages)
+       ("C-c J m" . #'jinx-mode)))
 
     ;; (leaf transient
     ;;   :ensure t
@@ -1256,7 +1257,7 @@ Make compilation look better and therefore make it work with modern tools
       :commands (fancy-compilation-mode))
 #+END_SRC
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
     (defvar my/compile-last-buffer nil)
 
     (defun my/compile-toggle ()
@@ -1654,6 +1655,7 @@ Make compilation look better and therefore make it work with modern tools
 *** Buffer
 #+begin_src emacs-lisp
     (leaf simple
+      :require t
       :bind
       (("C-c b C" . clean-buffer-list)
        ("C-c b k" . kill-current-buffer)
