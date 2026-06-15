@@ -1,0 +1,1790 @@
+#+Title: Emacs Config
+#+Author: Mathis Albertzard
+#+Description: My Config based on a starter config probably don't use this I have no clue
+#+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
+
+* Table of contents :toc:
+- [[#early-init][Early Init]]
+- [[#bootstrap][Bootstrap]]
+- [[#package-manager][Package Manager]]
+  - [[#leaf][Leaf]]
+  - [[#keep-folders-clean][Keep folders clean]]
+- [[#ui--eyecandy][UI / Eyecandy]]
+  - [[#font][Font]]
+  - [[#dim-inactive-windows][Dim Inactive windows]]
+  - [[#scroll-margins][Scroll Margins]]
+  - [[#modeline][Modeline]]
+  - [[#theme][Theme]]
+  - [[#which-key][Which Key]]
+  - [[#indent-bars][Indent Bars]]
+  - [[#highlight-current-line][Highlight Current line]]
+  - [[#line-numbers][Line Numbers]]
+  - [[#nerdicons][Nerdicons]]
+  - [[#zoom-verschieben][Zoom (Verschieben)]]
+- [[#core][Core]]
+  - [[#sensible-defaults][Sensible Defaults]]
+  - [[#start-emacs-server-on-startup][Start Emacs server on startup]]
+  - [[#performance][Performance]]
+  - [[#completion-systems][Completion Systems]]
+  - [[#editing][Editing]]
+  - [[#info-sources][Info Sources]]
+- [[#features][Features]]
+  - [[#layout][Layout]]
+  - [[#vcs][VCS]]
+  - [[#terminal][Terminal]]
+  - [[#compilation][Compilation]]
+  - [[#helper][Helper]]
+- [[#langs][Langs]]
+  - [[#web-mode][Web Mode]]
+  - [[#pdf-tools][PDF Tools]]
+  - [[#csv-mode][CSV Mode]]
+  - [[#markdown][Markdown]]
+  - [[#nix][Nix]]
+  - [[#org][Org]]
+  - [[#rust-mode][Rust Mode]]
+  - [[#perl][Perl]]
+- [[#keymaps][Keymaps]]
+  - [[#meow][Meow]]
+  - [[#window--buffer-nav][Window / Buffer Nav]]
+  - [[#development][Development]]
+  - [[#replacing-stuff][Replacing stuff]]
+  - [[#hydra][Hydra]]
+  - [[#search-stuff][Search Stuff]]
+- [[#local-config][Local Config]]
+
+* Early Init
+#+begin_src emacs-lisp :tangle early-init.el
+    (setq gc-cons-threshold 10000000)
+    (setq byte-compile-warnings '(not obsolete))
+    (setq warning-suppress-log-types '((comp) (bytecomp)))
+    (setq native-comp-async-report-warnings-errors 'silent)
+    (setq warning-minimum-level :error)
+
+    ;; Silence stupid startup message
+    (setq inhibit-startup-echo-area-message (user-login-name))
+
+    ;; Default frame configuration: full screen, good-looking title bar on macOS
+    (setq frame-resize-pixelwise t)
+    (tool-bar-mode -1)			    ; All these tools are in the menu-bar anyway
+    (setq default-frame-alist '((fullscreen . maximized)
+                                (vertical-scroll-bars . nil)
+                                (horizontal-scroll-bars . nil)
+                                (ns-transparent-titlebar . t)))
+
+    (when (and (fboundp 'startup-redirect-eln-cache)
+               (fboundp 'native-comp-available-p)
+               (native-comp-available-p))
+      (startup-redirect-eln-cache
+       (convert-standard-filename
+        (expand-file-name  "var/eln-cache/" user-emacs-directory))))
+
+    (setq package-enable-at-startup nil)
+#+end_src
+
+* Bootstrap
+#+begin_src emacs-lisp
+    ;;; -*- lexical-binding: t -*-
+    (setq lexical-binding t)
+#+end_src
+* Package Manager
+** Leaf
+#+begin_src emacs-lisp
+    (defvar my/use-nix-packages
+      (getenv "IN_NIX_SHELL")
+      "Non-nil when running inside Nix environment.")
+
+    (require 'package)
+
+    (unless my/use-nix-packages
+      (add-to-list 'package-archives
+                   '("gnu" . "https://elpa.gnu.org/packages/"))
+
+      (add-to-list 'package-archives
+                   '("melpa" . "https://melpa.org/packages/"))
+
+      (package-initialize)
+
+      (unless (package-installed-p 'leaf)
+        (package-refresh-contents)
+        (package-install 'leaf))
+
+      (unless (package-installed-p 'leaf-keywords)
+        (package-install 'leaf-keywords)))
+
+    (require 'leaf)
+    (leaf leaf-keywords :ensure t)
+#+end_src
+** Keep folders clean
+#+begin_src emacs-lisp
+    (unless my/use-nix-packages
+      (leaf no-littering
+    	:ensure t
+    	:init
+    	;; Set these BEFORE the package loads
+    	(setq no-littering-etc-directory
+    		  (expand-file-name "config/" user-emacs-directory))
+
+    	(setq no-littering-var-directory
+    		  (expand-file-name "data/" user-emacs-directory))
+    	(no-littering-theme-backups)))
+#+end_src
+* UI / Eyecandy
+** Font
+#+BEGIN_src emacs-lisp
+    (leaf emacs
+      :ensure nil
+      :init
+      (set-face-attribute 'default nil :family "Iosevka")
+      (set-face-attribute 'default nil
+    					  :height 120
+    					  :weight 'medium)
+      (setq-default line-spacing 0.15))    
+#+END_SRC
+
+** Dim Inactive windows
+#+begin_src emacs-lisp
+    (leaf dimmer
+      :ensure t
+      :custom
+      ((dimmer-fraction . 0.3)
+       (dimmer-adjustment-mode . :foreground)
+       (dimmer-use-colorspace . :rgb))
+      :init
+      (dimmer-mode 1))
+#+end_src
+
+** Scroll Margins
+#+BEGIN_src emacs-lisp
+    (leaf emacs
+      :ensure nil
+      :custom
+      ((scroll-conservatively . 10)
+       (scroll-margin . 10)))
+#+END_SRC
+
+** Modeline
+Use the right time format for the modeline
+#+BEGIN_src emacs-lisp
+    (leaf time
+      :ensure nil
+      :global-minor-mode (display-time-mode)
+      :custom
+      (display-time-24hr-format . t)
+      (display-time-default-load-average . nil))
+#+END_SRC
+
+Hide some minor modes so the modeline is not that cluttert
+#+BEGIN_src emacs-lisp
+    (leaf minions
+      :ensure t
+      :global-minor-mode (minions-mode))
+#+END_SRC
+
+Install the doom modeline
+#+BEGIN_src emacs-lisp
+    (leaf doom-modeline
+      :ensure t
+      :custom
+      ;; Keep it minimal
+      ((doom-modeline-buffer-file-name-style . 'truncate-upto-project)
+       (doom-modeline-icon . t)
+       (doom-modeline-major-mode-icon . nil)
+       (doom-modeline-minor-modes . nil)
+       (doom-modeline-enable-word-count . nil)
+       (doom-modeline-buffer-encoding . nil)
+       (doom-modeline-percent-position . nil)
+       (doom-modeline-indent-info . nil)
+       (doom-modeline-checker-simple-format . t)
+       (doom-modeline-vcs-max-length . 12)
+       (doom-modeline-lsp . nil)
+       (doom-modeline-env-version . nil))
+      :global-minor-mode (doom-modeline-mode))
+#+END_SRC
+
+** Theme
+#+BEGIN_src emacs-lisp
+    (leaf doom-themes
+      :ensure t
+      :custom
+      ((doom-themes-enable-bold . t)
+       (doom-themes-enable-italic . t))
+      :init
+      (load-theme 'doom-material-dark t)
+      (doom-themes-org-config))
+#+END_SRC
+
+** Which Key
+#+BEGIN_src emacs-lisp
+    (leaf which-key
+      :ensure nil
+      :global-minor-mode (which-key-mode)
+      :custom
+      ((which-key-popup-type . 'minibuffer)
+       (which-key-idle-delay . 0.8)
+       (which-key-min-display-lines . 1)
+       (which-key-max-description-length . 25)
+       (which-key-separator . " → ")
+       (which-key-show-remaining-keys . nil)))
+
+#+END_SRC
+
+** Indent Bars
+#+begin_src emacs-lisp
+    (leaf indent-bars
+      :ensure t
+      :global-minor-mode (indent-bars-mode)
+      :hook (prog-mode-hook))
+#+end_src
+
+** Highlight Current line
+#+begin_src emacs-lisp
+    (leaf hl-line
+      :ensure nil
+      :global-minor-mode (hl-line-mode)
+      :hook (prog-mode-hook))
+#+end_src
+
+** Line Numbers
+#+BEGIN_src emacs-lisp
+    (leaf emacs
+      :ensure nil
+      :custom
+      (display-line-numbers-type . 'relative)
+      :config
+      (dolist (hook
+    		   '(dired-mode-hook
+    			 doc-view-presentation-mode-hook
+    			 doc-view-mode-hook
+    			 pdf-view-mode-hook
+    			 term-mode-hook
+    			 vterm-mode-hook
+    			 org-mode-hook
+    			 compilation-mode-hook))
+    	(add-hook hook
+    			  (lambda ()
+    				(display-line-numbers-mode -1))))
+      :global-minor-mode (global-display-line-numbers-mode))
+#+end_src
+
+** Nerdicons
+#+BEGIN_src emacs-lisp
+    (leaf nerd-icons
+      :ensure t)
+#+END_SRC
+
+*** Completions
+#+begin_src emacs-lisp
+    (leaf nerd-icons-completion
+      :ensure t
+      :after marginalia nerd-icons
+      :global-minor-mode (nerd-icons-completion-mode)
+      :hook
+      (marginalia-mode-hook . nerd-icons-completion-marginalia-setup))
+
+    (leaf nerd-icons-corfu
+      :ensure t
+      :after corfu nerd-icons
+      :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+#+END_SRC
+
+*** Dired
+#+begin_src emacs-lisp
+    (leaf nerd-icons-dired
+      :ensure t
+      :after dired nerd-icons
+      :hook
+      (dired-mode-hook . nerd-icons-dired-mode))
+#+END_SRC
+
+** Zoom (Verschieben)
+#+BEGIN_src emacs-lisp
+    (leaf emacs
+      :ensure nil
+      :bind
+      (("C-+" . text-scale-increase)
+       ("C--" . text-scale-decrease)
+       ("<C-wheel-up>" . text-scale-increase)
+       ("<C-wheel-down>" . text-scale-decrease)))
+#+END_SRC
+
+* Core
+** Sensible Defaults
+No Trash Files
+#+BEGIN_src emacs-lisp
+    (leaf emacs
+      :ensure nil
+      :custom
+      ((create-lockfiles . nil)
+       (make-backup-files . nil)))
+#+END_SRC
+
+UI Stuff
+#+BEGIN_src emacs-lisp
+    (leaf emacs
+      :ensure nil
+      :custom
+      (inhibit-startup-screen . t)
+      :init
+      (menu-bar-mode -1)
+      (scroll-bar-mode -1)
+      (tool-bar-mode -1))
+#+END_SRC
+
+Modern Input stuff
+#+BEGIN_src emacs-lisp
+    (leaf emacs
+      :ensure nil
+      :custom
+      ;; UI
+      ((inhibit-startup-screen . t)
+       ;; Mouse / input
+       (mouse-wheel-progressive-speed . nil)
+       (ring-bell-function . #'ignore)
+
+       ;; Editing
+       (electric-indent-mode . nil)
+       (truncate-lines . t)
+       (tab-width . 4)
+
+       ;; Dired
+       (dired-kill-when-opening-new-dired-buffer . t)
+
+       ;; Gnus
+       (gnus-agent . nil)
+
+       ;; Completion
+       (read-extended-command-predicate . #'command-completion-default-include-p)
+
+       ;; Dialogs / prompts
+       (use-short-answers . t)
+       (read-answer-short . t)
+       (use-dialog-box . nil)
+
+       ;; Exit confirmation
+       (confirm-kill-emacs . #'y-or-n-p)
+
+       ;; Auto-save visited buffers
+       (auto-save-visited-interval . 2))
+
+      :preface
+      ;; Shorter prompts
+      (defalias 'yes-or-no-p 'y-or-n-p)
+
+      :bind
+      ([escape] . keyboard-escape-quit)
+
+      :hook
+      (prog-mode-hook . (lambda ()
+    					  (hs-minor-mode 1)))
+
+      :init
+      (xterm-mouse-mode 1)
+      (blink-cursor-mode -1)
+
+      ;; Editing helpers
+      (delete-selection-mode 1)
+      (electric-pair-mode 1)
+
+      ;; Auto-save visited files
+      (auto-save-visited-mode 1)
+
+      ;; Auto-revert intentionally disabled
+      (global-auto-revert-mode -1))
+#+END_SRC
+
+** Start Emacs server on startup
+Ensure the Emacs server is started if not already running
+#+begin_src emacs-lisp :tangle no
+    (leaf emacs
+      :ensure nil
+      :require t
+      :init
+      (unless (server-running-p)
+    	(server-start)))
+#+END_SRC
+
+** Performance
+*** Compile External Packages
+#+begin_src emacs-lisp
+    (leaf compile-angel
+      :ensure t
+      :custom
+      (compile-angel-verbose . nil)
+      :global-minor-mode (compile-angel-on-load-mode))
+#+end_src
+*** Better GC
+
+#+begin_src emacs-lisp
+    (leaf gcmh
+      :ensure t
+      :hook
+      (emacs-startup-hook)
+      :custom
+      ((gcmh-idle-delay . 'auto)
+       (gc-cons-threshold . most-positive-fixnum)
+       (gcmh-auto-idle-delay-factor . 10))
+      :global-minor-mode (gcmh-mode))
+#+END_SRC
+
+*** View large files(VFL)
+#+BEGIN_src emacs-lisp
+    (leaf vlf
+      :ensure t
+      :init
+      (require 'vlf-setup))
+#+END_SRC
+
+** Completion Systems
+*** Completions at Point
+#+BEGIN_src emacs-lisp
+    (leaf orderless
+      :ensure t
+      :custom
+      ((completion-styles . '(orderless basic))
+       (completion-category-overrides . '((file (styles basic partial-completion))))))
+
+    (leaf corfu
+      :ensure t
+      :after orderless
+      :custom
+      ((corfu-cycle . nil)
+       (corfu-auto . t)
+       (corfu-auto-prefix . 2)
+       (corfu-popupinfo-delay . 0.15)
+       (corfu-separator . ?\s)
+       (corfu-count . 10)
+       (corfu-scroll-margin . 4)
+       (completion-ignore-case . t)
+       (tab-always-indent . 'complete)
+       (corfu-preview-current . nil)
+       (completion-styles . '(orderless basic)))
+      :global-minor-mode (global-corfu-mode corfu-popupinfo-mode))
+
+    (leaf cape
+      :ensure t
+      :after corfu
+      :init
+      (add-to-list 'completion-at-point-functions
+    			   #'cape-dabbrev)
+
+      (add-to-list 'completion-at-point-functions
+    			   #'cape-dict)
+
+      (add-to-list 'completion-at-point-functions
+    			   #'cape-file)
+
+      (add-to-list 'completion-at-point-functions
+    			   #'cape-elisp-block)
+
+      (add-to-list 'completion-at-point-functions
+    			   #'cape-keyword)
+
+      (add-to-list 'completion-at-point-functions
+    			   #'cape-history)
+
+      (add-to-list 'completion-at-point-functions
+    			   #'cape-elisp-symbol)
+      (advice-add 'eglot-completion-at-point
+    			  :around
+    			  #'cape-wrap-buster))
+
+    (leaf emacs
+      :custom
+      ((completion-category-overrides . '((eglot (styles orderless))
+    									  (eglot-capf (styles orderless))))))
+#+END_SRC
+*** Vertical Completions
+#+BEGIN_src emacs-lisp 
+    (leaf vertico
+      :ensure t
+      :bind (:vertico-map
+    		 ("<tab>" . vertico-insert)
+    		 ("C-j" . vertico-next)
+    		 ("C-k" . vertico-previous)
+    		 ("C-l" . vertico-exit))
+      :custom
+      (vertico-cycle . t)
+      (vertico-count . 13)
+      (vertico-resize . t)
+      :global-minor-mode (vertico-mode))
+
+    (leaf xref
+      :ensure nil
+      :custom
+      (xref-show-definitions-function . #'xref-show-definitions-completing-read))
+
+    (leaf marginalia
+      :ensure t
+      :after vertico
+      :custom
+      (marginalia-annotators . '(marginalia-annotators-heavy marginalia-annotators-light nil))
+      :global-minor-mode (marginalia-mode))
+#+END_SRC
+*** Templates
+#+BEGIN_src emacs-lisp
+    (leaf tempel
+      :ensure t
+      :custom
+      ((tempel-trigger-prefix . "<"))
+      :config
+      (defun my/tempel-setup-capf ()
+    	(setq-local completion-at-point-functions
+    				(cons #'tempel-complete
+    					  completion-at-point-functions)))
+      (add-hook 'conf-mode-hook #'my/tempel-setup-capf)
+      (add-hook 'prog-mode-hook #'my/tempel-setup-capf)
+      (add-hook 'text-mode-hook #'my/tempel-setup-capf)
+      (defvar my/tempel-prefix-map
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "i") #'tempel-insert)
+    	  (define-key map (kbd "e") #'tempel-end)
+    	  (define-key map (kbd "n") #'tempel-next)
+    	  (define-key map (kbd "p") #'tempel-previous)
+    	  (define-key map (kbd "k") #'tempel-kill)
+    	  map)
+    	"Tempel one-shot keymap.")
+      (global-set-key (kbd "C-c i") my/tempel-prefix-map))
+
+    (leaf tempel-collection
+      :ensure t
+      :after tempel)
+#+END_SRC
+
+**** Perl Templates
+#+begin_src emacs-lisp
+    (leaf emacs
+      :ensure nil
+      :after tempel
+      :preface
+      (defvar my-perl-templates
+    	'((dump "print Dumper(" q ");")
+
+          (sub
+           "sub " p " {\n"
+           "    my (" p ") = @_;\n"
+           n> r>
+           "\n}")
+
+          (foreach
+           "foreach my $" p " (" p ") {\n"
+           n> r>
+           "\n}")
+
+          (foreach-hash
+           "foreach my $" p " (keys %" p2 ") {\n"
+           "    my $" p " = $" p2 "{" p "};\n"
+           n> r>
+           "\n}")
+
+          (foreach-kv
+           "while (my ($" p ", $" p2 ") = each %" p3 ") {\n"
+           n> r>
+           "\n}"))
+    	"List of Perl templates.")
+
+      (dolist (hook '(perl-mode-hook cperl-mode-hook))
+    	(add-hook
+    	 hook
+    	 (lambda ()
+           (setq-local tempel-template-sources
+        			   (cons 'my-perl-templates
+        					 tempel-template-sources))))))
+#+END_SRC
+
+*** Actions on completions
+#+BEGIN_src emacs-lisp
+    (leaf embark
+      :ensure t
+      :bind (("C-." . embark-act)
+    		 (:minibuffer-local-map
+    		  ("C-c C-c" . embark-collect)
+    		  ("C-c C-e" . embark-export))))
+
+    (leaf embark-consult
+      :ensure t
+      :after embark consult
+      :hook
+      (embark-collect-mode-hook . consult-preview-at-point-mode))
+#+END_SRC
+
+*** Useful commands Consult
+Provides search and navigation commands based on the Emacs completion function.
+Check out their [[https://github.com/minad/consult][git repository]] for more awesome functions.
+#+begin_src emacs-lisp
+    (leaf consult
+      :ensure t
+      :hook (completion-list-mode-hook . consult-preview-at-point-mode)
+      :bind
+      (("C-c B"   . consult-bookmark)
+       ("C-c b B" . consult-buffer)
+       ("C-c s G" . consult-grep)
+       ("C-c s g" . consult-ripgrep)
+       ("C-c s o" . consult-outline)
+       ("C-c s l" . consult-line)
+       ("C-c s f" . consult-find))
+      :init
+      (setq register-preview-delay 0.5
+    		register-preview-function #'consult-register-format)
+      (advice-add #'register-preview :override #'consult-register-window)
+      (setq xref-show-xrefs-function #'consult-xref
+    		xref-show-definitions-function #'consult-xref))
+#+end_src
+
+** Editing
+*** Jump to char
+#+begin_src emacs-lisp
+    (leaf avy
+      :ensure t)
+#+end_src
+
+*** Move lines
+#+BEGIN_src emacs-lisp
+    (leaf move-text
+      :bind(
+    		("M-j" . move-text-down)
+    		("M-k" . move-text-up))
+      :ensure t)
+#+end_src
+*** Surround
+Interact with surrounds remove add them change them
+
+#+BEGIN_src emacs-lisp
+    (leaf surround
+      :ensure t)
+    ;; safer surround binding
+    ;; '("S" . surround-keymap)
+
+#+END_SRC
+
+*** Dired
+#+BEGIN_src emacs-lisp
+    (leaf dired
+      :ensure nil ;; built-in
+      :init
+      (put 'dired-find-alternate-file 'disabled nil)
+      :hook
+      dired-mode-hook dired-hide-details-mode
+      :custom
+      ((dired-dwim-target . t)		  ;; do what I mean
+       (dired-recursive-copies . 'always)	  ;; don't ask when copying directories
+       (dired-create-destination-dirs . 'ask)
+       (dired-clean-confirm-killing-deleted-buffers . nil)
+       (dired-make-directory-clickable . t)
+       (dired-mouse-drag-files . t)
+       (dired-kill-when-opening-new-dired-buffer . t)	  ;; Tidy up open buffers by default
+       (dired-use-ls-dired . t)
+       (dired-listing-switches  ."-aBhl  --group-directories-first")))
+#+END_SRC
+
+*** Harpoon
+#+BEGIN_SRC  emacs-lisp
+    (leaf harpoon
+      :ensure t
+      :after tab-bar
+      :init
+      (defun my-harpoon-tab-name ()
+    	"Use the current tab-bar tab name as project name fallback."
+    	(let ((tab-name (alist-get 'name (tab-bar--current-tab))))
+    	  (or tab-name "default")))
+
+      (setq harpoon-without-project-function #'my-harpoon-tab-name)
+
+      ;; --- One-shot prefix (C-c h) ---
+      (defvar my/harpoon-prefix-map
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "1") #'harpoon-go-to-1)
+    	  (define-key map (kbd "2") #'harpoon-go-to-2)
+    	  (define-key map (kbd "3") #'harpoon-go-to-3)
+    	  (define-key map (kbd "4") #'harpoon-go-to-4)
+    	  (define-key map (kbd "5") #'harpoon-go-to-5)
+
+    	  ;; actions
+    	  (define-key map (kbd "a") #'harpoon-add-file)
+    	  (define-key map (kbd "c") #'harpoon-clear)
+    	  (define-key map (kbd "l") #'harpoon-toggle-quick-menu)
+    	  (define-key map (kbd "f") #'harpoon-toggle-file)
+    	  map)
+    	"Harpoon one-shot keymap.")
+
+      (global-set-key (kbd "C-c H") my/harpoon-prefix-map)
+
+      ;; --- Hydra (C-c H) ---
+      (global-set-key (kbd "C-c H H") #'harpoon-quick-menu-hydra))
+#+END_SRC
+
+** Info Sources
+*** Error
+Lets use flymake
+#+BEGIN_src emacs-lisp :tangle no
+    (leaf flymake
+      :ensure nil
+      :hook (prog-mode-hook . flymake-mode)
+      :after consult
+      :init
+      (defvar my/flymake-prefix-map
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "j") #'flymake-goto-next-error)
+    	  (define-key map (kbd "k") #'flymake-goto-prev-error)
+    	  (define-key map (kbd "l") #'flymake-show-buffer-diagnostics)
+    	  (define-key map (kbd "L") #'flymake-show-project-diagnostics)
+    	  (define-key map (kbd "s") #'consult-flymake)
+    	  (define-key map (kbd "d") #'flymake-show-diagnostic)
+    	  map)
+    	"Flymake keymap.")
+
+      (global-set-key (kbd "C-c e") my/flymake-prefix-map))
+
+    ;; (leaf transient
+    ;;   :ensure t
+    ;;   :after flymake consult
+    ;;   :init
+    ;;   (require 'transient)
+    ;;   (transient-define-prefix my/flymake-transient ()
+    ;; 	"Flymake sticky commands"
+    ;; 	:transient-suffix 'transient--do-stay
+    ;; 	[["Navigate"
+    ;; 	  ("j" "next error" flymake-goto-next-error)
+    ;; 	  ("k" "previous error" flymake-goto-prev-error)]
+
+    ;; 	 ["View"
+    ;; 	  ("l" "list errors" flymake-show-buffer-diagnostics)
+    ;; 	  ("L" "list project errors" flymake-show-project-diagnostics)
+    ;; 	  ("s" "search error" consult-flymake)
+    ;; 	  ("d" "display error" flymake-show-diagnostic)]
+
+    ;; 	 ["Quit"
+    ;; 	  ("q" "quit" transient-quit-one)]])
+    ;;   (global-set-key (kbd "C-c E") #'my/flymake-transient))
+#+end_src
+
+*** Spelling
+#+BEGIN_src emacs-lisp :tangle no
+    (leaf jinx
+      :ensure t
+      :init
+      (defvar my/jinx-prefix-map
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "j") #'jinx-next)
+    	  (define-key map (kbd "k") #'jinx-previous)
+    	  (define-key map (kbd "c") #'jinx-correct)
+    	  (define-key map (kbd "l") #'jinx-languages)
+    	  (define-key map (kbd "m") #'jinx-mode)
+    	  map)
+    	"Jinx keymap.")
+
+      (global-set-key (kbd "C-c j") my/jinx-prefix-map))
+
+    ;; (leaf transient
+    ;;   :ensure t
+    ;;   :after jinx
+    ;;   :init
+    ;;   (require 'transient)
+    ;;   (transient-define-prefix my/jinx-transient ()
+    ;; 	"Jinx Sticky commands"
+    ;; 	:transient-suffix 'transient--do-stay
+    ;; 	[["Correct / Navigation"
+    ;; 	  ("c" "correct" jinx-correct)
+    ;; 	  ("n" "next" jinx-next)
+    ;; 	  ("k" "previous" jinx-previous)]
+
+    ;; 	 ["Mode / Config"
+    ;; 	  ("l" "languages" jinx-languages)
+    ;; 	  ("m" "toggle mode" jinx-mode)]
+
+    ;; 	 ["Quit"
+    ;; 	  ("q" "quit" transient-quit-one)]])
+    ;;   (global-set-key (kbd "C-c J") #'my/jinx-transient))
+
+#+END_SRC
+
+*** Info's
+
+#+BEGIN_src emacs-lisp
+    (leaf eldoc-box
+      :ensure t
+      :after eglot
+      :custom
+      ((eldoc-echo-area-use-multiline-p . nil)
+       (eldoc-documentation-strategy . 'eldoc-documentation-compose)
+       (eldoc-idle-delay . 0.1)
+       (eldoc-box-hover-mode . nil)
+       (eldoc-box-cleanup-interval . 3))
+      :init
+      (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil))
+
+
+#+END_SRC
+*** Folding
+**** Fold Keybinds
+#+BEGIN_src emacs-lisp
+    (leaf kirigami
+      :ensure t
+      :init
+      (defvar my/kirigami-prefix-map
+    	(let ((map (make-sparse-keymap)))
+    	  (define-key map (kbd "o") #'kirigami-open-fold)
+    	  (define-key map (kbd "O") #'kirigami-open-fold-rec)
+    	  (define-key map (kbd "r") #'kirigami-open-folds)
+    	  (define-key map (kbd "c") #'kirigami-close-fold)
+    	  (define-key map (kbd "C") #'kirigami-close-folds)
+    	  (define-key map (kbd "a") #'kirigami-toggle-fold)
+    	  map)
+    	"Kirigami one-shot keymap.")
+
+      (global-set-key (kbd "C-c z") my/kirigami-prefix-map))
+#+END_SRC
+
+**** Treesit Fold
+#+BEGIN_src emacs-lisp
+    (leaf treesit-fold
+      :after treesit
+      :ensure t
+      :hook
+      (prog-mode-hook . treesit-fold-mode))
+#+END_SRC
+*** Tree-sitter Config
+#+begin_src emacs-lisp
+    (leaf treesit
+      :ensure nil
+      :custom
+      ((treesit-font-lock-level . 4)
+       (treesit-language-source-alist .
+    								  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+    									(css "https://github.com/tree-sitter/tree-sitter-css")
+    									(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+    									(go "https://github.com/tree-sitter/tree-sitter-go")
+    									(gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+    									(html "https://github.com/tree-sitter/tree-sitter-html")
+    									(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+    									(json "https://github.com/tree-sitter/tree-sitter-json")
+    									(lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+    									(perl "https://github.com/tree-sitter-perl/tree-sitter-perl" "release")
+    									(pod "https://github.com/tree-sitter-perl/tree-sitter-pod" "release")
+    									(python "https://github.com/tree-sitter/tree-sitter-python")
+    									(rust "https://github.com/tree-sitter/tree-sitter-rust")
+    									(toml "https://github.com/tree-sitter/tree-sitter-toml")
+    									(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+    									(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+    									(yaml "https://github.com/ikatyang/tree-sitter-yaml")))))
+
+    (leaf treesit-auto
+      :ensure t
+      :after treesit
+      :custom
+      ((treesit-auto-install . 'prompt))
+      :global-minor-mode (global-treesit-auto-mode))
+#+end_src
+*** Formattierung
+**** Editor Conf
+We want to use the same Configurations as out teammates
+#+BEGIN_src emacs-lisp
+    (leaf editorconfig
+      :ensure nil
+      :global-minor-mode (editorconfig-mode))
+
+#+END_SRC
+
+**** Externe Formatter
+#+begin_src emacs-lisp
+    (leaf apheleia
+      :ensure t
+      :global-minor-mode (apheleia-global-mode))
+#+end_src
+
+*** LSP
+**** Dape
+#+BEGIN_src emacs-lisp
+    (leaf dape
+      :ensure t
+      :after eglot
+      :custom
+      ((dape-cwd-fn . project-root)
+       (dape-buffer-window-arrangement . 'right))
+      :bind
+      (("C-c L d" . dape)
+       ("C-c L n" . dape-next)
+       ("C-c L s" . dape-step-in)
+       ("C-c L o" . dape-step-out)
+       ("C-c L c" . dape-continue)
+       ("C-c L b" . dape-breakpoint-toggle))
+      :global-minor-mode (dape-breakpoint-global-mode))
+#+END_SRC
+**** Eglot
+#+BEGIN_src emacs-lisp
+    (leaf eglot
+      :ensure nil
+      :hook
+      ((python-ts-mode-hook . eglot-ensure)
+       (go-ts-mode-hook . eglot-ensure)
+       (rust-ts-mode-hook . eglot-ensure)
+       (nix-ts-mode-hook . eglot-ensure)
+       (cperl-mode-hook . eglot-ensure))
+      :custom
+      ((eglot-autoshutdown . t)
+       (eglot-events-buffer-size . 0)
+       (eglot-report-progress . nil)
+       (eglot-sync-connect . nil)
+       (eglot-extend-to-xref . nil)
+       (eglot-ignored-server-capabilities
+        . '(:documentHighlightProvider
+            :inlayHintProvider)))
+      :init
+      (fset #'jsonrpc--log-event #'ignore)
+      :config
+      (setq eglot-ignored-server-capabilities '(:documentHighlightProvider :inlayHintProvider))
+
+      (setq-default eglot-workspace-configuration
+    				'((:perlnavigator .
+    								  (:perlPath
+    								   "/usr/bin/perl"
+    								   :includePaths
+    								 ["/DATA/ds/DatenService/SCRIPT/lib/local/util/"
+    								  "/DATA/ds/DatenService/SCRIPT/lib/local/ds1/"
+    								  "/DATA/ds/DatenService/SCRIPT/lib/local/SDS/"]
+    								 :enableWarnings t))))
+
+      (setq-default eglot-workspace-configuration
+    				'((:python
+    				   (:analysis
+    					(:diagnosticMode "workspace")))))
+
+      (dolist (server
+               '((gdscript-mode . ("localhost:6005"))
+                 (go-ts-mode . ("gopls"))
+                 (rust-ts-mode . ("rust-analyzer"))
+                 (nix-ts-mode . ("nixd"))
+                 (cperl-mode . ("perlnavigator" "--stdio"))
+                 (python-ts-mode
+                  . ("~/.local/share/nvim/mason/bin/pyright-langserver"
+                     "--stdio"))))
+        (add-to-list 'eglot-server-programs server)))
+#+END_SRC
+
+* Features
+** Layout
+*** Display buffer alist
+#+begin_src emacs-lisp
+    (leaf emacs 
+      :ensure nil
+      :custom
+      ((window-sides-slots . '(1 2 3 4))
+       (split-width-threshold . 0)
+       (split-height-threshold . nil)
+       (window-combination-resize . t)
+       (display-buffer-alist . 
+            				 '(
+            				   ;; -----------------------------
+            				   ;; Bottom tool panel (shared)
+            				   ;; -----------------------------
+
+            				   ;; vterm
+            				   ("\\*vterm.*\\*"
+            					(display-buffer-reuse-window
+            					 display-buffer-in-side-window)
+            					(side . bottom)
+            					(window-height . 0.30)
+            					(slot . -1))
+
+            				   ("\\*eshell.*\\*"
+            					(display-buffer-reuse-window
+            					 display-buffer-in-side-window)
+            					(side . bottom)
+            					(window-height . 0.30)
+            					(slot . 0))
+
+            				   ;; compilation
+            				   ("\\*compilation\\*"
+            					(display-buffer-reuse-window
+            					 display-buffer-in-side-window)
+            					(side . bottom)
+            					(window-height . 0.30)
+            					(slot . 0))
+
+            				   ;; async shell commands
+            				   ("\\*Async Shell Command\\*"
+            					(display-buffer-reuse-window
+            					 display-buffer-in-side-window)
+            					(side . bottom)
+            					(window-height . 0.30)
+            					(slot . 1))
+
+            				   ;; shell / ansi-term
+            				   ("\\*shell\\*"
+            					(display-buffer-reuse-window
+            					 display-buffer-in-side-window)
+            					(side . bottom)
+            					(window-height . 0.30)
+            					(slot . 2))
+
+            				   ("\\*ansi-term\\*"
+            					(display-buffer-reuse-window
+            					 display-buffer-in-side-window)
+            					(side . bottom)
+            					(window-height . 0.30)
+            					(slot . 2))
+
+            				   ;; -----------------------------
+            				   ;; Left side tools
+            				   ;; -----------------------------
+
+            				   ("\\*grep\\*"
+            					(display-buffer-in-side-window)
+            					(side . left)
+            					(window-width . 0.25))
+
+            				   ("\\*dired\\*"
+            					(display-buffer-reuse-window
+            					 display-buffer-in-side-window)
+            					(side . left)
+            					(window-width . 0.25))
+
+            				   ;; -----------------------------
+            				   ;; Right side help/info
+            				   ;; -----------------------------
+
+            				   ("\\*Help\\*"
+            					(display-buffer-in-side-window)
+            					(side . right)
+            					(window-width . 0.30))
+
+            				   ("\\*Messages\\*"
+            					(display-buffer-in-side-window)
+            					(side . right)
+            					(window-width . 0.20))
+
+            				   ("\\*Apropos\\*"
+            					(display-buffer-in-side-window)
+            					(side . right)
+            					(window-width . 0.25))
+
+            				   ("\\*info\\*"
+            					(display-buffer-in-side-window)
+            					(side . right)
+            					(window-width . 0.35))
+
+            				   ;; -----------------------------
+            				   ;; fallback
+            				   ;; -----------------------------
+
+            				   ("\\*.*\\*"
+            					(display-buffer-reuse-window
+            					 display-buffer-in-side-window)
+            					(side . bottom)
+            					(window-height . 0.30))))
+       ))
+
+#+end_src
+
+*** Activities
+Tab Bar Mode um einzelne Buffer Layouts zu Trennen
+#+begin_src emacs-lisp
+    (leaf tab-bar
+      :ensure nil
+      :custom
+      ((tab-bar-show . 1)
+       (tab-bar-close-button-show . nil)
+       (tab-bar-tab-hints . nil)
+       (tab-bar-format . '(tab-bar-format-tabs tab-bar-separator)))
+      :global-minor-mode (tab-bar-mode))
+
+    (leaf vim-tab-bar
+      :ensure t
+      :after (tab-bar)
+      :global-minor-mode (vim-tab-bar-mode))
+
+    (leaf activities
+      :ensure t
+      :after (tab-bar)
+      :global-minor-mode (activities-mode activities-tabs-mode)
+      :custom
+      ((edebug-inhibit-emacs-lisp-mode-bindings . t))
+      :bind
+      (("C-c b b" . activities-switch-buffer)
+       ("C-x C-a C-d" . activities-define)
+       ("C-x C-a C-d" . activities-define)
+       ("C-x C-a C-a" . activities-resume)
+       ("C-x C-a C-s" . activities-suspend)
+       ("C-x C-a C-k" . activities-kill)
+       ("C-x C-a RET" . activities-switch)
+       ("C-x C-a b" . activities-switch-buffer)
+       ("C-x C-a g" . activities-revert)
+       ("C-x C-a l" . activities-list)))
+#+end_src
+
+** VCS
+*** Magit
+#+BEGIN_src emacs-lisp
+    (leaf magit
+      :ensure t
+      :bind (("C-c G G" . magit-status))
+      :custom
+      ((auth-sources . '("~/.authinfo")))
+      :commands magit-status)
+
+    (leaf forge
+      :after magit
+      :ensure t)
+
+    (leaf magit-todos
+      :ensure t
+      :after magit
+      :global-minor-mode (magit-todos-mode))
+#+END_SRC
+
+*** Gutter
+#+begin_src emacs-lisp
+    (leaf diff-hl
+      :ensure t
+      :after magit
+      :custom
+      (diff-hl-disable-on-remote . t)
+      :init
+      (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
+      (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+      (add-hook 'vc-checkin 'diff-hl-update)
+      :global-minor-mode (global-diff-hl-mode))
+#+end_src
+
+** Terminal
+*** Commands
+#+begin_src emacs-lisp
+    (leaf comint-mode
+      :ensure nil
+      :custom
+      ((comint-buffer-maximum-size . 10000))
+      :init
+      (add-hook 'comint-output-filter-functions #'comint-truncate-buffer))
+#+end_src
+*** Eshell
+#+begin_src emacs-lisp
+    (require 'notifications)
+
+    (defun eshell/alert-me (&rest args)
+      "Run a command and notify when it finishes."
+      (let* ((cmd (string-join args " "))
+    		 (buf (current-buffer))
+    		 (proc (start-process-shell-command
+    				"eshell-alert-me" buf cmd)))
+
+    	;; store metadata on the process (this is the key fix)
+    	(process-put proc 'cmd cmd)
+    	(process-put proc 'start-time (current-time))
+
+    	(set-process-sentinel
+    	 proc
+    	 (lambda (p _event)
+    	   (when (memq (process-status p) '(exit signal))
+    		 (let* ((cmd (process-get p 'cmd))
+    				(start-time (process-get p 'start-time))
+    				(elapsed (float-time
+    						  (time-subtract (current-time)
+    										 start-time))))
+    		   (notifications-notify
+    			:title "Eshell done"
+    			:body (format "%.2fs: %s" elapsed cmd)
+    			:app-name "Emacs")))))
+
+    	proc))
+
+#+end_src
+
+*** Terminal Emulation
+#+begin_src emacs-lisp
+    (leaf vterm
+      :ensure t
+      :custom
+      ((vterm-term-environment-variable . "xterm-color")
+       (vterm-kill-buffer-on-exit . t))
+      :config
+      (defun vterm-with-prefix ()
+    	"Run `vterm` with a universal- argument (C-u)."
+    	(interactive)
+    	(let ((current-prefix-arg '(4))) ; C-u
+    	  (call-interactively 'vterm)))
+      (defun vterm-other-window-with-prefix ()
+    	"Run `eat` with a universal- argument (C-u)."
+    	(interactive)
+    	(let ((current-prefix-arg '(4))) ; C-u
+    	  (call-interactively 'vterm-other-window)))
+      (global-set-key (kbd "C-c t T") 'vterm-with-prefix))
+
+    (add-to-list 'display-buffer-alist
+    			 '((major-mode . vterm-mode)
+    			   (display-buffer-reuse-window
+    				display-buffer-in-side-window)
+    			   (side . bottom)
+    			   (window-height . 0.3)))
+
+    (defvar my/tab-vterm-last-buffer nil)
+
+    (defun my/tab-vterm-toggle ()
+      (interactive)
+      (let* ((tab (tab-bar--current-tab))
+    		 (tab-name (alist-get 'name tab))
+    		 (buf-name (format "*vterm:%s*" tab-name))
+    		 (buf (get-buffer buf-name)))
+
+    	(if (and buf (eq (current-buffer) buf))
+    		;; If we're in the vterm → go back
+    		(when my/tab-vterm-last-buffer
+    		  (pop-to-buffer my/tab-vterm-last-buffer))
+
+    	  ;; Otherwise → open/switch to vterm
+    	  (setq my/tab-vterm-last-buffer (current-buffer))
+
+    	  (if buf
+    		  (pop-to-buffer buf)
+    		(let ((new (vterm-other-window)))
+    		  (with-current-buffer new
+    			(rename-buffer buf-name)))))))
+
+    (global-set-key (kbd "C-c t t") #'my/tab-vterm-toggle)
+
+    (defun my/vterm-update-last-access ()
+      (setq-local my/vterm-last-access (float-time)))
+
+    (add-hook 'vterm-mode-hook #'my/vterm-update-last-access)
+    (add-hook 'buffer-list-update-hook
+    		  (lambda ()
+    			(when (eq major-mode 'vterm-mode)
+    			  (my/vterm-update-last-access))))
+
+    (defun my/kill-stale-vterms (&optional hours)
+      "Kill vterm buffers unused for HOURS (default 24)."
+      (interactive "P")
+      (let* ((hours (or hours 24))
+    		 (cutoff (- (float-time) (* hours 3600))))
+    	(dolist (buf (buffer-list))
+    	  (with-current-buffer buf
+    		(when (and (eq major-mode 'vterm-mode)
+    				   (boundp 'my/vterm-last-access)
+    				   (< my/vterm-last-access cutoff))
+    		  (kill-buffer buf))))))
+#+end_src
+
+** Compilation
+*** Errors in Compilation
+Make compilation look better and therefore make it work with modern tools
+#+begin_src emacs-lisp
+    (leaf fancy-compilation
+      :ensure t
+      :global-minor-mode (fancy-compilation-mode)
+      :custom
+      ((fancy-compilation-override-colors . nil)
+       (compilation-scroll-output . t)
+       (with-eval-after-load . 'compile))
+      :commands (fancy-compilation-mode))
+#+END_SRC
+
+#+begin_src emacs-lisp
+    (defvar my/compile-last-buffer nil)
+
+    (defun my/compile-toggle ()
+      "Toggle compilation buffer like a terminal panel."
+      (interactive)
+      (let ((buf (get-buffer "*compilation*")))
+    	(if (and buf (get-buffer-window buf))
+    		;; If visible → hide it
+    		(delete-window (get-buffer-window buf))
+
+    	  ;; If not visible → show or create it
+    	  (setq my/compile-last-buffer (current-buffer))
+
+    	  (if buf
+    		  (pop-to-buffer buf)
+    		(call-interactively 'my/compile)))))
+
+    (defun my/tab-name ()
+      "Return current tab name safely."
+      (alist-get 'name (tab-bar--current-tab)))
+
+    (setq compilation-buffer-name-function
+    	  (lambda (_mode)
+    		(format "*compilation:%s*" (my/tab-name))))
+
+    (defun my/compile ()
+      "Compile per tab, reusing tab-specific compilation buffer."
+      (interactive)
+      (let ((compilation-buffer-name-function
+    		 (lambda (_)
+    		   (format "*compilation:%s*" (my/tab-name)))))
+    	(call-interactively 'compile)))
+
+    (global-set-key (kbd "C-c C o") #'my/compile-toggle)
+    (global-set-key (kbd "C-c C c") #'compile)
+    (global-set-key (kbd "C-c C r") #'recompile)
+    (global-set-key (kbd "C-c C k") #'kill-compilation)
+
+    (global-set-key (kbd "C-c C e j") #'compilation-next-error)
+    (global-set-key (kbd "C-c C e k") #'compilation-previous-error)
+    (global-set-key (kbd "C-c C e l") #'consult-compile-error)
+#+END_SRC
+
+** Helper
+*** Midnight commander / cleanup
+#+BEGIN_src emacs-lisp
+    (leaf midnight
+      :ensure nil
+      :hook (after-init-hook)
+      :after tramp
+      :global-minor-mode (midnight-mode)
+      :custom
+      (midnight-delay . "00:00")
+      :init
+      (defun my/clear-minibuffer-histories ()
+    	"Clear common minibuffer and command history variables."
+    	(interactive)
+    	(setq command-history nil
+    		  extended-command-history nil
+    		  minibuffer-history nil
+      		  file-name-history nil
+    		  search-ring nil
+    		  regexp-search-ring nil
+    		  read-expression-history nil)
+    	(message "Minibuffer and command histories cleared."))
+
+      (add-hook 'midnight-hook #'clean-buffer-list)
+      (add-hook 'midnight-hook #'tramp-cleanup-all-buffers)
+      (add-hook 'midnight-hook #'tramp-cleanup-all-connections)
+      (add-hook 'midnight-hook #'package-refresh-contents)
+      (add-hook 'midnight-hook #'my/clear-minibuffer-histories)
+      (add-hook 'midnight-hook
+      			(lambda ()
+      			  (message "[midnight-mode] Cleanup..."))))
+#+END_SRC
+
+*** Making Emacs more explorable
+#+BEGIN_src emacs-lisp
+    (leaf helpful :ensure t)
+#+END_SRC
+
+*** Manage System processes from inside Emacs
+#+BEGIN_src emacs-lisp
+    (leaf proced
+      :ensure nil
+      :commands proced
+      :custom
+      ((proced-auto-update-flag . t)
+       (proced-goal-attribute . nil)
+       (proced-show-remote-processes . t)
+       (proced-enable-color-flag . t)
+       (proced-format . 'custom))
+      :init
+      (add-to-list
+       'proced-format-alist
+       '(custom user pid ppid sess tree pcpu pmem rss start time state (args comm))))
+#+END_SRC
+
+*** Collection of usefule commands
+#+BEGIN_src emacs-lisp
+    (leaf crux
+      :ensure t
+      :bind
+      (("C-c b O" . crux-kill-other-buffers)))
+#+END_SRC
+
+* Langs
+** Web Mode
+#+begin_src emacs-lisp
+    (leaf web-mode 
+      :ensure t
+      :mode (("\\.phtml\\'" . web-mode)
+    		 ("\\.tpl\\.php\\'" . web-mode)
+    		 ("\\.[agj]sp\\'" . web-mode)
+    		 ("\\.as[cp]x\\'" . web-mode)
+    		 ("\\.erb\\'" . web-mode)
+    		 ("\\.tt\\'" . web-mode)
+    		 ("\\.mustache\\'" . web-mode)
+    		 ("\\.djhtml\\'" . web-mode)
+    		 ("\\.vue\\'" . web-mode)
+    		 ("\\.blade\\.php\\'" . web-mode))
+      :custom
+      (web-mode-script-padding . 0)
+      (web-mode-code-indent-offset . 2)
+      (web-mode-markup-indent-offset . 2)
+      (web-mode-css-indent-offset . 2)
+      (web-mode-style-padding . 0)
+      (web-mode-enable-comment-annotation . t))
+#+end_src
+
+** PDF Tools
+#+begin_src emacs-lisp
+    (leaf pdf-tools :ensure t)
+#+END_SRC
+** CSV Mode
+#+begin_src emacs-lisp
+    (leaf csv-mode
+      :ensure t
+      :init
+      (add-to-list 'auto-mode-alist '("\\.csv\\'" . csv-mode))
+      :hook
+      (csv-mode-hook . 'csv-guess-set-separator))
+#+END_SRC
+
+** Markdown
+*** Markdown Mode
+#+begin_src emacs-lisp
+    (leaf markdown-mode
+      :ensure t
+      :mode ("README\\.md\\'" . gfm-mode)
+      :custom(markdown-command . "multimarkdown"))
+#+END_SRC
+
+*** Obsidian
+#+begin_src emacs-lisp :tangle no
+    (leaf obsidian
+      :ensure t
+      :custom
+      (global-obsidian-mode . t)
+      (obsidian-backlinks-mode . t)
+      (obsidian-directory . "~/Dokumente/Cadmus")
+      (markdown-enable-wiki-links . t)
+      :bind (("C-c N n" . obsidian-capture)
+    		 ("C-c N l" . obsidian-insert-link)
+    		 ("C-c N o" . obsidian-follow-link-at-point)
+    		 ("C-c N p" . obsidian-jump)
+    		 ("C-c N b" . obsidian-backlink-jump)))
+#+end_src
+
+** Nix
+#+begin_src emacs-lisp
+    (leaf nix-ts-mode
+      :mode "\\.nix\\'"
+      :ensure t)
+#+END_SRC
+
+** Org
+*** Org Mode
+#+begin_src emacs-lisp
+    (leaf org
+      :ensure t
+      :custom
+      ((org-edit-src-content-indentation . 4)
+       (org-startup-indented . t)
+       (org-startup-with-inline-images . t)
+       (org-image-actual-width . '(450))
+       (org-fold-catch-invisible-edits . 'error)
+       (org-pretty-entities . t)
+       (org-id-link-to-org-use-id . t)
+       (org-fold-catch-invisible-edits . 'show))
+      :config
+      (custom-set-faces
+       '(org-level-1 ((t (:inherit outline-1 :height 1.4))))
+       '(org-level-2 ((t (:inherit outline-2 :height 1.3))))
+       '(org-level-3 ((t (:inherit outline-3 :height 1.2))))
+       '(org-level-4 ((t (:inherit outline-4 :height 1.1))))
+       '(org-level-5 ((t (:inherit outline-5 :height 1.0))))
+       '(org-level-6 ((t (:inherit outline-5 :height 1.0))))
+       '(org-level-7 ((t (:inherit outline-5 :height 1.0)))))
+      (add-hook 'org-mode-hook 'visual-line-mode)
+      (setq org-startup-folded 'fold)
+      :hook
+      (org-mode-hook . org-indent-mode))
+
+#+end_src
+*** Table of Contents
+#+begin_src emacs-lisp
+    (leaf toc-org
+      :ensure t
+      :after org
+      :commands toc-org-enable
+      :hook (org-mode-hook . toc-org-mode))
+#+end_src
+*** Org Modern
+#+begin_src emacs-lisp
+    (leaf org-modern
+      :ensure t
+      :after  org
+      :hook (org-mode-hook . org-modern-mode))
+#+END_SRC
+** Rust Mode
+#+BEGIN_SRC emacs-lisp
+    (leaf rust-mode :ensure t)
+#+END_SRC
+
+** Perl
+#+begin_src emacs-lisp
+    (leaf cperl-mode
+      :ensure nil
+      :after (perl-mode)
+      :custom
+      ((cperl-invalid-face . nil)
+       (cperl-indent-parens-as-block . t)
+       (cperl-close-paren-offset . (- cperl-indent-level)))
+      :init
+      (add-hook 'cperl-mode-hook
+    			(lambda ()
+    			  (setq tab-width 8)              ; Display width of a tab character
+    			  (setq indent-tabs-mode t)))     ; Use tabs instead of spaces
+      (fset 'perl-mode 'cperl-mode))
+#+END_SRC
+
+* Keymaps
+** Meow
+*** Meow Basic Layout
+#+BEGIN_src emacs-lisp
+    (leaf meow
+      :ensure t
+      :init
+      (setq meow-keypad-leader-dispatch "C-c")
+      (defun meow-setup ()
+    	;; Layout
+    	(setq meow-cheatsheet-physical-layout
+    		  meow-cheatsheet-physical-layout-iso)
+
+    	;; Remove this if your Meow version does not support it
+    	;; (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwertz)
+
+    	;; Motion state
+    	(meow-motion-overwrite-define-key
+    	 '("j" . meow-next)
+    	 '("k" . meow-prev)
+    	 '("<escape>" . ignore))
+
+    	;; Leader key
+    	(meow-leader-define-key
+    	 '("j" . "H-j")
+    	 '("k" . "H-k")
+
+    	 ;; Digit arguments
+    	 '("1" . meow-digit-argument)
+    	 '("2" . meow-digit-argument)
+    	 '("3" . meow-digit-argument)
+    	 '("4" . meow-digit-argument)
+    	 '("5" . meow-digit-argument)
+    	 '("6" . meow-digit-argument)
+    	 '("7" . meow-digit-argument)
+    	 '("8" . meow-digit-argument)
+    	 '("9" . meow-digit-argument)
+    	 '("0" . meow-digit-argument)
+
+    	 '("?" . meow-cheatsheet))
+
+    	;; Normal mode
+    	(meow-normal-define-key
+    	 '("0" . meow-expand-0)
+    	 '("1" . meow-expand-1)
+    	 '("2" . meow-expand-2)
+    	 '("3" . meow-expand-3)
+    	 '("4" . meow-expand-4)
+    	 '("5" . meow-expand-5)
+    	 '("6" . meow-expand-6)
+    	 '("7" . meow-expand-7)
+    	 '("8" . meow-expand-8)
+    	 '("9" . meow-expand-9)
+
+    	 '("-" . negative-argument)
+
+    	 '("/" . comment-or-uncomment-region)
+
+    	 '("," . meow-inner-of-thing)
+    	 '("." . meow-bounds-of-thing)
+    	 '(";" . meow-beginning-of-thing)
+    	 '(":" . meow-end-of-thing)
+
+    	 '("a" . meow-append)
+    	 '("A" . meow-open-below)
+
+    	 '("b" . meow-back-word)
+    	 '("B" . meow-back-symbol)
+
+    	 '("c" . meow-change)
+
+    	 '("d" . meow-delete)
+    	 '("D" . meow-backward-delete)
+
+    	 '("e" . meow-next-word)
+    	 '("E" . meow-next-symbol)
+
+    	 '("f" . meow-find)
+
+    	 '("g" . meow-cancel-selection)
+
+    	 '("G" . meow-grab)
+    	 '("R" . meow-swap-grab)
+
+    	 '("h" . meow-left)
+    	 '("j" . meow-next)
+    	 '("k" . meow-prev)
+    	 '("l" . meow-right)
+
+    	 '("i" . meow-insert)
+
+    	 '("n" . meow-search)
+
+    	 '("o" . meow-block)
+    	 '("O" . meow-to-block)
+
+    	 '("p" . meow-yank)
+    	 '("P" . clipboard-yank)
+
+    	 '("y" . meow-save)
+    	 '("Y" . meow-clipboard-save)
+
+    	 '("H" . meow-left-expand)
+    	 '("J" . meow-next-expand)
+    	 '("K" . meow-prev-expand)
+    	 '("L" . meow-right-expand)
+
+    	 '("I" . meow-open-above)
+
+    	 '("q" . kmacro-start-macro-or-insert-counter)
+    	 '("Q" . meow-end-or-call-kmacro)
+
+    	 '("r" . meow-replace)
+
+    	 '("s" . meow-kill)
+    	 '("t" . meow-till)
+    	 '("u" . undo)
+    	 ;; Emacs 28+
+    	 '("U" . undo-redo)
+    	 '("v" . meow-visit)
+    	 '("w" . meow-mark-word)
+    	 '("W" . meow-mark-symbol)
+    	 '("x" . meow-line)
+    	 '("X" . consult-goto-line)
+    	 '("z" . meow-pop-selection)
+    	 '("Z" . avy-goto-char)
+    	 '("#" . meow-reverse)
+    	 '("'" . repeat)
+    	 '("<escape>" . ignore)))
+
+      :config
+      (require 'meow)
+      (meow-setup)
+      (meow-global-mode 1))
+
+#+END_SRC
+
+*** Meow Things for semantic editing
+#+BEGIN_src emacs-lisp
+    (leaf meow-tree-sitter
+      :ensure t
+      :after meow treesit
+      :init
+      (meow-tree-sitter-register-defaults))
+#+end_src
+
+** Window / Buffer Nav
+*** Buffer
+#+begin_src emacs-lisp :tangle no
+    (leaf simple
+      :ensure nil
+      :bind
+      (("C-c b C" . clean-buffer-list)
+       ("C-c b k" . kill-current-buffer)
+       ("C-c b K" . kill-some-buffers)
+       ("C-c b r" . revert-buffer)
+       ("C-c b i" . ibuffer)))
+#+END_SRC
+
+*** Switching Windows
+#+BEGIN_src emacs-lisp
+    (leaf windmove
+      :ensure nil
+      :bind
+      (("C-c w h" . windmove-left)
+       ("C-c w l" . windmove-right)
+       ("C-c w k" . windmove-up)
+       ("C-c w j" . windmove-down)
+       ("C-c w w" . window-toggle-side-windows)
+       ("C-c w v" . split-window-right)
+       ("C-c w s" . split-window-below)
+       ("C-c w d" . delete-window)
+       ("C-c w o" . delete-other-window)))
+#+END_SRC
+** Development
+*** Language Bindings
+#+BEGIN_src emacs-lisp :tangle no
+    ;; Define main language keymap under "C-c l"
+    (define-prefix-command 'my/lang-map)
+    (global-set-key (kbd "C-c l") 'my/lang-map)
+
+    ;; Define sub-prefix for server commands under "C-c l S"
+    (define-prefix-command 'my/lang-server-map)
+    (define-key my/lang-map (kbd "S") 'my/lang-server-map)
+
+    ;; Xref bindings
+    (define-key my/lang-map (kbd "d") #'xref-find-definitions)
+    (define-key my/lang-map (kbd "b") #'xref-go-back)
+    (define-key my/lang-map (kbd "B") #'xref-go-forward)
+    (define-key my/lang-map (kbd "r") #'xref-find-references)
+    (define-key my/lang-map (kbd "a") #'xref-find-apropos)
+
+    ;; Eldoc (doc at point)
+    (define-key my/lang-map (kbd "h") #'eldoc-box-help-at-point)
+
+    ;; Eglot-specific bindings (only when eglot is loaded)
+    (with-eval-after-load 'eglot
+      (define-key my/lang-map (kbd "f") #'eglot-format)
+      (define-key my/lang-map (kbd "F") #'eglot-format-buffer)
+      (define-key my/lang-map (kbd "I") #'eglot-code-action-organize-imports)
+      (define-key my/lang-map (kbd "a") #'eglot-code-actions)
+      (define-key my/lang-map (kbd "R") #'eglot-rename)
+      (define-key my/lang-map (kbd "i") #'eglot-find-implementation)
+      (define-key my/lang-map (kbd "t") #'eglot-find-typeDefinition)
+
+      ;; Server-related bindings under "C-c l S"
+      (define-key my/lang-server-map (kbd "r") #'eglot-reconnect)
+      (define-key my/lang-server-map (kbd "Q") #'eglot-shutdown-all)
+      (define-key my/lang-server-map (kbd "q") #'eglot-shutdown))
+#+END_SRC
+
+** Replacing stuff
+#+BEGIN_src emacs-lisp
+    (leaf simple
+      :ensure nil
+      :bind
+      (("C-c r s" . replace-string)
+       ("C-c r r" . query-replace)))
+#+END_SRC
+
+** Hydra
+*** Resizing Windows
+#+begin_src emacs-lisp
+    (leaf hydra
+      :ensure t
+      :config
+      (defhydra hydra-window (:hint nil)
+    	"
+    ^Resize^
+    --------------------------------
+    _H_ shrink horiz
+    _J_ shrink vert
+    _K_ enlarge vert
+    _L_ enlarge horiz
+    "
+    	("H" shrink-window-horizontally)
+    	("L" enlarge-window-horizontally)
+    	("J" shrink-window)
+    	("K" enlarge-window)
+    	("q" nil "quit"))
+
+      (with-eval-after-load 'hydra
+    	(global-set-key (kbd "C-c w W") 'hydra-window/body)))
+#+end_src
+** Search Stuff
+#+begin_src emacs-lisp
+    (leaf simple
+      :ensure nil
+      :bind
+      (("C-c s s" . occur)))
+#+END_SRC
+* Local Config
+
+#+begin_src emacs-lisp
+    (defun my/load-local-config ()
+      "Load machine-specific Emacs config if it exists."
+      (let ((file (expand-file-name "~/.config/emacs/local.el")))
+        (when (file-readable-p file)
+          (condition-case err
+              (progn
+                (load-file file)
+                (message "Loaded local config: %s" file))
+            (error
+             (message "Error loading local config %s: %s"
+                      file err))))))
+
+    (add-hook 'emacs-startup-hook #'my/load-local-config)
+#+END_SRC
