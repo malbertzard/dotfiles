@@ -1,10 +1,11 @@
 #+Title: Emacs Config
 #+Author: Mathis Albertzard
 #+Description: My Config based on a starter config probably don't use this I have no clue
-#+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
 
 * Table of contents :toc:
 - [[#early-init][Early Init]]
+- [[#helper-libary][Helper Libary]]
 - [[#bootstrap][Bootstrap]]
 - [[#package-manager][Package Manager]]
   - [[#leaf][Leaf]]
@@ -80,6 +81,40 @@
         (expand-file-name  "var/eln-cache/" user-emacs-directory))))
 
     (setq package-enable-at-startup nil)
+#+end_src
+
+* Helper Libary
+#+begin_src emacs-lisp
+    (defvar my/managed-buffer-last-buffer nil)
+
+    (defun my/tab-name ()
+      (alist-get 'name (tab-bar--current-tab)))
+
+    (defun my/managed-buffer-name (kind)
+      (format "*%s:%s*" kind (my/tab-name)))
+
+    (defmacro my/define-tab-buffer (name create-fn key)
+      (let ((fn (intern (format "my/tab-%s-toggle" name))))
+        `(progn
+           (defun ,fn ()
+             (interactive)
+             (let* ((buf-name (my/managed-buffer-name ,name))
+                    (buf (get-buffer buf-name)))
+
+               (if (and buf (eq (current-buffer) buf))
+                   (when my/managed-buffer-last-buffer
+                     (pop-to-buffer my/managed-buffer-last-buffer))
+
+                 (setq my/managed-buffer-last-buffer (current-buffer))
+
+                 (if buf
+                     (pop-to-buffer buf)
+                   (let ((new (funcall ,create-fn)))
+                     (with-current-buffer new
+                       (rename-buffer buf-name)))))))
+
+           (global-set-key (kbd ,key) #',fn)
+           ',fn)))
 #+end_src
 
 * Bootstrap
@@ -165,6 +200,7 @@
 Use the right time format for the modeline
 #+BEGIN_src emacs-lisp
     (leaf time
+      :ensure nil
       :custom
       (display-time-24hr-format . t)
       (display-time-default-load-average . nil)
@@ -236,6 +272,7 @@ Install the doom modeline
 ** Highlight Current line
 #+begin_src emacs-lisp
     (leaf hl-line
+      :ensure nil
       :hook (prog-mode-hook)
       :global-minor-mode (hl-line-mode))
 #+end_src
@@ -268,7 +305,7 @@ Install the doom modeline
 #+END_SRC
 
 *** Completions
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (leaf nerd-icons-completion
       :ensure t
       :after marginalia nerd-icons
@@ -285,7 +322,7 @@ Install the doom modeline
 #+END_SRC
 
 *** Dired
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (leaf nerd-icons-dired
       :ensure t
       :after dired nerd-icons
@@ -297,6 +334,7 @@ Install the doom modeline
 ** Zoom (Verschieben)
 #+BEGIN_src emacs-lisp
     (leaf emacs
+      :ensure nil
       :bind
       (("C-+" . text-scale-increase)
        ("C--" . text-scale-decrease)
@@ -309,6 +347,7 @@ Install the doom modeline
 No Trash Files
 #+BEGIN_src emacs-lisp
     (leaf emacs
+      :ensure nil
       :custom
       ((create-lockfiles . nil)
        (make-backup-files . nil)))
@@ -317,6 +356,7 @@ No Trash Files
 UI Stuff
 #+BEGIN_src emacs-lisp
     (leaf emacs
+      :ensure nil
       :custom
       (inhibit-startup-screen . t)
       :init
@@ -328,6 +368,7 @@ UI Stuff
 Modern Input stuff
 #+BEGIN_src emacs-lisp
     (leaf emacs
+      :ensure nil
       :custom
       ;; UI
       ((inhibit-startup-screen . t)
@@ -389,12 +430,13 @@ Modern Input stuff
 ** Start Emacs server on startup
 Ensure the Emacs server is started if not already running
 #+begin_src emacs-lisp
-    (leaf emacs
-      :init
-      (unless (server-running-p)
-    	(server-start)))
+    (leaf server
+      :ensure nil
+      :config
+      (with-eval-after-load 'server
+    	(unless (server-running-p)
+    	  (server-start))))
 #+END_SRC
-
 ** Performance
 *** Compile External Packages
 #+begin_src emacs-lisp
@@ -650,6 +692,7 @@ Interact with surrounds remove add them change them
 *** Dired
 #+BEGIN_src emacs-lisp
     (leaf dired
+      :ensure nil
       :init
       (put 'dired-find-alternate-file 'disabled nil)
       :custom
@@ -856,7 +899,6 @@ Lets use flymake
       :after treesit
       :config
       (setq treesit-auto-langs '(lua ruby zig python rust go toml yaml json php)))
-
 
     (defun my/treesit-install-all-languages ()
       "Install all grammars listed in `treesit-language-source-alist'."
@@ -1131,6 +1173,7 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
 *** Commands
 #+begin_src emacs-lisp
     (leaf comint-mode
+      :ensure nil
       :custom
       ((comint-buffer-maximum-size . 10000))
       :init
@@ -1176,71 +1219,25 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
       :custom
       ((vterm-term-environment-variable . "xterm-color")
        (vterm-kill-buffer-on-exit . t))
+      :bind
+      (("C-c t T" . vterm-with-prefix)
+       ("C-c t t" . my/tab-vterm-toggle))
       :config
+
       (defun vterm-with-prefix ()
-    	"Run `vterm` with a universal- argument (C-u)."
-    	(interactive)
-    	(let ((current-prefix-arg '(4))) ; C-u
-    	  (call-interactively 'vterm)))
+        (interactive)
+        (let ((current-prefix-arg '(4)))
+          (call-interactively #'vterm)))
+
       (defun vterm-other-window-with-prefix ()
-    	"Run `eat` with a universal- argument (C-u)."
-    	(interactive)
-    	(let ((current-prefix-arg '(4))) ; C-u
-    	  (call-interactively 'vterm-other-window)))
-      (global-set-key (kbd "C-c t T") 'vterm-with-prefix))
+        (interactive)
+        (let ((current-prefix-arg '(4)))
+          (call-interactively #'vterm-other-window)))
 
-    (add-to-list 'display-buffer-alist
-    			 '((major-mode . vterm-mode)
-    			   (display-buffer-reuse-window
-    				display-buffer-in-side-window)
-    			   (side . bottom)
-    			   (window-height . 0.3)))
-
-    (defvar my/tab-vterm-last-buffer nil)
-
-    (defun my/tab-vterm-toggle ()
-      (interactive)
-      (let* ((tab (tab-bar--current-tab))
-    		 (tab-name (alist-get 'name tab))
-    		 (buf-name (format "*vterm:%s*" tab-name))
-    		 (buf (get-buffer buf-name)))
-
-    	(if (and buf (eq (current-buffer) buf))
-    		;; If we're in the vterm → go back
-    		(when my/tab-vterm-last-buffer
-    		  (pop-to-buffer my/tab-vterm-last-buffer))
-
-    	  ;; Otherwise → open/switch to vterm
-    	  (setq my/tab-vterm-last-buffer (current-buffer))
-
-    	  (if buf
-    		  (pop-to-buffer buf)
-    		(let ((new (vterm-other-window)))
-    		  (with-current-buffer new
-    			(rename-buffer buf-name)))))))
-
-    (global-set-key (kbd "C-c t t") #'my/tab-vterm-toggle)
-
-    (defun my/vterm-update-last-access ()
-      (setq-local my/vterm-last-access (float-time)))
-
-    (add-hook 'vterm-mode-hook #'my/vterm-update-last-access)
-    (add-hook 'buffer-list-update-hook
-    		  (lambda ()
-    			(when (eq major-mode 'vterm-mode)
-    			  (my/vterm-update-last-access))))
-
-    (defun my/kill-stale-vterms (&optional hours)
-      "Kill vterm buffers unused for HOURS (default 24)."
-      (interactive "P")
-      (let* ((hours (or hours 24))
-    		 (cutoff (- (float-time) (* hours 3600))))
-    	(dolist (buf (buffer-list))
-    	  (with-current-buffer buf
-    		(when (and (eq major-mode 'vterm-mode)
-    				   (boundp 'my/vterm-last-access)
-    				   (< my/vterm-last-access cutoff))
-    		  (kill-buffer buf))))))
+      (my/define-tab-buffer
+       "vterm"
+       #'vterm-other-window
+       "C-c t t"))
 #+end_src
 
 ** Compilation
@@ -1258,47 +1255,34 @@ Make compilation look better and therefore make it work with modern tools
 #+END_SRC
 
 #+begin_src emacs-lisp
-    (defvar my/compile-last-buffer nil)
+    (leaf compile
+      :ensure nil
+      :bind
+      (("C-c C c" . my/compile)
+       ("C-c C r" . recompile)
+       ("C-c C k" . kill-compilation)
 
-    (defun my/compile-toggle ()
-      "Toggle compilation buffer like a terminal panel."
-      (interactive)
-      (let ((buf (get-buffer "*compilation*")))
-    	(if (and buf (get-buffer-window buf))
-    		;; If visible → hide it
-    		(delete-window (get-buffer-window buf))
+       ("C-c C e j" . compilation-next-error)
+       ("C-c C e k" . compilation-previous-error)
+       ("C-c C e l" . consult-compile-error))
 
-    	  ;; If not visible → show or create it
-    	  (setq my/compile-last-buffer (current-buffer))
+      :config
 
-    	  (if buf
-    		  (pop-to-buffer buf)
-    		(call-interactively 'my/compile)))))
+      ;; tab-local compile entry point
+      (defun my/compile ()
+        (interactive)
+        (let ((compilation-buffer-name-function
+               (lambda (_)
+                 (my/managed-buffer-name "compilation"))))
+          (call-interactively #'compile)))
 
-    (defun my/tab-name ()
-      "Return current tab name safely."
-      (alist-get 'name (tab-bar--current-tab)))
-
-    (setq compilation-buffer-name-function
-    	  (lambda (_mode)
-    		(format "*compilation:%s*" (my/tab-name))))
-
-    (defun my/compile ()
-      "Compile per tab, reusing tab-specific compilation buffer."
-      (interactive)
-      (let ((compilation-buffer-name-function
-    		 (lambda (_)
-    		   (format "*compilation:%s*" (my/tab-name)))))
-    	(call-interactively 'compile)))
-
-    (global-set-key (kbd "C-c C o") #'my/compile-toggle)
-    (global-set-key (kbd "C-c C c") #'compile)
-    (global-set-key (kbd "C-c C r") #'recompile)
-    (global-set-key (kbd "C-c C k") #'kill-compilation)
-
-    (global-set-key (kbd "C-c C e j") #'compilation-next-error)
-    (global-set-key (kbd "C-c C e k") #'compilation-previous-error)
-    (global-set-key (kbd "C-c C e l") #'consult-compile-error)
+      ;; toggle behavior via macro
+      (my/define-tab-buffer
+       "compilation"
+       (lambda ()
+         (my/compile)
+         (current-buffer))
+       "C-c C o"))
 #+END_SRC
 
 ** Helper
@@ -1341,6 +1325,7 @@ Make compilation look better and therefore make it work with modern tools
 *** Manage System processes from inside Emacs
 #+BEGIN_src emacs-lisp
     (leaf proced
+      :ensure nil
       :commands proced
       :custom
       ((proced-auto-update-flag . t)
@@ -1484,15 +1469,16 @@ Make compilation look better and therefore make it work with modern tools
 ** Python
 
 #+begin_src emacs-lisp
-(leaf pet
-  :ensure t
-  :config
-  (add-hook 'python-base-mode-hook 'pet-mode -10))
+    (leaf pet
+      :ensure t
+      :config
+      (add-hook 'python-base-mode-hook 'pet-mode -10))
 #+END_SRC
 
 ** Perl
 #+begin_src emacs-lisp
     (leaf cperl-mode
+      :ensure nil
       :after (perl-mode)
       :custom
       ((cperl-invalid-face . nil)
@@ -1655,6 +1641,7 @@ Make compilation look better and therefore make it work with modern tools
 *** Buffer
 #+begin_src emacs-lisp
     (leaf simple
+      :ensure nil
       :require t
       :bind
       (("C-c b C" . clean-buffer-list)
@@ -1667,6 +1654,7 @@ Make compilation look better and therefore make it work with modern tools
 *** Switching Windows
 #+BEGIN_src emacs-lisp
     (leaf windmove
+      :ensure nil
       :bind
       (("C-c w h" . windmove-left)
        ("C-c w l" . windmove-right)

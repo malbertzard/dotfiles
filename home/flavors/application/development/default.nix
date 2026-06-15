@@ -14,6 +14,7 @@
     ../../../features/development/python.nix
     ../../../features/development/go.nix
     ../../../features/development/zig.nix
+    ../../../features/development/nix.nix
     ../../../features/development/ruby.nix
     ../../../features/development/rust.nix
     ../../../features/development/godot.nix

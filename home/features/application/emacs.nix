@@ -1,7 +1,7 @@
 { pkgs, lib, config, ... }:
 let
   my_emacs = pkgs.emacsWithPackagesFromUsePackage {
-      config = ../../../config/emacs/.config/emacs/config.org;
+      config = ../../../config/emacs/.config/emacs/init.org;
       defaultInitFile = true;
       alwaysTangle = true;
       alwaysEnsure = true;
