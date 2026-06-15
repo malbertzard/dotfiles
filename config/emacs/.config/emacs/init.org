@@ -1,7 +1,7 @@
 #+Title: Emacs Config
 #+Author: Mathis Albertzard
 #+Description: My Config based on a starter config probably don't use this I have no clue
-#+PROPERTY: header-args:emacs-lisp :tangle ./config.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
 * Table of contents :toc:
 - [[#early-init][Early Init]]
@@ -42,6 +42,7 @@
   - [[#nix][Nix]]
   - [[#org][Org]]
   - [[#rust-mode][Rust Mode]]
+  - [[#python][Python]]
   - [[#perl][Perl]]
 - [[#keymaps][Keymaps]]
   - [[#meow][Meow]]
@@ -132,13 +133,12 @@
 ** Font
 #+BEGIN_src emacs-lisp
     (leaf emacs
-      :ensure nil
       :init
-      (set-face-attribute 'default nil :family "Iosevka")
+      (set-face-attribute 'default nil :family "Noto Sans Mono")
       (set-face-attribute 'default nil
     					  :height 120
     					  :weight 'medium)
-      (setq-default line-spacing 0.15))    
+      (setq-default line-spacing 0.15))
 #+END_SRC
 
 ** Dim Inactive windows
@@ -149,8 +149,7 @@
       ((dimmer-fraction . 0.3)
        (dimmer-adjustment-mode . :foreground)
        (dimmer-use-colorspace . :rgb))
-      :init
-      (dimmer-mode 1))
+      :global-minor-mode (dimmer-mode))
 #+end_src
 
 ** Scroll Margins
@@ -166,11 +165,10 @@
 Use the right time format for the modeline
 #+BEGIN_src emacs-lisp
     (leaf time
-      :ensure nil
-      :global-minor-mode (display-time-mode)
       :custom
       (display-time-24hr-format . t)
-      (display-time-default-load-average . nil))
+      (display-time-default-load-average . nil)
+      :global-minor-mode (display-time-mode))
 #+END_SRC
 
 Hide some minor modes so the modeline is not that cluttert
@@ -216,15 +214,14 @@ Install the doom modeline
 ** Which Key
 #+BEGIN_src emacs-lisp
     (leaf which-key
-      :ensure nil
-      :global-minor-mode (which-key-mode)
       :custom
       ((which-key-popup-type . 'minibuffer)
        (which-key-idle-delay . 0.8)
        (which-key-min-display-lines . 1)
        (which-key-max-description-length . 25)
        (which-key-separator . " → ")
-       (which-key-show-remaining-keys . nil)))
+       (which-key-show-remaining-keys . nil))
+      :global-minor-mode (which-key-mode))
 
 #+END_SRC
 
@@ -232,25 +229,23 @@ Install the doom modeline
 #+begin_src emacs-lisp
     (leaf indent-bars
       :ensure t
-      :global-minor-mode (indent-bars-mode)
-      :hook (prog-mode-hook))
+      :hook prog-mode-hook
+      :global-minor-mode (indent-bars-mode))
 #+end_src
 
 ** Highlight Current line
 #+begin_src emacs-lisp
     (leaf hl-line
-      :ensure nil
-      :global-minor-mode (hl-line-mode)
-      :hook (prog-mode-hook))
+      :hook (prog-mode-hook)
+      :global-minor-mode (hl-line-mode))
 #+end_src
 
 ** Line Numbers
 #+BEGIN_src emacs-lisp
     (leaf emacs
-      :ensure nil
       :custom
       (display-line-numbers-type . 'relative)
-      :config
+      :init
       (dolist (hook
     		   '(dired-mode-hook
     			 doc-view-presentation-mode-hook
@@ -273,34 +268,35 @@ Install the doom modeline
 #+END_SRC
 
 *** Completions
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (leaf nerd-icons-completion
       :ensure t
       :after marginalia nerd-icons
-      :global-minor-mode (nerd-icons-completion-mode)
       :hook
-      (marginalia-mode-hook . nerd-icons-completion-marginalia-setup))
+      (marginalia-mode-hook . nerd-icons-completion-marginalia-setup)
+      :global-minor-mode (nerd-icons-completion-mode))
+#+END_SRC
 
+#+begin_src emacs-lisp
     (leaf nerd-icons-corfu
       :ensure t
       :after corfu nerd-icons
       :init (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-
 #+END_SRC
 
 *** Dired
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (leaf nerd-icons-dired
       :ensure t
       :after dired nerd-icons
       :hook
-      (dired-mode-hook . nerd-icons-dired-mode))
+      dired-mode-hook
+      :global-minor-mode (nerd-icons-dired-mode))
 #+END_SRC
 
 ** Zoom (Verschieben)
 #+BEGIN_src emacs-lisp
     (leaf emacs
-      :ensure nil
       :bind
       (("C-+" . text-scale-increase)
        ("C--" . text-scale-decrease)
@@ -313,7 +309,6 @@ Install the doom modeline
 No Trash Files
 #+BEGIN_src emacs-lisp
     (leaf emacs
-      :ensure nil
       :custom
       ((create-lockfiles . nil)
        (make-backup-files . nil)))
@@ -322,7 +317,6 @@ No Trash Files
 UI Stuff
 #+BEGIN_src emacs-lisp
     (leaf emacs
-      :ensure nil
       :custom
       (inhibit-startup-screen . t)
       :init
@@ -334,7 +328,6 @@ UI Stuff
 Modern Input stuff
 #+BEGIN_src emacs-lisp
     (leaf emacs
-      :ensure nil
       :custom
       ;; UI
       ((inhibit-startup-screen . t)
@@ -395,10 +388,8 @@ Modern Input stuff
 
 ** Start Emacs server on startup
 Ensure the Emacs server is started if not already running
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
     (leaf emacs
-      :ensure nil
-      :require t
       :init
       (unless (server-running-p)
     	(server-start)))
@@ -495,7 +486,7 @@ Ensure the Emacs server is started if not already running
     									  (eglot-capf (styles orderless))))))
 #+END_SRC
 *** Vertical Completions
-#+BEGIN_src emacs-lisp 
+#+BEGIN_src emacs-lisp
     (leaf vertico
       :ensure t
       :bind (:vertico-map
@@ -510,7 +501,6 @@ Ensure the Emacs server is started if not already running
       :global-minor-mode (vertico-mode))
 
     (leaf xref
-      :ensure nil
       :custom
       (xref-show-definitions-function . #'xref-show-definitions-completing-read))
 
@@ -554,40 +544,39 @@ Ensure the Emacs server is started if not already running
 **** Perl Templates
 #+begin_src emacs-lisp
     (leaf emacs
-      :ensure nil
       :after tempel
       :preface
       (defvar my-perl-templates
     	'((dump "print Dumper(" q ");")
 
-          (sub
-           "sub " p " {\n"
-           "    my (" p ") = @_;\n"
-           n> r>
-           "\n}")
+    	  (sub
+    	   "sub " p " {\n"
+    	   "    my (" p ") = @_;\n"
+    	   n> r>
+    	   "\n}")
 
-          (foreach
-           "foreach my $" p " (" p ") {\n"
-           n> r>
-           "\n}")
+    	  (foreach
+    	   "foreach my $" p " (" p ") {\n"
+    	   n> r>
+    	   "\n}")
 
-          (foreach-hash
-           "foreach my $" p " (keys %" p2 ") {\n"
-           "    my $" p " = $" p2 "{" p "};\n"
-           n> r>
-           "\n}")
+    	  (foreach-hash
+    	   "foreach my $" p " (keys %" p2 ") {\n"
+    	   "    my $" p " = $" p2 "{" p "};\n"
+    	   n> r>
+    	   "\n}")
 
-          (foreach-kv
-           "while (my ($" p ", $" p2 ") = each %" p3 ") {\n"
-           n> r>
-           "\n}"))
+    	  (foreach-kv
+    	   "while (my ($" p ", $" p2 ") = each %" p3 ") {\n"
+    	   n> r>
+    	   "\n}"))
     	"List of Perl templates.")
 
       (dolist (hook '(perl-mode-hook cperl-mode-hook))
     	(add-hook
     	 hook
     	 (lambda ()
-           (setq-local tempel-template-sources
+    	   (setq-local tempel-template-sources
         			   (cons 'my-perl-templates
         					 tempel-template-sources))))))
 #+END_SRC
@@ -614,7 +603,6 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
 #+begin_src emacs-lisp
     (leaf consult
       :ensure t
-      :hook (completion-list-mode-hook . consult-preview-at-point-mode)
       :bind
       (("C-c B"   . consult-bookmark)
        ("C-c b B" . consult-buffer)
@@ -624,6 +612,7 @@ Check out their [[https://github.com/minad/consult][git repository]] for more aw
        ("C-c s l" . consult-line)
        ("C-c s f" . consult-find))
       :init
+      (add-hook 'completion-list-mode-hook 'consult-preview-at-point-mode)
       (setq register-preview-delay 0.5
     		register-preview-function #'consult-register-format)
       (advice-add #'register-preview :override #'consult-register-window)
@@ -660,11 +649,8 @@ Interact with surrounds remove add them change them
 *** Dired
 #+BEGIN_src emacs-lisp
     (leaf dired
-      :ensure nil ;; built-in
       :init
       (put 'dired-find-alternate-file 'disabled nil)
-      :hook
-      dired-mode-hook dired-hide-details-mode
       :custom
       ((dired-dwim-target . t)		  ;; do what I mean
        (dired-recursive-copies . 'always)	  ;; don't ask when copying directories
@@ -716,64 +702,66 @@ Interact with surrounds remove add them change them
 ** Info Sources
 *** Error
 Lets use flymake
-#+BEGIN_src emacs-lisp :tangle no
+#+BEGIN_src emacs-lisp
     (leaf flymake
-      :ensure nil
-      :hook (prog-mode-hook . flymake-mode)
       :after consult
-      :init
-      (defvar my/flymake-prefix-map
-    	(let ((map (make-sparse-keymap)))
-    	  (define-key map (kbd "j") #'flymake-goto-next-error)
-    	  (define-key map (kbd "k") #'flymake-goto-prev-error)
-    	  (define-key map (kbd "l") #'flymake-show-buffer-diagnostics)
-    	  (define-key map (kbd "L") #'flymake-show-project-diagnostics)
-    	  (define-key map (kbd "s") #'consult-flymake)
-    	  (define-key map (kbd "d") #'flymake-show-diagnostic)
-    	  map)
-    	"Flymake keymap.")
-
-      (global-set-key (kbd "C-c e") my/flymake-prefix-map))
+      :hook
+      (prog-mode-hook . flymake-mode)
+      :bind
+      (("C-c e j" . flymake-goto-next-error)
+       ("C-c e k" . flymake-goto-prev-error)
+       ("C-c e l" . flymake-show-buffer-diagnostics)
+       ("C-c e L" . flymake-show-project-diagnostics)
+       ("C-c e s" . consult-flymake)
+       ("C-c e d" . flymake-show-diagnostic)))
 
     ;; (leaf transient
-    ;;   :ensure t
-    ;;   :after flymake consult
-    ;;   :init
-    ;;   (require 'transient)
-    ;;   (transient-define-prefix my/flymake-transient ()
-    ;; 	"Flymake sticky commands"
-    ;; 	:transient-suffix 'transient--do-stay
-    ;; 	[["Navigate"
-    ;; 	  ("j" "next error" flymake-goto-next-error)
-    ;; 	  ("k" "previous error" flymake-goto-prev-error)]
+    ;; 	  :ensure t
+    ;; 	  :after (flymake consult)
+    ;; 	  :config
+    ;; 	  (require 'transient)
 
-    ;; 	 ["View"
-    ;; 	  ("l" "list errors" flymake-show-buffer-diagnostics)
-    ;; 	  ("L" "list project errors" flymake-show-project-diagnostics)
-    ;; 	  ("s" "search error" consult-flymake)
-    ;; 	  ("d" "display error" flymake-show-diagnostic)]
+    ;; 	  (transient-define-prefix my/flymake-transient ()
+    ;; 		"Flymake transient menu."
 
-    ;; 	 ["Quit"
-    ;; 	  ("q" "quit" transient-quit-one)]])
-    ;;   (global-set-key (kbd "C-c E") #'my/flymake-transient))
+    ;; 		[["Navigate"
+    ;; 		  ("j" "Next error"
+    ;; 		   flymake-goto-next-error
+    ;; 		   :transient t)
+    ;; 		  ("k" "Previous error"
+    ;; 		   flymake-goto-prev-error
+    ;; 		   :transient t)]
+
+    ;; 		 ["View"
+    ;; 		  ("l" "Buffer diagnostics"
+    ;; 		   flymake-show-buffer-diagnostics
+    ;; 		   :transient t)
+    ;; 		  ("L" "Project diagnostics"
+    ;; 		   flymake-show-project-diagnostics
+    ;; 		   :transient t)
+    ;; 		  ("s" "Search diagnostics"
+    ;; 		   consult-flymake
+    ;; 		   :transient t)
+    ;; 		  ("d" "Show diagnostic"
+    ;; 		   flymake-show-diagnostic
+    ;; 		   :transient t)]
+
+    ;; 		 ["Quit"
+    ;; 		  ("q" "Quit" transient-quit-one)]])
+
+    ;; 	  (global-set-key (kbd "C-c E") #'my/flymake-transient))
 #+end_src
 
 *** Spelling
 #+BEGIN_src emacs-lisp :tangle no
     (leaf jinx
       :ensure t
-      :init
-      (defvar my/jinx-prefix-map
-    	(let ((map (make-sparse-keymap)))
-    	  (define-key map (kbd "j") #'jinx-next)
-    	  (define-key map (kbd "k") #'jinx-previous)
-    	  (define-key map (kbd "c") #'jinx-correct)
-    	  (define-key map (kbd "l") #'jinx-languages)
-    	  (define-key map (kbd "m") #'jinx-mode)
-    	  map)
-    	"Jinx keymap.")
-
-      (global-set-key (kbd "C-c j") my/jinx-prefix-map))
+      :bind
+      (("C-c j j" . jinx-next)
+       ("C-c j k" . jinx-previous)
+       ("C-c j c" . jinx-correct)
+       ("C-c j L" . jinx-languages)
+       ("C-c j m" . jinx-mode)))
 
     ;; (leaf transient
     ;;   :ensure t
@@ -804,16 +792,13 @@ Lets use flymake
     (leaf eldoc-box
       :ensure t
       :after eglot
+      :config
+      (setq eldoc-box-hover-mode nil)
       :custom
       ((eldoc-echo-area-use-multiline-p . nil)
        (eldoc-documentation-strategy . 'eldoc-documentation-compose)
        (eldoc-idle-delay . 0.1)
-       (eldoc-box-hover-mode . nil)
-       (eldoc-box-cleanup-interval . 3))
-      :init
-      (add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode nil))
-
-
+       (eldoc-box-cleanup-interval . 3)))
 #+END_SRC
 *** Folding
 **** Fold Keybinds
@@ -848,39 +833,43 @@ Lets use flymake
     (leaf treesit
       :ensure nil
       :custom
-      ((treesit-font-lock-level . 4)
-       (treesit-language-source-alist .
-    								  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-    									(css "https://github.com/tree-sitter/tree-sitter-css")
-    									(dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-    									(go "https://github.com/tree-sitter/tree-sitter-go")
-    									(gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-    									(html "https://github.com/tree-sitter/tree-sitter-html")
-    									(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-    									(json "https://github.com/tree-sitter/tree-sitter-json")
-    									(lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
-    									(perl "https://github.com/tree-sitter-perl/tree-sitter-perl" "release")
-    									(pod "https://github.com/tree-sitter-perl/tree-sitter-pod" "release")
-    									(python "https://github.com/tree-sitter/tree-sitter-python")
-    									(rust "https://github.com/tree-sitter/tree-sitter-rust")
-    									(toml "https://github.com/tree-sitter/tree-sitter-toml")
-    									(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-    									(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-    									(yaml "https://github.com/ikatyang/tree-sitter-yaml")))))
+      ((treesit-font-lock-level . 4))
+      :config
+      (setq treesit-language-source-alist
+            '((bash       "https://github.com/tree-sitter/tree-sitter-bash")
+              (c          "https://github.com/tree-sitter/tree-sitter-c")
+              (cpp        "https://github.com/tree-sitter/tree-sitter-cpp")
+              (css        "https://github.com/tree-sitter/tree-sitter-css")
+              (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+              (json       "https://github.com/tree-sitter/tree-sitter-json")
+              (python     "https://github.com/tree-sitter/tree-sitter-python")
+              (rust       "https://github.com/tree-sitter/tree-sitter-rust")
+              (toml       "https://github.com/tree-sitter/tree-sitter-toml")
+              (tsx        "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+              (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+              (yaml       "https://github.com/ikatyang/tree-sitter-yaml"))))
+
 
     (leaf treesit-auto
       :ensure t
       :after treesit
-      :custom
-      ((treesit-auto-install . 'prompt))
-      :global-minor-mode (global-treesit-auto-mode))
+      :config
+      (setq treesit-auto-langs '(lua ruby zig python rust go toml yaml json php)))
+
+
+    (defun my/treesit-install-all-languages ()
+      "Install all grammars listed in `treesit-language-source-alist'."
+      (interactive)
+      (dolist (lang (mapcar #'car treesit-language-source-alist))
+        (unless (treesit-language-available-p lang)
+          (treesit-install-language-grammar lang))))
+
 #+end_src
 *** Formattierung
 **** Editor Conf
 We want to use the same Configurations as out teammates
 #+BEGIN_src emacs-lisp
     (leaf editorconfig
-      :ensure nil
       :global-minor-mode (editorconfig-mode))
 
 #+END_SRC
@@ -899,36 +888,32 @@ We want to use the same Configurations as out teammates
       :ensure t
       :after eglot
       :custom
-      ((dape-cwd-fn . project-root)
-       (dape-buffer-window-arrangement . 'right))
+      ((dape-buffer-window-arrangement . 'right)
+       (dape-key-prefix . nil))
       :bind
-      (("C-c L d" . dape)
-       ("C-c L n" . dape-next)
-       ("C-c L s" . dape-step-in)
-       ("C-c L o" . dape-step-out)
-       ("C-c L c" . dape-continue)
-       ("C-c L b" . dape-breakpoint-toggle))
+      (("\C-c L d" . dape)
+       ("\C-c L n" . dape-next)
+       ("\C-c L s" . dape-step-in)
+       ("\C-c L o" . dape-step-out)
+       ("\C-c L c" . dape-continue)
+       ("\C-c L b" . dape-breakpoint-toggle))
       :global-minor-mode (dape-breakpoint-global-mode))
 #+END_SRC
 **** Eglot
 #+BEGIN_src emacs-lisp
     (leaf eglot
-      :ensure nil
       :hook
       ((python-ts-mode-hook . eglot-ensure)
+       (python-mode-hook . eglot-ensure)
        (go-ts-mode-hook . eglot-ensure)
        (rust-ts-mode-hook . eglot-ensure)
-       (nix-ts-mode-hook . eglot-ensure)
        (cperl-mode-hook . eglot-ensure))
       :custom
       ((eglot-autoshutdown . t)
        (eglot-events-buffer-size . 0)
        (eglot-report-progress . nil)
        (eglot-sync-connect . nil)
-       (eglot-extend-to-xref . nil)
-       (eglot-ignored-server-capabilities
-        . '(:documentHighlightProvider
-            :inlayHintProvider)))
+       (eglot-extend-to-xref . nil))
       :init
       (fset #'jsonrpc--log-event #'ignore)
       :config
@@ -939,40 +924,34 @@ We want to use the same Configurations as out teammates
     								  (:perlPath
     								   "/usr/bin/perl"
     								   :includePaths
-    								 ["/DATA/ds/DatenService/SCRIPT/lib/local/util/"
-    								  "/DATA/ds/DatenService/SCRIPT/lib/local/ds1/"
-    								  "/DATA/ds/DatenService/SCRIPT/lib/local/SDS/"]
-    								 :enableWarnings t))))
-
-      (setq-default eglot-workspace-configuration
-    				'((:python
-    				   (:analysis
-    					(:diagnosticMode "workspace")))))
+    								   ["/DATA/ds/DatenService/SCRIPT/lib/local/util/"
+    									"/DATA/ds/DatenService/SCRIPT/lib/local/ds1/"
+    									"/DATA/ds/DatenService/SCRIPT/lib/local/SDS/"]
+    								   :enableWarnings t))))
 
       (dolist (server
-               '((gdscript-mode . ("localhost:6005"))
-                 (go-ts-mode . ("gopls"))
-                 (rust-ts-mode . ("rust-analyzer"))
-                 (nix-ts-mode . ("nixd"))
-                 (cperl-mode . ("perlnavigator" "--stdio"))
-                 (python-ts-mode
-                  . ("~/.local/share/nvim/mason/bin/pyright-langserver"
-                     "--stdio"))))
-        (add-to-list 'eglot-server-programs server)))
+    		   '((gdscript-mode . ("localhost:6005"))
+    			 (go-ts-mode . ("gopls"))
+    			 (rust-ts-mode . ("rust-analyzer"))
+    			 (nix-ts-mode . ("nixd"))
+    			 (cperl-mode . ("perlnavigator" "--stdio"))
+    			 (python-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))
+    			 (python-ts-mode . ("~/.local/share/nvim/mason/bin/pyright-langserver" "--stdio"))))
+    	(add-to-list 'eglot-server-programs server)))
 #+END_SRC
 
 * Features
 ** Layout
 *** Display buffer alist
 #+begin_src emacs-lisp
-    (leaf emacs 
+    (leaf emacs
       :ensure nil
       :custom
       ((window-sides-slots . '(1 2 3 4))
        (split-width-threshold . 0)
        (split-height-threshold . nil)
        (window-combination-resize . t)
-       (display-buffer-alist . 
+       (display-buffer-alist .
             				 '(
             				   ;; -----------------------------
             				   ;; Bottom tool panel (shared)
@@ -1071,8 +1050,7 @@ We want to use the same Configurations as out teammates
             					(display-buffer-reuse-window
             					 display-buffer-in-side-window)
             					(side . bottom)
-            					(window-height . 0.30))))
-       ))
+            					(window-height . 0.30))))))
 
 #+end_src
 
@@ -1082,7 +1060,7 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
     (leaf tab-bar
       :ensure nil
       :custom
-      ((tab-bar-show . 1)
+      ((tab-bar-show . t)
        (tab-bar-close-button-show . nil)
        (tab-bar-tab-hints . nil)
        (tab-bar-format . '(tab-bar-format-tabs tab-bar-separator)))
@@ -1090,15 +1068,17 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
 
     (leaf vim-tab-bar
       :ensure t
-      :after (tab-bar)
+      :after tab-bar
       :global-minor-mode (vim-tab-bar-mode))
 
     (leaf activities
       :ensure t
-      :after (tab-bar)
-      :global-minor-mode (activities-mode activities-tabs-mode)
+      :after tab-bar
       :custom
       ((edebug-inhibit-emacs-lisp-mode-bindings . t))
+      :init
+      (activities-mode)
+      (activities-tabs-mode)
       :bind
       (("C-c b b" . activities-switch-buffer)
        ("C-x C-a C-d" . activities-define)
@@ -1150,7 +1130,6 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
 *** Commands
 #+begin_src emacs-lisp
     (leaf comint-mode
-      :ensure nil
       :custom
       ((comint-buffer-maximum-size . 10000))
       :init
@@ -1277,7 +1256,7 @@ Make compilation look better and therefore make it work with modern tools
       :commands (fancy-compilation-mode))
 #+END_SRC
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
     (defvar my/compile-last-buffer nil)
 
     (defun my/compile-toggle ()
@@ -1326,7 +1305,6 @@ Make compilation look better and therefore make it work with modern tools
 #+BEGIN_src emacs-lisp
     (leaf midnight
       :ensure nil
-      :hook (after-init-hook)
       :after tramp
       :global-minor-mode (midnight-mode)
       :custom
@@ -1362,7 +1340,6 @@ Make compilation look better and therefore make it work with modern tools
 *** Manage System processes from inside Emacs
 #+BEGIN_src emacs-lisp
     (leaf proced
-      :ensure nil
       :commands proced
       :custom
       ((proced-auto-update-flag . t)
@@ -1370,7 +1347,7 @@ Make compilation look better and therefore make it work with modern tools
        (proced-show-remote-processes . t)
        (proced-enable-color-flag . t)
        (proced-format . 'custom))
-      :init
+      :config
       (add-to-list
        'proced-format-alist
        '(custom user pid ppid sess tree pcpu pmem rss start time state (args comm))))
@@ -1387,7 +1364,7 @@ Make compilation look better and therefore make it work with modern tools
 * Langs
 ** Web Mode
 #+begin_src emacs-lisp
-    (leaf web-mode 
+    (leaf web-mode
       :ensure t
       :mode (("\\.phtml\\'" . web-mode)
     		 ("\\.tpl\\.php\\'" . web-mode)
@@ -1503,10 +1480,18 @@ Make compilation look better and therefore make it work with modern tools
     (leaf rust-mode :ensure t)
 #+END_SRC
 
+** Python
+
+#+begin_src emacs-lisp
+(leaf pet
+  :ensure t
+  :config
+  (add-hook 'python-base-mode-hook 'pet-mode -10))
+#+END_SRC
+
 ** Perl
 #+begin_src emacs-lisp
     (leaf cperl-mode
-      :ensure nil
       :after (perl-mode)
       :custom
       ((cperl-invalid-face . nil)
@@ -1649,7 +1634,6 @@ Make compilation look better and therefore make it work with modern tools
     	 '("#" . meow-reverse)
     	 '("'" . repeat)
     	 '("<escape>" . ignore)))
-
       :config
       (require 'meow)
       (meow-setup)
@@ -1668,9 +1652,8 @@ Make compilation look better and therefore make it work with modern tools
 
 ** Window / Buffer Nav
 *** Buffer
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
     (leaf simple
-      :ensure nil
       :bind
       (("C-c b C" . clean-buffer-list)
        ("C-c b k" . kill-current-buffer)
@@ -1682,7 +1665,6 @@ Make compilation look better and therefore make it work with modern tools
 *** Switching Windows
 #+BEGIN_src emacs-lisp
     (leaf windmove
-      :ensure nil
       :bind
       (("C-c w h" . windmove-left)
        ("C-c w l" . windmove-right)
@@ -1696,7 +1678,7 @@ Make compilation look better and therefore make it work with modern tools
 #+END_SRC
 ** Development
 *** Language Bindings
-#+BEGIN_src emacs-lisp :tangle no
+#+BEGIN_src emacs-lisp
     ;; Define main language keymap under "C-c l"
     (define-prefix-command 'my/lang-map)
     (global-set-key (kbd "C-c l") 'my/lang-map)
@@ -1733,8 +1715,7 @@ Make compilation look better and therefore make it work with modern tools
 
 ** Replacing stuff
 #+BEGIN_src emacs-lisp
-    (leaf simple
-      :ensure nil
+    (leaf emacs
       :bind
       (("C-c r s" . replace-string)
        ("C-c r r" . query-replace)))
@@ -1766,8 +1747,7 @@ Make compilation look better and therefore make it work with modern tools
 #+end_src
 ** Search Stuff
 #+begin_src emacs-lisp
-    (leaf simple
-      :ensure nil
+    (leaf emacs
       :bind
       (("C-c s s" . occur)))
 #+END_SRC
