@@ -39,7 +39,7 @@ in
     with pkgs;
     []
     ++ mkLinuxOnly [
-      emacs-lsp-booster
+	  emacs-lsp-booster
     ];
 
     programs.emacs = {

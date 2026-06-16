@@ -467,6 +467,17 @@ Ensure the Emacs server is started if not already running
       :init
       (require 'vlf-setup))
 #+END_SRC
+*** LSP Booster
+#+BEGIN_src emacs-lisp
+    (if my/use-nix-packages
+    	(leaf eglot-booster
+    	  :vc (eglot-booster
+    		   :url "https://github.com/jdtsmith/eglot-booster"
+    		   :branch "main")
+    	  :after eglot
+    	  :config
+    	  (eglot-booster-mode 1)))
+#+END_SRC
 
 ** Completion Systems
 *** Completions at Point
@@ -1213,6 +1224,38 @@ Tab Bar Mode um einzelne Buffer Layouts zu Trennen
 #+end_src
 
 *** Terminal Emulation
+**** Ghostel
+#+begin_src emacs-lisp :tangle no
+    (leaf ghostel
+      :ensure t
+      :bind
+      (("C-c t T" . ghostel-with-prefix)
+       ("C-c t t" . my/tab-ghostel-toggle))
+      :config
+
+      (defun ghostel-with-prefix ()
+    	(interactive)
+    	(let ((current-prefix-arg '(4)))
+    	  (call-interactively #'ghostel)))
+
+      (defun ghostel-other-window ()
+    	(interactive)
+    	(other-window 1)
+    	(ghostel))
+
+      (defun ghostel-other-window-with-prefix ()
+    	(interactive)
+    	(other-window 1)
+    	(let ((current-prefix-arg '(4)))
+    	  (call-interactively #'ghostel)))
+
+      (my/define-tab-buffer
+       "ghostel"
+       #'ghostel-other-window
+       "C-c t t"))
+#+end_src
+
+**** Vterm
 #+begin_src emacs-lisp
     (leaf vterm
       :ensure t
