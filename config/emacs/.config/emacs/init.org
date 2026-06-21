@@ -694,10 +694,11 @@ Interact with surrounds remove add them change them
 
 #+BEGIN_src emacs-lisp
     (leaf surround
+      :require t
       :ensure t)
-    ;; safer surround binding
-    ;; '("S" . surround-keymap)
 
+      ;; '("S" . surround-keymap)
+      ;; safer surround binding
 #+END_SRC
 
 *** Dired
@@ -1541,6 +1542,7 @@ Make compilation look better and therefore make it work with modern tools
 #+BEGIN_src emacs-lisp
     (leaf meow
       :ensure t
+      :after surround
       :init
       (setq meow-keypad-leader-dispatch "C-c")
       (defun meow-setup ()
@@ -1649,6 +1651,8 @@ Make compilation look better and therefore make it work with modern tools
 
     	 '("r" . meow-replace)
 
+    	 (cons "S" surround-keymap)
+
     	 '("s" . meow-kill)
     	 '("t" . meow-till)
     	 '("u" . undo)
@@ -1707,7 +1711,7 @@ Make compilation look better and therefore make it work with modern tools
        ("C-c w v" . split-window-right)
        ("C-c w s" . split-window-below)
        ("C-c w d" . delete-window)
-       ("C-c w o" . delete-other-window)))
+       ("C-c w o" . delete-other-windows)))
 #+END_SRC
 ** Development
 *** Language Bindings
